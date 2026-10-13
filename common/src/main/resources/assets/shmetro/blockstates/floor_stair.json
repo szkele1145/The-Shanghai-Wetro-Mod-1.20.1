@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,left=false,right=false": {
+      "model": "shmetro:block/floor_stair"
+    },
+    "facing=north,left=true,right=false": {
+      "model": "shmetro:block/floor_stair_side"
+    },
+    "facing=north,left=false,right=true": {
+      "model": "shmetro:block/floor_stair_side_mirrored"
+    },
+    "facing=north,left=true,right=true": {
+      "model": "shmetro:block/floor_stair"
+    },
+    "facing=east,left=false,right=false": {
+      "model": "shmetro:block/floor_stair",
+      "y": 90
+    },
+    "facing=east,left=true,right=false": {
+      "model": "shmetro:block/floor_stair_side",
+      "y": 90
+    },
+    "facing=east,left=false,right=true": {
+      "model": "shmetro:block/floor_stair_side_mirrored",
+      "y": 90
+    },
+    "facing=east,left=true,right=true": {
+      "model": "shmetro:block/floor_stair",
+      "y": 90
+    },
+    "facing=south,left=false,right=false": {
+      "model": "shmetro:block/floor_stair",
+      "y": 180
+    },
+    "facing=south,left=true,right=false": {
+      "model": "shmetro:block/floor_stair_side",
+      "y": 180
+    },
+    "facing=south,left=false,right=true": {
+      "model": "shmetro:block/floor_stair_side_mirrored",
+      "y": 180
+    },
+    "facing=south,left=true,right=true": {
+      "model": "shmetro:block/floor_stair",
+      "y": 180
+    },
+    "facing=west,left=false,right=false": {
+      "model": "shmetro:block/floor_stair",
+      "y": 270
+    },
+    "facing=west,left=true,right=false": {
+      "model": "shmetro:block/floor_stair_side",
+      "y": 270
+    },
+    "facing=west,left=false,right=true": {
+      "model": "shmetro:block/floor_stair_side_mirrored",
+      "y": 270
+    },
+    "facing=west,left=true,right=true": {
+      "model": "shmetro:block/floor_stair",
+      "y": 270
+    }
+  }
+}

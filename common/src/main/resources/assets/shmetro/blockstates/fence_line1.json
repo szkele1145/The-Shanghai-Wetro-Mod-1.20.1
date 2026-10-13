@@ -1,0 +1,109 @@
+{
+	"variants": {
+		"facing=north,type=ordinary": {
+			"model": "shmetro:block/fence_line1",
+			"y": 180
+		},
+		"facing=east,type=ordinary": {
+			"model": "shmetro:block/fence_line1",
+			"y": 270
+		},
+		"facing=south,type=ordinary": {
+			"model": "shmetro:block/fence_line1"
+		},
+		"facing=west,type=ordinary": {
+			"model": "shmetro:block/fence_line1",
+			"y": 90
+		},
+		"facing=north,type=slope": {
+			"model": "shmetro:block/fence_line1_slope",
+			"y": 180
+		},
+		"facing=east,type=slope": {
+			"model": "shmetro:block/fence_line1_slope",
+			"y": 270
+		},
+		"facing=south,type=slope": {
+			"model": "shmetro:block/fence_line1_slope"
+		},
+		"facing=west,type=slope": {
+			"model": "shmetro:block/fence_line1_slope",
+			"y": 90
+		},
+		"facing=north,type=slope_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_mirror",
+			"y": 180
+		},
+		"facing=east,type=slope_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_mirror",
+			"y": 270
+		},
+		"facing=south,type=slope_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_mirror"
+		},
+		"facing=west,type=slope_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_mirror",
+			"y": 90
+		},
+		"facing=north,type=slope_transition_down": {
+			"model": "shmetro:block/fence_line1_slope_transition_down",
+			"y": 180
+		},
+		"facing=east,type=slope_transition_down": {
+			"model": "shmetro:block/fence_line1_slope_transition_down",
+			"y": 270
+		},
+		"facing=south,type=slope_transition_down": {
+			"model": "shmetro:block/fence_line1_slope_transition_down"
+		},
+		"facing=west,type=slope_transition_down": {
+			"model": "shmetro:block/fence_line1_slope_transition_down",
+			"y": 90
+		},
+		"facing=north,type=slope_transition_down_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_down_mirror",
+			"y": 180
+		},
+		"facing=east,type=slope_transition_down_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_down_mirror",
+			"y": 270
+		},
+		"facing=south,type=slope_transition_down_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_down_mirror"
+		},
+		"facing=west,type=slope_transition_down_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_down_mirror",
+			"y": 90
+		},
+		"facing=north,type=slope_transition_up": {
+			"model": "shmetro:block/fence_line1_slope_transition_up",
+			"y": 180
+		},
+		"facing=east,type=slope_transition_up": {
+			"model": "shmetro:block/fence_line1_slope_transition_up",
+			"y": 270
+		},
+		"facing=south,type=slope_transition_up": {
+			"model": "shmetro:block/fence_line1_slope_transition_up"
+		},
+		"facing=west,type=slope_transition_up": {
+			"model": "shmetro:block/fence_line1_slope_transition_up",
+			"y": 90
+		},
+		"facing=north,type=slope_transition_up_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_up_mirror",
+			"y": 180
+		},
+		"facing=east,type=slope_transition_up_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_up_mirror",
+			"y": 270
+		},
+		"facing=south,type=slope_transition_up_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_up_mirror"
+		},
+		"facing=west,type=slope_transition_up_mirrored": {
+			"model": "shmetro:block/fence_line1_slope_transition_up_mirror",
+			"y": 90
+		}
+	}
+}

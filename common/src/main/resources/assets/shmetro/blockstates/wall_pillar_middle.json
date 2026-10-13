@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "shmetro:block/wall_pillar_middle"
+    },
+    "facing=east": {
+      "model": "shmetro:block/wall_pillar_middle",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "shmetro:block/wall_pillar_middle",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "shmetro:block/wall_pillar_middle",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "shmetro:block/wall_pillar_middle",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "shmetro:block/wall_pillar_middle",
+      "x": 90
+    }
+  }
+}

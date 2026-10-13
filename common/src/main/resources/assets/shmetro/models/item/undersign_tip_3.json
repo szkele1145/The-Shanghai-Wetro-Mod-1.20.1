@@ -1,0 +1,36 @@
+{
+  "parent": "shmetro:block/undersign_tip_3",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [0, 90, 90],
+      "translation": [0, 4.75, 0],
+      "scale": [0.375, 0.375, 0.375]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [0, 90, 90],
+      "translation": [0, 4.75, 0],
+      "scale": [0.375, 0.375, 0.375]
+    },
+    "firstperson_righthand": {
+      "rotation": [0, 90, 0],
+      "scale": [0.375, 0.375, 0.375]
+    },
+    "firstperson_lefthand": {
+      "rotation": [0, 90, 0],
+      "scale": [0.375, 0.375, 0.375]
+    },
+    "ground": {
+      "scale": [0.375, 0.375, 0.375]
+    },
+    "gui": {
+      "translation": [0, 1.5, 0],
+      "scale": [0.6, 0.6, 0.6]
+    },
+    "head": {
+      "translation": [0, 3.75, 0]
+    },
+    "fixed": {
+      "translation": [0, -5.25, -1.25]
+    }
+  }
+}

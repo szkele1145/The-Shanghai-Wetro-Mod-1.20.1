@@ -1,0 +1,37 @@
+{
+	"credit": "Powered by XHG78999 All Right Reserved",
+	"texture_size": [128, 128],
+	"textures": {
+		"0": "shmetro:block/emergency_exit_upon",
+		"1": "shmetro:block/erailing_side_light",
+		"particle": "shmetro:block/emergency_exit_upon"
+	},
+	"elements": [
+		{
+			"from": [0.05, 8, 4.8],
+			"to": [0.45, 10.4, 11.2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [11.2, 0, 4.8]},
+			"faces": {
+				"north": {"uv": [0.125, 0, 0, 0.75], "texture": "#1"},
+				"east": {"uv": [16, 0, 0, 16], "texture": "#1"},
+				"south": {"uv": [0.125, 0, 0, 0.75], "texture": "#1"},
+				"west": {"uv": [2, 0, 0, 0.75], "texture": "#1"},
+				"up": {"uv": [0.125, 0, 0, 2], "texture": "#1"},
+				"down": {"uv": [0.125, 0, 0, 2], "texture": "#1"}
+			}
+		},
+		{
+			"from": [0.46, 8.1, 5],
+			"to": [0.46, 10.3, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [11.2, 0, 4.8]},
+			"faces": {
+				"north": {"uv": [0.125, 0, 0, 0.75], "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"south": {"uv": [0.125, 0, 0, 0.75], "texture": "#0"},
+				"west": {"uv": [2, 0, 0, 0.75], "texture": "#0"},
+				"up": {"uv": [0.125, 0, 0, 2], "texture": "#0"},
+				"down": {"uv": [0.125, 0, 0, 2], "texture": "#0"}
+			}
+		}
+	]
+}

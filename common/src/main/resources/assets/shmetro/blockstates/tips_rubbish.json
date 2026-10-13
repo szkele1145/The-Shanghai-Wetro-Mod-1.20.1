@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/tips_rubbish"
+		},
+		"facing=east": {
+			"model": "shmetro:block/tips_rubbish",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/tips_rubbish",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/tips_rubbish",
+			"y": 270
+		}
+	}
+}

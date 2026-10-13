@@ -1,0 +1,22 @@
+{
+	"credit": "Powered by XHG78999 All Right Reserved",
+	"textures": {
+		"0": "shmetro:block/tip_security_check",
+		"particle": "shmetro:block/tip_security_check"
+	},
+	"elements": [
+		{
+			"from": [-3, -6.5, 0.025],
+			"to": [19, 24, 0.025],
+			"rotation": {"angle": 0, "axis": "y", "origin": [16, -6.25, 16]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"east": {"uv": [0, 0, 0, 16], "texture": "#0"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"west": {"uv": [0, 0, 0, 16], "texture": "#0"},
+				"up": {"uv": [0, 16, 0, 0], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [0, 16, 0, 0], "rotation": 270, "texture": "#0"}
+			}
+		}
+	]
+}

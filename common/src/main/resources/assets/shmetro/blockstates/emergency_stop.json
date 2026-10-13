@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/emergency_stop"
+		},
+		"facing=east": {
+			"model": "shmetro:block/emergency_stop",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/emergency_stop",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/emergency_stop",
+			"y": 270
+		}
+	}
+}

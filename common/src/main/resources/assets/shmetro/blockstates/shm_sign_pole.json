@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/railway_sign_end_one_pole"
+		},
+		"facing=east": {
+			"model": "shmetro:block/railway_sign_end_one_pole",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/railway_sign_end_one_pole",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/railway_sign_end_one_pole",
+			"y": 270
+		}
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=west": {
+			"model": "shmetro:block/erailing_end_single"
+		},
+		"facing=north": {
+			"model": "shmetro:block/erailing_end_single",
+			"y": 90
+		},
+		"facing=east": {
+			"model": "shmetro:block/erailing_end_single",
+			"y": 180
+		},
+		"facing=south": {
+			"model": "shmetro:block/erailing_end_single",
+			"y": 270
+		}
+	}
+}

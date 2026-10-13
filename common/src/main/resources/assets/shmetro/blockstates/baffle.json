@@ -1,0 +1,19 @@
+{
+    "variants":{
+        "facing=north": {
+			"model": "shmetro:block/baffle"
+		},
+		"facing=east": {
+			"model": "shmetro:block/baffle",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/baffle",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/baffle",
+			"y": 270
+		}
+    }
+}

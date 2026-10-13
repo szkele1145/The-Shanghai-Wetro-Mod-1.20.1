@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/psd_controller",
+			"y": 180
+		},
+		"facing=east": {
+			"model": "shmetro:block/psd_controller",
+			"y": 270
+		},
+		"facing=south": {
+			"model": "shmetro:block/psd_controller"
+		},
+		"facing=west": {
+			"model": "shmetro:block/psd_controller",
+			"y": 90
+		}
+	}
+}

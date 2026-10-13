@@ -1,0 +1,64 @@
+{
+	"variants": {
+		"facing=west,half=lower,mirrored=false": {
+			"model": "shmetro:block/erailing_end_corner"
+		},
+		"facing=north,half=lower,mirrored=false": {
+			"model": "shmetro:block/erailing_end_corner",
+			"y": 90
+		},
+		"facing=east,half=lower,mirrored=false": {
+			"model": "shmetro:block/erailing_end_corner",
+			"y": 180
+		},
+		"facing=south,half=lower,mirrored=false": {
+			"model": "shmetro:block/erailing_end_corner",
+			"y": 270
+		},
+		"facing=west,half=upper,mirrored=false": {
+			"model": "minecraft:block/air"
+		},
+		"facing=north,half=upper,mirrored=false": {
+			"model": "minecraft:block/air",
+			"y": 90
+		},
+		"facing=east,half=upper,mirrored=false": {
+			"model": "minecraft:block/air",
+			"y": 180
+		},
+		"facing=south,half=upper,mirrored=false": {
+			"model": "minecraft:block/air",
+			"y": 270
+		},
+		"facing=west,half=lower,mirrored=true": {
+			"model": "shmetro:block/erailing_end_corner_mirrored"
+		},
+		"facing=north,half=lower,mirrored=true": {
+			"model": "shmetro:block/erailing_end_corner_mirrored",
+			"y": 90
+		},
+		"facing=east,half=lower,mirrored=true": {
+			"model": "shmetro:block/erailing_end_corner_mirrored",
+			"y": 180
+		},
+		"facing=south,half=lower,mirrored=true": {
+			"model": "shmetro:block/erailing_end_corner_mirrored",
+			"y": 270
+		},
+		"facing=west,half=upper,mirrored=true": {
+			"model": "minecraft:block/air"
+		},
+		"facing=north,half=upper,mirrored=true": {
+			"model": "minecraft:block/air",
+			"y": 90
+		},
+		"facing=east,half=upper,mirrored=true": {
+			"model": "minecraft:block/air",
+			"y": 180
+		},
+		"facing=south,half=upper,mirrored=true": {
+			"model": "minecraft:block/air",
+			"y": 270
+		}
+	}
+}

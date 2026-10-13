@@ -1,0 +1,28 @@
+plugins {
+	id "com.gradleup.shadow" version "9.4.2"
+}
+
+dependencies {
+	compileOnly "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+}
+
+architectury {
+	common("fabric", "forge")
+}
+
+loom {
+	mixin {
+		defaultRefmapName = "mixins.shmetro.refmap.json"
+	}
+}
+
+java {
+	withSourcesJar()
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+	options.release = 17
+}
+

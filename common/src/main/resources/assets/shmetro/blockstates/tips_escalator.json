@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/tips_escalator"
+		},
+		"facing=east": {
+			"model": "shmetro:block/tips_escalator",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/tips_escalator",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/tips_escalator",
+			"y": 270
+		}
+	}
+}

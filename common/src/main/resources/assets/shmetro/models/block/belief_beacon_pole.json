@@ -1,0 +1,22 @@
+{
+	"credit": "Powered by XHG78999 All Right Reserved",
+	"textures": {
+		"0": "shmetro:block/belief_beacon",
+		"particle": "shmetro:block/belief_beacon"
+	},
+	"elements": [
+		{
+			"from": [7.25, 0, 7.25],
+			"to": [8.75, 16, 8.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"},
+				"east": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"},
+				"south": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"},
+				"west": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"},
+				"up": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"},
+				"down": {"uv": [1.375, 14.625, 7.0625, 15.6875], "texture": "#0"}
+			}
+		}
+	]
+}

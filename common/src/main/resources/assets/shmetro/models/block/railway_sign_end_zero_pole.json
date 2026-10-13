@@ -1,0 +1,22 @@
+{
+	"credit": "Powered by XHG78999 All Right Reserved",
+	"parent": "block/block",
+	"textures": {
+		"2": "mtr:block/metal",
+		"particle": "mtr:block/blue"
+	},
+	"elements": [
+		{
+			"from": [13, 0, 7.6],
+			"to": [13.8, 16, 8.4],
+			"faces": {
+				"north": {"uv": [11.5, 7, 16, 16], "texture": "#2"},
+				"east": {"uv": [11.5, 7, 16, 16], "texture": "#2"},
+				"south": {"uv": [11.5, 7, 16, 16], "texture": "#2"},
+				"west": {"uv": [11.5, 7, 16, 16], "texture": "#2"},
+				"up": {"uv": [11.5, 7, 16, 16], "texture": "#2"},
+				"down": {"uv": [11.5, 7, 16, 16], "texture": "#2"}
+			}
+		}
+	]
+}

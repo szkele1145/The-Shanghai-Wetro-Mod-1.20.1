@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/gd"
+		},
+		"facing=east": {
+			"model": "shmetro:block/gd",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/gd",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/gd",
+			"y": 270
+		}
+	}
+}

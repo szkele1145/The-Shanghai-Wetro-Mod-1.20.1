@@ -1,0 +1,56 @@
+plugins {
+	id "architectury-plugin" version "3.4.160"
+	id "dev.architectury.loom" version "1.10.431" apply false
+	id "base"
+}
+
+architectury {
+	minecraft = rootProject.minecraft_version
+}
+
+configure(allprojects) {
+	apply plugin: "architectury-plugin"
+
+	version = rootProject.mod_version + "+" + minecraft_version
+	group = project.maven_group
+
+	repositories {
+		mavenLocal()
+		maven { url = "https://maven.minecraftforge.net/" }
+		maven { url = "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/" }
+		maven { url = "https://maven.aliyun.com/repository/public/" }
+		maven { url = "https://maven.terraformersmc.com/" }
+		maven { url = "https://bmclapi2.bangbang93.com/maven/" }
+		maven { url = "https://repo1.maven.org/maven2/" }
+	}
+}
+
+configure(subprojects) {
+	apply plugin: "dev.architectury.loom"
+
+	loom {
+		silentMojangMappingsLicense()
+	}
+
+	configurations {
+		shadowCommon
+	}
+
+	dependencies {
+		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+		mappings loom.officialMojangMappings()
+		implementation files("../checkouts/${rootProject.minecraft_version}/mtr-common.jar")
+		// mixin (fabric 提供的 spongepowered fork)
+		compileOnly "net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5"
+		annotationProcessor "net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5"
+	}
+
+	tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+		options.release = 17
+	}
+}
+
+tasks.register("setupMtr") {
+	// 已预置 checkouts/1.20.1 下的 dev jar
+}

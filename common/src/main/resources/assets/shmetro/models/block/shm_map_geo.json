@@ -1,0 +1,22 @@
+{
+	"credit": "Powered by XHG78999 All Right Reserved",
+	"textures": {
+		"0": "shmetro:block/shm_map_geo",
+		"particle": "shmetro:block/shm_map_geo"
+	},
+	"elements": [
+		{
+			"from": [-14, -8.5, 15.975],
+			"to": [30, 24.5, 15.975],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 1.5, 0]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"east": {"uv": [0, 0, 0, 15], "texture": "#0"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"west": {"uv": [0, 0, 0, 15], "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 0], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 0], "texture": "#0"}
+			}
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=west": {
+			"model": "shmetro:block/isolation_fence"
+		},
+		"facing=north": {
+			"model": "shmetro:block/isolation_fence",
+			"y": 90
+		},
+		"facing=east": {
+			"model": "shmetro:block/isolation_fence",
+			"y": 180
+		},
+		"facing=south": {
+			"model": "shmetro:block/isolation_fence",
+			"y": 270
+		}
+	}
+}

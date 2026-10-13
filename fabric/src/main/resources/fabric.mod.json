@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "shmetro",
+  "version": "${version}",
+  "name": "The Shanghai Wetro Mod",
+  "description": "Provide some decorations in Shanghai Metro for Minecraft Transit Railway.",
+  "authors": [
+    "TKP30",
+    "DF11Z-003A",
+    "MMCJelly",
+    "xhg78999"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/shwetro",
+    "sources": "https://github.com/xhg78999/The-Shanghai-Wetro-Mod"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.xhg78999.shmetro.fabric.MainFabric"
+    ],
+    "client": [
+      "com.xhg78999.shmetro.fabric.MainFabricClient"
+    ],
+    "modmenu": [
+      "com.xhg78999.shmetro.fabric.ModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "shmetro.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1",
+    "mtr": "~3.0"
+  }
+}

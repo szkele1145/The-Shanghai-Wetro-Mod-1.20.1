@@ -1,0 +1,8 @@
+﻿.gradle/
+build/
+work/
+tools/
+reference/
+checkouts/
+run/
+*.log

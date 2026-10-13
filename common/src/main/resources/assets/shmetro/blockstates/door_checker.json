@@ -1,0 +1,34 @@
+{
+	"variants": {
+		"facing=north,mirrored=false": {
+			"model": "shmetro:block/door_checker",
+			"y": 180
+		},
+		"facing=east,mirrored=false": {
+			"model": "shmetro:block/door_checker",
+			"y": 270
+		},
+		"facing=south,mirrored=false": {
+			"model": "shmetro:block/door_checker"
+		},
+		"facing=west,mirrored=false": {
+			"model": "shmetro:block/door_checker",
+			"y": 90
+		},
+		"facing=north,mirrored=true": {
+			"model": "shmetro:block/door_checker_mirrored",
+			"y": 180
+		},
+		"facing=east,mirrored=true": {
+			"model": "shmetro:block/door_checker_mirrored",
+			"y": 270
+		},
+		"facing=south,mirrored=true": {
+			"model": "shmetro:block/door_checker_mirrored"
+		},
+		"facing=west,mirrored=true": {
+			"model": "shmetro:block/door_checker_mirrored",
+			"y": 90
+		}
+	}
+}

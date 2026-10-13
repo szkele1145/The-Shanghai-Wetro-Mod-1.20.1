@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "shmetro:block/pillar_gray",
+    "up": "shmetro:block/pillar_gray",
+    "north": "shmetro:block/pillar_1_middle_front",
+    "east": "shmetro:block/pillar_1_middle_side",
+    "south": "shmetro:block/pillar_1_middle_front",
+    "west": "shmetro:block/pillar_1_middle_side",
+    "particle": "shmetro:block/pillar_gray"
+  }
+}

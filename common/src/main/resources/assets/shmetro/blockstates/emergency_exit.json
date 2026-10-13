@@ -1,0 +1,49 @@
+{
+	"variants": {
+		"type=0,facing=north": {
+			"model": "shmetro:block/emergency_exit_left",
+			"y": 90
+		},
+		"type=0,facing=east": {
+			"model": "shmetro:block/emergency_exit_left",
+			"y": 180
+		},
+		"type=0,facing=south": {
+			"model": "shmetro:block/emergency_exit_left",
+			"y": 270
+		},
+		"type=0,facing=west": {
+			"model": "shmetro:block/emergency_exit_left"
+		},
+		"type=1,facing=north": {
+			"model": "shmetro:block/emergency_exit_right",
+			"y": 90
+		},
+		"type=1,facing=east": {
+			"model": "shmetro:block/emergency_exit_right",
+			"y": 180
+		},
+		"type=1,facing=south": {
+			"model": "shmetro:block/emergency_exit_right",
+			"y": 270
+		},
+		"type=1,facing=west": {
+			"model": "shmetro:block/emergency_exit_right"
+		},
+		"type=2,facing=north": {
+			"model": "shmetro:block/emergency_exit_upon",
+			"y": 90
+		},
+		"type=2,facing=east": {
+			"model": "shmetro:block/emergency_exit_upon",
+			"y": 180
+		},
+		"type=2,facing=south": {
+			"model": "shmetro:block/emergency_exit_upon",
+			"y": 270
+		},
+		"type=2,facing=west": {
+			"model": "shmetro:block/emergency_exit_upon"
+		}
+	}
+}

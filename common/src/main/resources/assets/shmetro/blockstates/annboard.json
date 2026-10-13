@@ -1,0 +1,19 @@
+{
+    "variants":{
+        "facing=north": {
+			"model": "shmetro:block/annboard"
+		},
+		"facing=east": {
+			"model": "shmetro:block/annboard",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/annboard",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/annboard",
+			"y": 270
+		}
+    }
+}

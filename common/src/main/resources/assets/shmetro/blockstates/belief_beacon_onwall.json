@@ -1,0 +1,19 @@
+{
+    "variants":{
+        "facing=north": {
+			"model": "shmetro:block/belief_beacon_onwall"
+		},
+		"facing=east": {
+			"model": "shmetro:block/belief_beacon_onwall",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/belief_beacon_onwall",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/belief_beacon_onwall",
+			"y": 270
+		}
+    }
+}

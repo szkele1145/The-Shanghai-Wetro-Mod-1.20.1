@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/wetfloor",
+			"y": 180
+		},
+		"facing=east": {
+			"model": "shmetro:block/wetfloor",
+			"y": 270
+		},
+		"facing=south": {
+			"model": "shmetro:block/wetfloor"
+		},
+		"facing=west": {
+			"model": "shmetro:block/wetfloor",
+			"y": 90
+		}
+	}
+}

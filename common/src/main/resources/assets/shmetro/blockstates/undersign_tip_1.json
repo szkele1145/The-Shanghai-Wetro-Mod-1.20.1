@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=north": {
+			"model": "shmetro:block/undersign_tip_1"
+		},
+		"facing=east": {
+			"model": "shmetro:block/undersign_tip_1",
+			"y": 90
+		},
+		"facing=south": {
+			"model": "shmetro:block/undersign_tip_1",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "shmetro:block/undersign_tip_1",
+			"y": 270
+		}
+	}
+}
