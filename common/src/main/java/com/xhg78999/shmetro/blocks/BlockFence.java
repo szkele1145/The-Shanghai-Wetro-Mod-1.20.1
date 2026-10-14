@@ -60,7 +60,7 @@ implements IBlock {
 
     public VoxelShape getShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext collisionContext) {
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING);
-        EnumShanghaiFence type = (EnumShanghaiFence)((Object)IBlock.getStatePropertySafe((BlockState)state, TYPE));
+        EnumShanghaiFence type = IBlock.getStatePropertySafe(state, TYPE);
         return switch (type) {
             case ORDINARY -> IBlock.getVoxelShapeByDirection((double)0.0, (double)0.0, (double)0.0, (double)16.0, (double)19.0, (double)3.0, (Direction)facing);
             default -> IBlock.getVoxelShapeByDirection((double)0.0, (double)-8.0, (double)0.0, (double)16.0, (double)19.0, (double)3.0, (Direction)facing);

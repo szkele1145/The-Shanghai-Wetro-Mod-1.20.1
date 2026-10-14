@@ -50,7 +50,7 @@ IBlock {
             boolean side = IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPSDAPGDoorBase.SIDE) == IBlock.EnumSide.RIGHT;
             boolean half = IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPSDAPGDoorBase.HALF) == DoubleBlockHalf.UPPER;
             boolean end = (Boolean)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPSDAPGDoorBase.END);
-            float open = Math.min(((BlockShanghaiPSDDoor.TileEntitySHPSDDoor)((Object)entity)).getOpen(MTRClient.getLastFrameDuration()), 1.0f);
+            float open = Math.min(((BlockShanghaiPSDDoor.TileEntitySHPSDDoor)entity).getOpen(MTRClient.getLastFrameDuration()), 1.0f);
             StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();
             storedMatrixTransformations.add(matricesNew -> {
                 matricesNew.translate(0.5 + (double)entity.getBlockPos().getX(), (double)entity.getBlockPos().getY(), 0.5 + (double)entity.getBlockPos().getZ());

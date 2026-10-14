@@ -171,7 +171,7 @@ public class GraphicsCache {
         }
 
         private void remove() {
-            if (!this.resourceLocation.equals((Object)DEFAULT_WHITE_RESOURCE)) {
+            if (!this.resourceLocation.equals(DEFAULT_WHITE_RESOURCE)) {
                 TextureManager textureManager = Minecraft.getInstance().getTextureManager();
                 textureManager.release(this.resourceLocation);
                 AbstractTexture abstractTexture = textureManager.getTexture(this.resourceLocation);

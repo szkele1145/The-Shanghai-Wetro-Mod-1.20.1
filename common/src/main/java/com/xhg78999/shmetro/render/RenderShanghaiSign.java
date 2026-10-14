@@ -50,11 +50,11 @@ IDrawing {
             return;
         }
         BlockShanghaiSign block = (BlockShanghaiSign)state.getBlock();
-        if (((BlockShanghaiSign.TileEntityRailwaySign)((Object)entity)).getSignIds().length != block.length) {
+        if (((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds().length != block.length) {
             return;
         }
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)BlockStationNameBase.FACING);
-        String[] signIds = ((BlockShanghaiSign.TileEntityRailwaySign)((Object)entity)).getSignIds();
+        String[] signIds = ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds();
         boolean renderBackground = false;
         int backgroundColor = 0;
         for (String signId : signIds) {
@@ -89,7 +89,7 @@ IDrawing {
         }
         for (int i = 0; i < signIds.length; ++i) {
             if (signIds[i] == null) continue;
-            RenderRailwaySign.drawSign((PoseStack)matrices, (MultiBufferSource)vertexConsumers, (StoredMatrixTransformations)storedMatrixTransformations, (Font)Minecraft.getInstance().font, (BlockPos)pos, (String)signIds[i], (float)(0.5f * (float)i), (float)0.0f, (float)0.5f, (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)true), ((BlockShanghaiSign.TileEntityRailwaySign)((Object)entity)).getSelectedIds(), (Direction)facing, (int)(backgroundColor | 0x223533), (textureId, x, y, size, flipTexture) -> RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(textureId.toString()), (boolean)true, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT, (matricesNew, vertexConsumer) -> {
+            RenderRailwaySign.drawSign((PoseStack)matrices, (MultiBufferSource)vertexConsumers, (StoredMatrixTransformations)storedMatrixTransformations, (Font)Minecraft.getInstance().font, (BlockPos)pos, (String)signIds[i], (float)(0.5f * (float)i), (float)0.0f, (float)0.5f, (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)true), ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSelectedIds(), (Direction)facing, (int)(backgroundColor | 0x223533), (textureId, x, y, size, flipTexture) -> RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(textureId.toString()), (boolean)true, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT, (matricesNew, vertexConsumer) -> {
                 storedMatrixTransformations.transform(matricesNew);
                 IDrawing.drawTexture((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, (float)x, (float)y, (float)size, (float)size, (float)(flipTexture ? 1.0f : 0.0f), (float)0.0f, (float)(flipTexture ? 0.0f : 1.0f), (float)1.0f, (Direction)facing, (int)-1, (int)0xF000F0);
                 matricesNew.popPose();

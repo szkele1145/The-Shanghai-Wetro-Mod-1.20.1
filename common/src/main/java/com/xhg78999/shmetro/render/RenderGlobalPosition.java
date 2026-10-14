@@ -37,7 +37,7 @@ implements BlockEntityRenderer<T> {
             UtilitiesClient.rotateZDegrees((PoseStack)poseStack, (float)180.0f);
             UtilitiesClient.rotateYDegrees((PoseStack)poseStack, (float)(-facing.toYRot()));
             poseStack.translate(0.0, 0.0, -0.48);
-            GraphicsHelper.drawTextFont(poseStack, bufferSource, this.dispatcher, ((BlockEntityGlobalPosition)((Object)entity)).code, 0.1f, 0.5f, 255, 255, 255, packedLight, 0.02f, -0.02f, 0.02f);
+            GraphicsHelper.drawTextFont(poseStack, bufferSource, this.dispatcher, ((BlockEntityGlobalPosition)entity).code, 0.1f, 0.5f, 255, 255, 255, packedLight, 0.02f, -0.02f, 0.02f);
             poseStack.popPose();
         }
     }

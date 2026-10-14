@@ -52,16 +52,16 @@ public class SHDestination {
             g2d.fillPolygon(new int[]{150, 162, 162}, new int[]{365, 365, 353}, 3);
             GraphicsHelper.pasteImage(g2d, new ResourceLocation("shmetro", "textures/rendering/arrow_left.png"), 162, 223);
             g2d.setColor(Color.BLACK);
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(70.0f), String.format("\u5f80%s", StringUtil.getCjkMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get((Object)Long.valueOf((long)(flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), 313, 277, "left");
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(25.0f), String.format("To %s", StringUtil.getEngMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get((Object)Long.valueOf((long)(flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), 313, 310, "left");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(70.0f), String.format("\u5f80%s", StringUtil.getCjkMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get(Long.valueOf((long)(flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), 313, 277, "left");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(25.0f), String.format("To %s", StringUtil.getEngMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get(Long.valueOf((long)(flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), 313, 310, "left");
             SHDestination.drawLineBig(g2d, line, width, false);
         } else {
             g2d.fillRect(150, 353, width - 312, 12);
             g2d.fillPolygon(new int[]{width - 162, width - 162, width - 150}, new int[]{353, 365, 365}, 3);
             GraphicsHelper.pasteImage(g2d, new ResourceLocation("shmetro", "textures/rendering/arrow_right.png"), width - 289, 223);
             g2d.setColor(Color.BLACK);
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(70.0f), String.format("\u5f80%s", StringUtil.getCjkMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get((Object)Long.valueOf((long)(!flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), width - 184 - 129, 277, "right");
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(25.0f), String.format("To %s", StringUtil.getEngMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get((Object)Long.valueOf((long)(!flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), width - 184 - 129, 310, "right");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(70.0f), String.format("\u5f80%s", StringUtil.getCjkMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get(Long.valueOf((long)(!flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), width - 184 - 129, 277, "right");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(25.0f), String.format("To %s", StringUtil.getEngMain(((Station)ClientData.DATA_CACHE.platformIdToStation.get(Long.valueOf((long)(!flip ? line.getFirstPlatformId() : line.getLastPlatformId())))).name)), width - 184 - 129, 310, "right");
             SHDestination.drawLineBig(g2d, line, 150, true);
         }
         SHDestination.drawPlatformId(g2d, platform, width / 2);

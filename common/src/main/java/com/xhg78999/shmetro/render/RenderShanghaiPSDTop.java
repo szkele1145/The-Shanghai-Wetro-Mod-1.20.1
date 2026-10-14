@@ -107,7 +107,7 @@ IBlock {
     }
 
     protected BlockShanghaiPSDTop.EnumPSDTop getRenderType(BlockGetter world, BlockPos pos, BlockState state) {
-        return (BlockShanghaiPSDTop.EnumPSDTop)((Object)IBlock.getStatePropertySafe((BlockState)state, BlockShanghaiPSDTop.KIND));
+        return IBlock.getStatePropertySafe(state, BlockShanghaiPSDTop.KIND);
     }
 
     private int getTextureNumber(BlockGetter world, BlockPos pos, Direction facing, boolean searchLeft) {
