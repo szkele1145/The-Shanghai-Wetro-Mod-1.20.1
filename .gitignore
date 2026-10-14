@@ -1,9 +1,13 @@
 .gradle/
 build/
 work/
-tools/
-!tools/modrinth-backfill.ps1
-!build.ps1
+tools/jdk17/
+tools/gradle-8.11-dist/
+tools/gradle-dist/
+tools/*.jar
+tools/*.zip
+tools/*.txt
+tools/int/
 reference/
 checkouts/
 run/
