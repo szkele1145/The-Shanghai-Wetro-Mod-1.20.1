@@ -89,7 +89,7 @@
     "block.shmetro.passing_entrance_2010":  "Ticket Barrier (Entrance, 2010)",
     "block.shmetro.passing_exit_2010":  "Ticket Barrier (Exit, 2010)",
     "block.shmetro.passing_entrance_2000":  "Ticket Barrier (Entrance, 2000)",
-    "block.shmetro.passing_exit_2000":  "Ticket Barrier (Exit, 2000)",
+    "block.shmetro.passing_exit_2000":  "Ticket Barrier (Exit, 2020)",
     "block.shmetro.psd_controller":  "PSD Controller",
     "block.shmetro.shm_sign":  "Shanghai Metro Sign",
     "block.shmetro.shm_sign_pole":  "Shanghai Metro Sign Pole",
@@ -154,8 +154,5 @@
     "block.shmetro.shm_sign_8_even":  "Shanghai Metro Sign",
     "block.shmetro.shm_sign_8_odd":  "Shanghai Metro Sign",
     "block.shmetro.shm_sign_9_even":  "Shanghai Metro Sign",
-    "block.shmetro.shm_sign_9_odd":  "Shanghai Metro Sign",
-    "block.shmetro.passing_entrance_2008":  "Ticket Barrier (Entrance, 2008)",
-    "block.shmetro.passing_exit_2008":  "Ticket Barrier (Exit, 2008)",
-    "block.shmetro.station_name_onwall":  "Station Name Sign (Wall)"
+    "block.shmetro.shm_sign_9_odd":  "Shanghai Metro Sign"
 }
