@@ -26,8 +26,8 @@ implements EntityBlock {
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
     }
 
-    public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
-        return new BlockEntityAC(p_153215_, p_153216_);
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new BlockEntityAC(pos, state);
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
