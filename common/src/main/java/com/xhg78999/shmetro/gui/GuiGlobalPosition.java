@@ -51,7 +51,7 @@ implements IGui {
             }
         }
         catch (Exception exception) {
-            // empty catch block
+            com.xhg78999.shmetro.Main.LOGGER.catching(exception);
         }
     }
 
@@ -82,7 +82,7 @@ implements IGui {
             guiGraphics.drawCenteredString(this.font, Text.translatable("gui.shmetro.gd"), this.width / 2, (int)((double)this.height * 0.37), -1);
         }
         catch (Exception var6) {
-            var6.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(var6);
         }
     }
 }

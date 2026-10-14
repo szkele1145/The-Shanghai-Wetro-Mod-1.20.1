@@ -1,0 +1,8 @@
+{
+	"variants": {
+		"facing=north": {"model": "shmetro:block/prohibited_list"},
+		"facing=east": {"model": "shmetro:block/prohibited_list", "y": 90},
+		"facing=south": {"model": "shmetro:block/prohibited_list", "y": 180},
+		"facing=west": {"model": "shmetro:block/prohibited_list", "y": 270}
+	}
+}

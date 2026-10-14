@@ -38,6 +38,7 @@ import com.xhg78999.shmetro.blocks.BlockStationInfoBoardSingle;
 import com.xhg78999.shmetro.blocks.BlockTipBlock;
 import com.xhg78999.shmetro.blocks.BlockUndersignTip;
 import com.xhg78999.shmetro.blocks.BlockWall;
+import com.xhg78999.shmetro.blocks.BlockProhibitedList;
 import com.xhg78999.shmetro.blocks.BlockWallRounded;
 import com.xhg78999.shmetro.blocks.BlockWetFloor;
 import mtr.RegistryObject;
@@ -135,6 +136,7 @@ public interface Blocks {
     public static final RegistryObject<Block> LIGHT_BAR_DOUBLE_WRAPPED = new RegistryObject(() -> new BlockLights(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).sound(SoundType.METAL).destroyTime(1.0f).lightLevel(s -> 13)));
     public static final RegistryObject<Block> LIGHT_BAR_OPEN = new RegistryObject(() -> new BlockLights(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).sound(SoundType.METAL).destroyTime(1.0f).lightLevel(s -> 13)));
     public static final RegistryObject<Block> LIGHT_BAR_GRID = new RegistryObject(() -> new BlockLights(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).sound(SoundType.METAL).destroyTime(1.0f).lightLevel(s -> 13)));
+    public static final RegistryObject<Block> PROHIBITED_LIST = new RegistryObject(BlockProhibitedList::new);
     public static final RegistryObject<Block> TIPS_MONITOR = new RegistryObject(() -> new BlockTipBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).sound(SoundType.GLASS).destroyTime(1.0f)));
     public static final RegistryObject<Block> TIPS_FIREWAY = new RegistryObject(() -> new BlockTipBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).sound(SoundType.GLASS).destroyTime(1.0f)));
     public static final RegistryObject<Block> TIPS_RUBBISH = new RegistryObject(() -> new BlockTipBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).sound(SoundType.GLASS).destroyTime(1.0f)));

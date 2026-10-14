@@ -49,7 +49,7 @@ public class GraphicsCache {
             this.fontCjk = Font.createFont(0, Utilities.getInputStream((Optional)resourceManager.getResource(new ResourceLocation("shmetro", "font/simhei.ttf"))));
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
         }
         for (ResourceLocation id : resourceManager.listResources("models/dynamic", path -> path.toString().endsWith(".bbmodel")).keySet()) {
             try {
@@ -61,7 +61,7 @@ public class GraphicsCache {
             }
             catch (Exception e) {
                 Main.LOGGER.error(String.format("MTR-SHM: ERROR Happened while loading Blockbench Model %s, skipping", id.toString()));
-                e.printStackTrace();
+                com.xhg78999.shmetro.Main.LOGGER.catching(e);
             }
         }
     }
@@ -80,7 +80,7 @@ public class GraphicsCache {
                 assert (nativeImage != null);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                com.xhg78999.shmetro.Main.LOGGER.catching(e);
             }
             DynamicResource staticTextureProviderOld = this.dynamicResources.get(key);
             if (staticTextureProviderOld != null) {
@@ -95,7 +95,7 @@ public class GraphicsCache {
                     newKey = URLEncoder.encode(key, StandardCharsets.UTF_8);
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    com.xhg78999.shmetro.Main.LOGGER.catching(e);
                 }
                 String newKeyLower = newKey.toLowerCase(Locale.ENGLISH);
                 ResourceLocation resourceLocation = new ResourceLocation("shmetro", "dynamic_texture_" + newKeyLower.replaceAll("[^0-9a-z_]", "_"));
@@ -133,18 +133,18 @@ public class GraphicsCache {
                     stream.close();
                 }
                 catch (Exception var8) {
-                    var8.printStackTrace();
+                    com.xhg78999.shmetro.Main.LOGGER.catching(var8);
                 }
                 try {
                     Utilities.closeResource((Resource)resource);
                 }
                 catch (IOException var5) {
-                    var5.printStackTrace();
+                    com.xhg78999.shmetro.Main.LOGGER.catching(var5);
                 }
             });
         }
         catch (Exception exception) {
-            // empty catch block
+            com.xhg78999.shmetro.Main.LOGGER.catching(exception);
         }
     }
 

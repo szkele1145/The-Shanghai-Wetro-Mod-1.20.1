@@ -154,5 +154,6 @@
     "block.shmetro.shm_sign_8_even":  "Shanghai Metro Sign",
     "block.shmetro.shm_sign_8_odd":  "Shanghai Metro Sign",
     "block.shmetro.shm_sign_9_even":  "Shanghai Metro Sign",
-    "block.shmetro.shm_sign_9_odd":  "Shanghai Metro Sign"
+    "block.shmetro.shm_sign_9_odd":  "Shanghai Metro Sign",
+    "block.shmetro.prohibited_list":  "Shanghai Metro Prohibited Items Sign"
 }

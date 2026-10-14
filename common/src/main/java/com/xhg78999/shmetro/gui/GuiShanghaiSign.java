@@ -106,7 +106,7 @@ implements IGui {
             }
         }
         catch (Exception var8) {
-            var8.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(var8);
         }
         if (world != null) {
             BlockEntity entity = world.getBlockEntity(signPos);
@@ -207,7 +207,7 @@ implements IGui {
             }
         }
         catch (Exception var7) {
-            var7.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(var7);
         }
     }
 

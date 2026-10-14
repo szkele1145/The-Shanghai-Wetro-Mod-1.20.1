@@ -39,7 +39,7 @@ public class SHDestination {
             ist = new ByteArrayInputStream(os.toByteArray());
         }
         catch (IOException e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return nat;
         }
         return NativeImage.read((InputStream) ist);

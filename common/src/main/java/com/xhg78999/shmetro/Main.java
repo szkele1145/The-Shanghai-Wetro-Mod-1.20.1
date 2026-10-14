@@ -55,6 +55,7 @@ public class Main {
         registries.registerBlockAndItem("belief_beacon", Blocks.BELIEF_BEACON, CreativeTab.SHNAVIGATE);
         registries.registerBlockAndItem("belief_beacon_onwall", Blocks.BELIEF_BEACON_ONWALL, CreativeTab.SHNAVIGATE);
         registries.registerBlockAndItem("belief_beacon_pole", Blocks.BELIEF_BEACON_POLE, CreativeTab.SHNAVIGATE);
+      registries.registerBlockAndItem("prohibited_list", Blocks.PROHIBITED_LIST, CreativeTab.SHFACILITIES);
         registries.registerBlockAndItem("security_check_machine", Blocks.SECURITY_CHECK_MACHINE, CreativeTab.SHFACILITIES);
         registries.registerBlockAndItem("security_check_pole", Blocks.SECURITY_CHECK_POLE, CreativeTab.SHFACILITIES);
         registries.registerBlockAndItem("floor", Blocks.FLOOR, CreativeTab.SHBLOCKS);

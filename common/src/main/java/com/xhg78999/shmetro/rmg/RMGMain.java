@@ -27,7 +27,7 @@ public class RMGMain {
             route = RMGMain.getRouteStream(platformId).get(0);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return null;
         }
         Station now = RMGMain.getStationFromPlatform(platformId);
@@ -37,7 +37,7 @@ public class RMGMain {
             return SHRunin.generate(hasLeft, next, past, now, route, flip);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return null;
         }
     }
@@ -48,7 +48,7 @@ public class RMGMain {
             route = RMGMain.getRouteStream(platformId).get(0);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return null;
         }
         Platform platform = (Platform)ClientData.DATA_CACHE.platformIdMap.get(platformId);
@@ -56,7 +56,7 @@ public class RMGMain {
             return SHDestination.generate(hasLeft, flip, route, width, platform);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return null;
         }
     }
@@ -78,7 +78,7 @@ public class RMGMain {
             return SHRouteMap.generate(hasLeft, flip, now, route, width, nowPos);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
             return null;
         }
     }

@@ -76,7 +76,7 @@ public class GraphicsHelper {
             gph.drawImage((Image)bfi, x, y, null);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
         }
     }
 

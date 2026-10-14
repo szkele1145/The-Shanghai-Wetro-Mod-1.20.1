@@ -56,7 +56,7 @@ extends EntityModel<Entity> {
             this.bone.setModelPart();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
         }
     }
 

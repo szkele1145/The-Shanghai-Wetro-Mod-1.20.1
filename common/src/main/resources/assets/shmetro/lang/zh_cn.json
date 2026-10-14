@@ -154,5 +154,6 @@
     "block.shmetro.shm_sign_8_even":  "上海地铁指示牌",
     "block.shmetro.shm_sign_8_odd":  "上海地铁指示牌",
     "block.shmetro.shm_sign_9_even":  "上海地铁指示牌",
-    "block.shmetro.shm_sign_9_odd":  "上海地铁指示牌"
+    "block.shmetro.shm_sign_9_odd":  "上海地铁指示牌",
+    "block.shmetro.prohibited_list":  "上海地铁禁止携带物品告示牌"
 }
