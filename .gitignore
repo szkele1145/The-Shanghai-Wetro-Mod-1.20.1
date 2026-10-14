@@ -2,6 +2,8 @@
 build/
 work/
 tools/
+!tools/modrinth-backfill.ps1
+!build.ps1
 reference/
 checkouts/
 run/
