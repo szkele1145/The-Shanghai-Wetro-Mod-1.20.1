@@ -115,7 +115,7 @@ public interface Blocks {
     public static final RegistryObject<Block> SHM_SIGN_13_EVEN = new RegistryObject(() -> new BlockShanghaiSign(13, false));
     public static final RegistryObject<Block> SHM_SIGN_13_ODD = new RegistryObject(() -> new BlockShanghaiSign(13, true));
     public static final RegistryObject<Block> SHM_SIGN_MIDDLE = new RegistryObject(() -> new BlockShanghaiSign(0, false));
-    public static final RegistryObject<Block> SHM_SIGN_POLE = new RegistryObject(() -> new BlockShanghaiSignPole(BlockBehaviour.Properties.of().sound(SoundType.METAL).noLootTable().destroyTime(2.0f).instabreak()));
+    public static final RegistryObject<Block> SHM_SIGN_POLE = new RegistryObject(() -> new BlockShanghaiSignPole(BlockBehaviour.Properties.of().sound(SoundType.METAL).noLootTable().destroyTime(2.0f).noOcclusion()));
     public static final RegistryObject<Block> SECURITY_CHECK_MACHINE = new RegistryObject(() -> new BlockSecurityCheckMachine(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BLACK).sound(SoundType.METAL).destroyTime(1.0f)));
     public static final RegistryObject<Block> SECURITY_CHECK_MACHINE_BIG = new RegistryObject(() -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_BLACK).sound(SoundType.METAL).destroyTime(1.0f)));
     public static final RegistryObject<Block> SECURITY_CHECK_POLE = new RegistryObject(() -> new BlockSecurityCheckPole(BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).sound(SoundType.GLASS).destroyTime(1.0f)));

@@ -18,7 +18,7 @@ public class BlockBeliefBeacon
 extends HorizontalDirectionalBlock
 implements EntityBlock {
     public BlockBeliefBeacon() {
-        super(BlockBehaviour.Properties.of().sound(SoundType.METAL).destroyTime(0.3f).instabreak().isValidSpawn((a, b, c, d) -> false).isRedstoneConductor((a, b, c) -> false).isViewBlocking((a, b, c) -> false).hasPostProcess((a, b, c) -> false).lightLevel(blockStatex -> 13));
+        super(BlockBehaviour.Properties.of().sound(SoundType.METAL).destroyTime(0.3f).noOcclusion().isValidSpawn((a, b, c, d) -> false).isRedstoneConductor((a, b, c) -> false).isViewBlocking((a, b, c) -> false).hasPostProcess((a, b, c) -> false).lightLevel(blockStatex -> 13));
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
