@@ -26,6 +26,7 @@ dependencies {
 	modApi "dev.architectury:architectury-forge:9.1.12"
 
 	implementation files("../checkouts/${rootProject.minecraft_version}/mtr-forge.jar")
+	modImplementation files("../checkouts/${rootProject.minecraft_version}/mtr-forge.jar")
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
