@@ -7,7 +7,8 @@ $env:JAVA_HOME = "$proj\tools\jdk17"
 $env:JAVA_TOOL_OPTIONS = "-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=65532 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=65532"
 
 Write-Host "=== shmetro build ===" -ForegroundColor Cyan
-& "$proj\tools\gradle-8.11-dist\bin\gradle.bat" :fabric:build :forge:build --no-build-cache
+& "$proj\tools\gradle-8.11-dist\bin\gradle.bat" :fabric:configureLaunch 2>$null
+& "$proj\tools\gradle-8.11-dist\bin\gradle.bat" :fabric:build :forge:build
 if ($LASTEXITCODE -ne 0) { throw "build failed" }
 
 $ver = (Select-String -Path "$proj\gradle.properties" -Pattern 'mod_version=(.+)').Matches[0].Groups[1].Value
