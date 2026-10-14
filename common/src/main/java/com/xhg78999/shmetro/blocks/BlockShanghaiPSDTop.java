@@ -61,7 +61,7 @@ IBlock {
     public static final EnumProperty<BlockPSDTop.EnumPersistent> PERSISTENT = EnumProperty.create((String)"persistent", BlockPSDTop.EnumPersistent.class);
 
     public BlockShanghaiPSDTop() {
-        super(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_YELLOW).sound(SoundType.METAL).noLootTable().destroyTime(2.0f).noOcclusion());
+        super(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_YELLOW).sound(SoundType.METAL).noLootTable().destroyTime(2.0f).noOcclusion().pushReaction(PushReaction.BLOCK));
     }
 
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
@@ -128,9 +128,6 @@ IBlock {
         return Shapes.empty();
     }
 
-    public PushReaction getPushReaction(BlockState blockState) {
-        return PushReaction.BLOCK;
-    }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(new Property[]{FACING, SIDE_EXTENDED, AIR_LEFT, AIR_RIGHT, ARROW_DIRECTION, PERSISTENT, KIND});

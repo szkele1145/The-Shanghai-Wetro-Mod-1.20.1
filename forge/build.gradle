@@ -57,3 +57,8 @@ remapJar {
 remapJar {
 	input.set shadowJar.archiveFile
 }
+// 产物命名: shmetro-<mod_version>-<mc_version>-<loader>.jar
+base {
+	archivesName = 'shmetro'
+}
+version = rootProject.mod_version + '-' + rootProject.minecraft_version + '-' + 'forge'
