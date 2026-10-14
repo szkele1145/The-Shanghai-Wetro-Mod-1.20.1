@@ -1,5 +1,10 @@
 # The Shanghai Wetro Mod — 1.20.1 移植版
 
+[![Mod Environment](https://img.shields.io/badge/environment-Fabric%20%26%20Forge-1976d2)](https://modrinth.com/mod/shwetro-1201)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-62b472)](https://modrinth.com/mod/shwetro-1201)
+[![Requires MTR 3.x](https://img.shields.io/badge/requires-MTR%203.x-e0484a)](https://modrinth.com/mod/minecraft-transit-railway)
+[![License MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 **[Modrinth 下载](https://modrinth.com/mod/shwetro-1201)** | [GitHub Release](https://github.com/szkele1145/The-Shanghai-Wetro-Mod-1.20.1/releases)
 
 [MTR Shanghai Wetro Addon (shwetro)](https://modrinth.com/mod/shwetro) 的 **Minecraft 1.20.1** 移植工程（Fabric + Forge 双加载器）。
