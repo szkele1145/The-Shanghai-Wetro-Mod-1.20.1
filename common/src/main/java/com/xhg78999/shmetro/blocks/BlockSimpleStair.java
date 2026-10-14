@@ -43,7 +43,7 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getClickedFace();
+        Direction facing = ctx.getHorizontalDirection();
         Level level = ctx.getLevel();
         BlockPos blockPos = ctx.getClickedPos();
         BlockPos posRight = blockPos.relative(facing.getOpposite());

@@ -41,7 +41,7 @@ implements IBlock {
             return InteractionResult.FAIL;
         }
         Level world = context.getLevel();
-        Direction playerFacing = context.getClickedFace();
+        Direction playerFacing = context.getHorizontalDirection();
         BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
         for (int x = 0; x < horizontalBlocks; ++x) {
             BlockPos newPos = pos.relative(playerFacing.getClockWise(), x);
@@ -86,7 +86,7 @@ implements IBlock {
     }
 
     public static boolean blocksNotReplaceable(UseOnContext context, int width, int height, Block blacklistBlock) {
-        Direction facing = context.getClickedFace();
+        Direction facing = context.getHorizontalDirection();
         Level world = context.getLevel();
         BlockPos startingPos = context.getClickedPos().relative(context.getClickedFace());
         for (int x = 0; x < width; ++x) {

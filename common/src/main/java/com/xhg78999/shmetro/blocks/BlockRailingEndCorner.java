@@ -62,7 +62,7 @@ extends BlockAPGGlass {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getClickedFace();
+        Direction facing = ctx.getHorizontalDirection();
         return IBlock.isReplaceable((BlockPlaceContext)ctx, (Direction)Direction.UP, (int)2) ? (BlockState)((BlockState)this.getAdditionalState(ctx.getClickedPos(), facing).setValue((Property)FACING, (Comparable)facing)).setValue((Property)HALF, (Comparable)DoubleBlockHalf.LOWER) : null;
     }
 
