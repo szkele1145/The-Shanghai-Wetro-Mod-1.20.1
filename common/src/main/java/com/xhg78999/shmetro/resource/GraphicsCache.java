@@ -94,11 +94,11 @@ public class GraphicsCache {
                 try {
                     newKey = URLEncoder.encode(key, StandardCharsets.UTF_8);
                 }
-                catch (Exception var10) {
-                    var10.printStackTrace();
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
-                String var10003 = newKey.toLowerCase(Locale.ENGLISH);
-                ResourceLocation resourceLocation = new ResourceLocation("shmetro", "dynamic_texture_" + var10003.replaceAll("[^0-9a-z_]", "_"));
+                String newKeyLower = newKey.toLowerCase(Locale.ENGLISH);
+                ResourceLocation resourceLocation = new ResourceLocation("shmetro", "dynamic_texture_" + newKeyLower.replaceAll("[^0-9a-z_]", "_"));
                 minecraftClient.getTextureManager().register(resourceLocation, (AbstractTexture)dynamicTexture);
                 dynamicResourceNew = new DynamicResource(resourceLocation, dynamicTexture);
             }

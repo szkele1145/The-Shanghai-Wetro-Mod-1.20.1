@@ -94,13 +94,13 @@ implements IGui {
                 });
                 ArrayList<mtr.data.Platform> platforms = new ArrayList<>(ClientData.DATA_CACHE.requestStationIdToPlatforms(station.id).values());
                 Collections.sort(platforms);
-                Stream<DataConverter> var10000 = platforms.stream().map(platform -> {
-                    String var10003 = platform.name;
-                    return new DataConverter(platform.id, var10003 + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().map(route -> ((ClientCache.PlatformRouteDetails.StationDetails)route.stationDetails.get((int)(route.stationDetails.size() - 1))).stationName).collect(Collectors.toList())), 0);
+                Stream<DataConverter> platformStream = platforms.stream().map(platform -> {
+                    String platformName = platform.name;
+                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().map(route -> ((ClientCache.PlatformRouteDetails.StationDetails)route.stationDetails.get((int)(route.stationDetails.size() - 1))).stationName).collect(Collectors.toList())), 0);
                 });
-                List<NameColorDataBase> var10001 = this.platformsForList;
-                Objects.requireNonNull(var10001);
-                var10000.forEach(var10001::add);
+                List<NameColorDataBase> platformList = this.platformsForList;
+                Objects.requireNonNull(platformList);
+                platformStream.forEach(platformList::add);
                 ClientData.DATA_CACHE.getAllRoutesIncludingConnectingStations(station).forEach((color, route) -> this.routesForList.add((NameColorDataBase)new DataConverter((long)route.color, route.name, route.color)));
                 ClientData.DATA_CACHE.getConnectingStationsIncludingThisOne(station).forEach(connectingStation -> this.stationsForList.add((NameColorDataBase)new DataConverter(connectingStation.id, connectingStation.name, connectingStation.color)));
             }

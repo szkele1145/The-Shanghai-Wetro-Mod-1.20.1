@@ -55,8 +55,8 @@ extends EntityModel<Entity> {
             modelDataWrapper.setModelPart(textureWidth, textureHeight);
             this.bone.setModelPart();
         }
-        catch (Exception var10) {
-            var10.printStackTrace();
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
