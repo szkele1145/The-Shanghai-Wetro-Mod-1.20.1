@@ -20,3 +20,10 @@
 ## 构建
 - 工程内自包含: tools/jdk17 + tools/gradle-8.11-dist + build.ps1
 - ./gradlew build 或 powershell build.ps1
+## 待用户操作清单 (睡醒后)
+1. Modrinth: 生成新 PAT (旧 token 已失效 401) → 补发 1.0.2~1.1.3 共 11 个版本
+2. GitHub: 生成带 workflow scope 的 token → 推送已备好的 CI (.github/workflows/build.yml, 上次被拒)
+3. 复测: 信仰灯下方贴图 / 指示牌连锁破坏 (1.0.3+ 已修)
+
+## 磁盘清理记录
+- work/ 临时解包与反编译参照: 794MB → 5MB (2026-10-15)
