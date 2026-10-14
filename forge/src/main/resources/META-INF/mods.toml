@@ -7,9 +7,10 @@ issueTrackerURL = "https://github.com/szkele1145/The-Shanghai-Wetro-Mod-1.20.1/i
 modId = "shmetro"
 version = "${version}"
 displayName = "The Shanghai Wetro Mod"
+displayURL = "https://modrinth.com/mod/shwetro-1201"
 authors = "TKP30, DF11Z-003A, MMCJelly, xhg78999"
 description = '''
-Provide some decorations in Shanghai Metro for Minecraft Transit Railway.
+Provide some decorations in Shanghai Metro for Minecraft Transit Railway (1.20.1 port, Fabric + Forge, requires MTR 3.x).
 '''
 logoFile = "icon.png"
 
