@@ -55,7 +55,7 @@ public class BlockProhibitedList extends BlockDirectionalMapper {
     }
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext collisionContext) {
-        return IBlock.getVoxelShapeByDirection(2.0, 1.0, 7.5, 14.0, 15.0, 8.5, (Direction) IBlock.getStatePropertySafe(state, FACING));
+        return IBlock.getVoxelShapeByDirection(1.0, 1.0, 7.5, 15.0, 15.0, 8.5, (Direction) IBlock.getStatePropertySafe(state, FACING));
     }
 
     @Override

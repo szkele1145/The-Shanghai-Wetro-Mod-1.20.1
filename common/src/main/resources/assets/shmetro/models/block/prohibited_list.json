@@ -6,12 +6,12 @@
 	},
 	"elements": [
 		{
-			"from": [2, 1, 8],
-			"to": [14, 15, 8],
+			"from": [1, 1, 8],
+			"to": [15, 15, 8],
 			"shade": false,
 			"faces": {
-				"north": {"uv": [2, 9, 14, 22], "texture": "#all"},
-				"south": {"uv": [2, 9, 14, 22], "texture": "#all"}
+				"north": {"uv": [2.0, 4.375, 30.0, 27.625], "texture": "#all"},
+				"south": {"uv": [2.0, 4.375, 30.0, 27.625], "texture": "#all"}
 			}
 		}
 	]
