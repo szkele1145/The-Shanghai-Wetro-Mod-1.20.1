@@ -1,5 +1,7 @@
 # The Shanghai Wetro Mod — 1.20.1 移植版
 
+**[Modrinth 下载](https://modrinth.com/mod/shwetro-1201)** | [GitHub Release](https://github.com/szkele1145/The-Shanghai-Wetro-Mod-1.20.1/releases)
+
 [MTR Shanghai Wetro Addon (shwetro)](https://modrinth.com/mod/shwetro) 的 **Minecraft 1.20.1** 移植工程（Fabric + Forge 双加载器）。
 
 原作：TKP30 / DF11Z-003A / MMCJelly（MIT License）
