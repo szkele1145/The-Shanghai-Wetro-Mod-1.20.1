@@ -45,7 +45,7 @@ extends BlockPSDGlassEnd {
             return;
         }
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING);
-        BlockPos leftPos = pos.relative(facing.getOpposite());
+        BlockPos leftPos = pos.relative(facing.getCounterClockWise());
         BlockState leftState = world.getBlockState(leftPos);
         boolean leftValid = this.canConnect(leftState);
         if (leftValid) {

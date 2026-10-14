@@ -74,7 +74,7 @@ IBlock {
                 int leftBlocks = this.getTextureNumber((BlockGetter)world, pos, facing, true);
                 int rightBlocks = this.getTextureNumber((BlockGetter)world, pos, facing, false);
                 int color = RenderShanghaiPSDTop.getShadingColor(facing, -1);
-                BlockShanghaiPSDTop.EnumPSDTop renderType = this.getRenderType((BlockGetter)world, pos.relative(facing.getOpposite(), leftBlocks), state);
+                BlockShanghaiPSDTop.EnumPSDTop renderType = this.getRenderType((BlockGetter)world, pos.relative(facing.getCounterClockWise(), leftBlocks), state);
                 if (renderType != BlockShanghaiPSDTop.EnumPSDTop.BLANK && IBlock.getStatePropertySafe((BlockState)state, (Property)SIDE_EXTENDED) != IBlock.EnumSide.SINGLE) {
                     float width = (float)(leftBlocks + rightBlocks + 1) - this.sidePadding * 2.0f;
                     float height = 1.0f - this.topPadding - this.bottomPadding;
@@ -114,7 +114,7 @@ IBlock {
         BlockState state;
         int number = 0;
         Block thisBlock = world.getBlockState(pos).getBlock();
-        while ((state = world.getBlockState(pos.relative(searchLeft ? facing.getOpposite() : facing.getClockWise(), number))).getBlock() == thisBlock) {
+        while ((state = world.getBlockState(pos.relative(searchLeft ? facing.getCounterClockWise() : facing.getClockWise(), number))).getBlock() == thisBlock) {
             boolean isLeft = this.isLeft(state);
             boolean isRight = this.isRight(state);
             if (number != 0 && (searchLeft ? isRight : isLeft)) break;
