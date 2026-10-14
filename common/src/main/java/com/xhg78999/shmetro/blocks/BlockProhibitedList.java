@@ -44,6 +44,15 @@ public class BlockProhibitedList extends BlockDirectionalMapper {
         builder.add(new Property[]{FACING});
     }
 
+
+    @Override
+    public net.minecraft.world.InteractionResult use(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
+        // 手持 MTR 刷子右键: 旋转告示牌朝向
+        return mtr.block.IBlock.checkHoldingBrush(level, player, () -> {
+            net.minecraft.core.Direction facing = (net.minecraft.core.Direction) mtr.block.IBlock.getStatePropertySafe(state, FACING);
+            level.setBlock(pos, state.setValue((net.minecraft.world.level.block.state.properties.Property) FACING, (java.lang.Comparable) facing.getClockWise()), 3);
+        });
+    }
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext collisionContext) {
         return IBlock.getVoxelShapeByDirection(2.0, 1.0, 7.5, 14.0, 15.0, 8.5, (Direction) IBlock.getStatePropertySafe(state, FACING));
