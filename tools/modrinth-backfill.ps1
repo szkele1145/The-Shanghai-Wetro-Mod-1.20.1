@@ -10,10 +10,8 @@ Write-Host ("认证 OK: " + $me.username)
 
 # 版本定义 (version_number => [changelog 标题, fabric jar, forge jar])
 # jar 用仓库对应 Release 下载 (本机构建产物可能已被 clean, 优先本地后下载)
+# 注意: 1.0.0~1.0.4 已在 Modrinth 发布过 (token 失效前), 此处只补发 1.0.5 起
 $versions = @(
-    @{ ver = '1.0.2+1.20.1'; title = 'shwetro 1.0.2 for 1.20.1'; log = '修复: 方块放置即崩游戏 (朝向取值错配 getHorizontalDirection/getClickedFace, 涉及 26 文件)' },
-    @{ ver = '1.0.3+1.20.1'; title = 'shwetro 1.0.3 for 1.20.1'; log = '修复: 信仰灯等方块下方贴图丢失 (noOcclusion 错映射); 方向语义批量修正 (getCounterClockWise/指示牌物品名/52处渲染层)' },
-    @{ ver = '1.0.4+1.20.1'; title = 'shwetro 1.0.4 for 1.20.1'; log = '修复: 屏蔽门活塞行为适配 1.20.1 API; 文件命名规范化 shmetro-版本-游戏版本-加载器.jar' },
     @{ ver = '1.0.5+1.20.1'; title = 'shwetro 1.0.5 for 1.20.1'; log = '新功能: 上海地铁禁止携带物品告示牌 (启用闲置官方贴图); 异常日志化; 数据包警告修复' },
     @{ ver = '1.0.5.1+1.20.1'; title = 'shwetro 1.0.5.1 for 1.20.1'; log = '增强: 禁止携带物品告示牌支持刷子右键旋转朝向' },
     @{ ver = '1.0.6+1.20.1'; title = 'shwetro 1.0.6 for 1.20.1'; log = '新功能: shm_route 路线图指示牌正式接入 MTR 自定义指示牌编辑器 (mtr_custom_resources.json)' },
