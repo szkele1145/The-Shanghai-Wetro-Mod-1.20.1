@@ -328,6 +328,36 @@
 		"facing=west,touching_left=air,touching_right=air,half=upper": {
 			"model": "shmetro:block/psd_glass_end_top_both_1",
 			"y": 270
+		},
+		"facing=north,touching_left=door,touching_right=door,half=lower": {
+			"model": "shmetro:block/psd_glass_end_bottom_both_1"
+		},
+		"facing=east,touching_left=door,touching_right=door,half=lower": {
+			"model": "shmetro:block/psd_glass_end_bottom_both_1",
+			"y": 90
+		},
+		"facing=south,touching_left=door,touching_right=door,half=lower": {
+			"model": "shmetro:block/psd_glass_end_bottom_both_1",
+			"y": 180
+		},
+		"facing=west,touching_left=door,touching_right=door,half=lower": {
+			"model": "shmetro:block/psd_glass_end_bottom_both_1",
+			"y": 270
+		},
+		"facing=north,touching_left=door,touching_right=door,half=upper": {
+			"model": "shmetro:block/psd_glass_end_top_both_1"
+		},
+		"facing=east,touching_left=door,touching_right=door,half=upper": {
+			"model": "shmetro:block/psd_glass_end_top_both_1",
+			"y": 90
+		},
+		"facing=south,touching_left=door,touching_right=door,half=upper": {
+			"model": "shmetro:block/psd_glass_end_top_both_1",
+			"y": 180
+		},
+		"facing=west,touching_left=door,touching_right=door,half=upper": {
+			"model": "shmetro:block/psd_glass_end_top_both_1",
+			"y": 270
 		}
 	}
 }
