@@ -36,12 +36,12 @@ public class GraphicsCache {
     public final HashMap<String, BlockbenchModel> models = new HashMap();
 
     public void reloadDynamic() {
-        System.out.println("MTR-SHM: Reloading dynamic resources");
+        com.xhg78999.shmetro.Main.LOGGER.info("Reloading dynamic resources");
         this.dynamicResources.clear();
     }
 
     public void reload(ResourceManager resourceManager) {
-        System.out.println("MTR-SHM: Reloading resources");
+        com.xhg78999.shmetro.Main.LOGGER.info("Reloading resources");
         this.reloadDynamic();
         this.models.clear();
         try {
