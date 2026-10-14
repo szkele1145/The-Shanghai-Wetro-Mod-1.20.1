@@ -1,4 +1,4 @@
-﻿# Modrinth 批量补发脚本 - 用户拿到新 token 后: pwsh -File tools\modrinth-backfill.ps1 -Token <新token>
+# Modrinth 批量补发脚本 - 用户拿到新 token 后: pwsh -File tools\modrinth-backfill.ps1 -Token <新token>
 param([Parameter(Mandatory)][string]$Token)
 $ErrorActionPreference = 'Stop'
 $proj = 'F:\vibe coding工程\shwetro-1201'
@@ -15,6 +15,7 @@ $versions = @(
     @{ ver = '1.0.3+1.20.1'; title = 'shwetro 1.0.3 for 1.20.1'; log = '修复: 信仰灯等方块下方贴图丢失 (noOcclusion 错映射); 方向语义批量修正 (getCounterClockWise/指示牌物品名/52处渲染层)' },
     @{ ver = '1.0.4+1.20.1'; title = 'shwetro 1.0.4 for 1.20.1'; log = '修复: 屏蔽门活塞行为适配 1.20.1 API; 文件命名规范化 shmetro-版本-游戏版本-加载器.jar' },
     @{ ver = '1.0.5+1.20.1'; title = 'shwetro 1.0.5 for 1.20.1'; log = '新功能: 上海地铁禁止携带物品告示牌 (启用闲置官方贴图); 异常日志化; 数据包警告修复' },
+    @{ ver = '1.0.5.1+1.20.1'; title = 'shwetro 1.0.5.1 for 1.20.1'; log = '增强: 禁止携带物品告示牌支持刷子右键旋转朝向' },
     @{ ver = '1.0.6+1.20.1'; title = 'shwetro 1.0.6 for 1.20.1'; log = '新功能: shm_route 路线图指示牌正式接入 MTR 自定义指示牌编辑器 (mtr_custom_resources.json)' },
     @{ ver = '1.0.7+1.20.1'; title = 'shwetro 1.0.7 for 1.20.1'; log = '恢复: GL 纹理压缩 mixin (remap=false 方案, 动态贴图省显存)' },
     @{ ver = '1.0.8+1.20.1'; title = 'shwetro 1.0.8 for 1.20.1'; log = '优化: 控制台输出统一 slf4j' },
