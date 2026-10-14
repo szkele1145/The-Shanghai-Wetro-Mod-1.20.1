@@ -40,7 +40,7 @@ public class MTRSignMixin {
             cancellable = true
     )
     private static void injectRenderingShanghaiSpecificSign(PoseStack matrices, MultiBufferSource vertexConsumers, StoredMatrixTransformations storedMatrixTransformations, Font textRenderer, BlockPos pos, String signId, float x, float y, float size, float maxWidthLeft, float maxWidthRight, Set<Long> selectedIds, Direction facing, int backgroundColor, RenderRailwaySign.DrawTexture drawTexture, CallbackInfo ci) {
-        if (!signId.equals("mtr_custom_sign_shm_route")) {
+        if (!signId.equals("mtr_custom_sign_shm_route") && !signId.equals("mtr_custom_sign_shm_route_flipped")) {
             return;
         }
 

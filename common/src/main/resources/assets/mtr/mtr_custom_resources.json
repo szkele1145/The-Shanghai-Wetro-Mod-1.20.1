@@ -7,6 +7,14 @@
 			"flip_texture": false,
 			"small": false,
 			"background_color": "0xFF8008"
+		},
+		"shm_route_flipped": {
+			"texture_id": "shmetro:textures/block/shm_route.png",
+			"custom_text": "",
+			"flip_custom_text": true,
+			"flip_texture": true,
+			"small": false,
+			"background_color": "0xFF8008"
 		}
 	}
 }
