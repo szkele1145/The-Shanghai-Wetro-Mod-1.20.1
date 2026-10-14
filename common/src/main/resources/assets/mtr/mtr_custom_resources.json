@@ -1,0 +1,12 @@
+{
+	"custom_signs": {
+		"shm_route": {
+			"texture_id": "shmetro:textures/block/shm_route.png",
+			"custom_text": "",
+			"flip_custom_text": false,
+			"flip_texture": false,
+			"small": false,
+			"background_color": "0xFF8008"
+		}
+	}
+}
