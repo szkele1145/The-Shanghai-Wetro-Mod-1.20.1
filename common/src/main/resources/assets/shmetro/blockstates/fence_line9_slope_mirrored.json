@@ -1,18 +1,18 @@
 {
 	"variants": {
 		"facing=north": {
-			"model": "shmetro:block/fence_line9_slope_mirrored",
+			"model": "shmetro:block/fence_line9_slope_mirror",
 			"y": 180
 		},
 		"facing=east": {
-			"model": "shmetro:block/fence_line9_slope_mirrored",
+			"model": "shmetro:block/fence_line9_slope_mirror",
 			"y": 270
 		},
 		"facing=south": {
-			"model": "shmetro:block/fence_line9_slope_mirrored"
+			"model": "shmetro:block/fence_line9_slope_mirror"
 		},
 		"facing=west": {
-			"model": "shmetro:block/fence_line9_slope_mirrored",
+			"model": "shmetro:block/fence_line9_slope_mirror",
 			"y": 90
 		}
 	}

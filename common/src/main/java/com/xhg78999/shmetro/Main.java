@@ -15,11 +15,17 @@ import org.apache.logging.log4j.Logger;
 
 public class Main {
     public static final String MOD_ID = "shmetro";
+    /**
+     * 与 gradle.properties 的 mod_version 保持同步；
+     * common/build.gradle 的 checkModVersion 任务会在二者不一致时直接让构建失败，
+     * 避免发布出启动日志里版本号陈旧的产物。
+     */
+    public static final String MOD_VERSION = "1.1.7";
     public static final Logger LOGGER = LogManager.getLogger((String)"shmetro");
 
     public static void init(RegistriesWrapper registries) {
         LOGGER.info("- Metro? 'W'etro!");
-        LOGGER.info("The Shanghai Wetro Mod v1.0.1 loaded");
+        LOGGER.info("The Shanghai Wetro Mod v" + MOD_VERSION + " loaded");
         registries.registerItem("erailing_door_1", Items.ERAILING_DOOR_1, CreativeTab.SHFACILITIES);
         registries.registerItem("erailing_door_2", Items.ERAILING_DOOR_2, CreativeTab.SHFACILITIES);
         registries.registerItem("erailing_glass_1", Items.ERAILING_GLASS_1, CreativeTab.SHFACILITIES);

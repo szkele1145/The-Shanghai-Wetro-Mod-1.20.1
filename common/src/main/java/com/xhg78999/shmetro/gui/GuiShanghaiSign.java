@@ -203,7 +203,8 @@ implements IGui {
                         RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, this.font, this.signPos, signId, (isBig ? xOffsetBig : finalXOffsetSmall) + x + (moveRight ? 32 : 0), 62 + y, 16.0f, 2.0f, 2.0f, this.selectedIds, Direction.UP, 0, (textureId, x1, y1, size, flipTexture) -> guiGraphics.blit(textureId, (int)x1, (int)y1, 0.0f, 0.0f, (int)size, (int)size, (int)(flipTexture ? -size : size), (int)size));
                     }
                 }, false);
-                guiGraphics.drawString(this.font, String.format("%s/%s", this.page + 1, this.totalPages), (this.width - 144 - 80) / 2 + 144 + 40, this.height - 40 + 6, -1);
+                // 热路径: 每帧渲染, 直接拼接替代 String.format 的格式串解析
+                guiGraphics.drawString(this.font, (this.page + 1) + "/" + this.totalPages, (this.width - 144 - 80) / 2 + 144 + 40, this.height - 40 + 6, -1);
             }
         }
         catch (Exception var7) {

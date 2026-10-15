@@ -21,6 +21,29 @@ java {
 	withSourcesJar()
 }
 
+// Fail the build when Main.MOD_VERSION drifts from gradle.properties' mod_version,
+// so a release can never ship a stale version string in the startup log.
+tasks.register("checkModVersion") {
+	def mainSource = file("src/main/java/com/xhg78999/shmetro/Main.java")
+	def declared = rootProject.mod_version
+	inputs.file(mainSource)
+	inputs.property("modVersion", declared)
+	doLast {
+		def matcher = mainSource.text =~ /MOD_VERSION\s*=\s*"([^"]+)"/
+		if (!matcher.find()) {
+			throw new GradleException("checkModVersion: MOD_VERSION constant not found in Main.java")
+		}
+		def inCode = matcher.group(1)
+		if (inCode != declared) {
+			throw new GradleException("checkModVersion: Main.MOD_VERSION=${inCode} but gradle.properties mod_version=${declared}; keep them in sync")
+		}
+	}
+}
+
+tasks.named("compileJava") {
+	dependsOn("checkModVersion")
+}
+
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 	options.release = 17
