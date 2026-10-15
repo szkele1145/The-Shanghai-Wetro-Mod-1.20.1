@@ -29,6 +29,7 @@ extends BlockEntityRendererMapper<T>
 implements IBlock,
 IGui,
 IDrawing {
+    private static final net.minecraft.resources.ResourceLocation WHITE = new net.minecraft.resources.ResourceLocation("mtr:textures/block/white.png");
     public static final int ARGB_SP_GREEN = 0x223533;
 
     public RenderShanghaiSign(BlockEntityRenderDispatcher dispatcher) {
@@ -81,7 +82,7 @@ IDrawing {
         matrices.translate((double)((float)block.getXStart() / 16.0f) - 0.5, -0.05, 0.06875000009313226);
         if (renderBackground) {
             int newBackgroundColor = backgroundColor | 0x223533;
-            RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("mtr:textures/block/white.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT, (matricesNew, vertexConsumer) -> {
+            RenderTrains.scheduleRender((ResourceLocation)WHITE, (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT, (matricesNew, vertexConsumer) -> {
                 storedMatrixTransformations.transform(matricesNew);
                 IDrawing.drawTexture((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, (float)0.0f, (float)0.0f, (float)0.003125f, (float)(0.5f * (float)signIds.length), (float)0.5f, (float)0.003125f, (Direction)facing, (int)newBackgroundColor, (int)0xF000F0);
                 matricesNew.popPose();

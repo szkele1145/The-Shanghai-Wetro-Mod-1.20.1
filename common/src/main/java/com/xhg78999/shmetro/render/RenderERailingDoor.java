@@ -25,6 +25,18 @@ public class RenderERailingDoor<T>
 extends RenderPSDAPGDoor
 implements IGui,
 IBlock {
+    // 热路径缓存: 4 种组合 (type 1/2 x side left/right)
+    private static final net.minecraft.resources.ResourceLocation[][] RAILING_TEX = new net.minecraft.resources.ResourceLocation[2][2];
+    static {
+        String[] types = { "1", "2" };
+        String[] sides = { "left", "right" };
+        for (int t = 0; t < 2; t++) {
+            for (int s = 0; s < 2; s++) {
+                RAILING_TEX[t][s] = new net.minecraft.resources.ResourceLocation(String.format("shmetro:textures/block/erailing_%s_%s.png", types[t], sides[s]));
+            }
+        }
+    }
+
     private final int type;
 
     public RenderERailingDoor(BlockEntityRenderDispatcher dispatcher, int type) {
@@ -49,7 +61,7 @@ IBlock {
             });
             storedMatrixTransformations.add(matricesNew -> matricesNew.translate((double)(open * (float)(side ? -1 : 1)), 0.0, 0.0));
             if (!half) {
-                RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(String.format("shmetro:textures/block/erailing_%s_%s.png", this.type == 114514 ? "1" : "2", side ? "right" : "left")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                RenderTrains.scheduleRender((ResourceLocation)RAILING_TEX[this.type == 114514 ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformations.transform(matricesNew);
                     ((EntityModel)GraphicsCache.CACHE.models.get("erailing_door")).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();

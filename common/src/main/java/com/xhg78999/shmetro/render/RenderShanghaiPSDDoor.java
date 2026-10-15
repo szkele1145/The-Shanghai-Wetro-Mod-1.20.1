@@ -30,6 +30,24 @@ public class RenderShanghaiPSDDoor<T extends BlockShanghaiPSDDoor.TileEntitySHPS
 extends BlockEntityRendererMapper<T>
 implements IGui,
 IBlock {
+    // 热路径缓存: 每帧 new ResourceLocation -> 静态化
+    private static final net.minecraft.resources.ResourceLocation LIGHT_ON = new net.minecraft.resources.ResourceLocation("mtr:textures/block/light_on.png");
+    private static final net.minecraft.resources.ResourceLocation LIGHT_OFF = new net.minecraft.resources.ResourceLocation("mtr:textures/block/light_off.png");
+    private static final net.minecraft.resources.ResourceLocation[][] DOOR_END_TEX = new net.minecraft.resources.ResourceLocation[2][2];
+    private static final net.minecraft.resources.ResourceLocation[][] DOOR_TEX = new net.minecraft.resources.ResourceLocation[2][2];
+    private static final net.minecraft.resources.ResourceLocation[][] DOOR_END_TEX2 = new net.minecraft.resources.ResourceLocation[2][2];
+    static {
+        String[] halves = { "top", "bottom" };
+        String[] sides = { "left", "right" };
+        for (int h = 0; h < 2; h++) {
+            for (int s = 0; s < 2; s++) {
+                DOOR_END_TEX[h][s] = new net.minecraft.resources.ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_end_%s_%s_1_1.png", halves[h], sides[s]));
+                DOOR_END_TEX2[h][s] = new net.minecraft.resources.ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_end_%s_%s_2_1.png", halves[h], sides[s]));
+                DOOR_TEX[h][s] = new net.minecraft.resources.ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_%s_%s_1.png", halves[h], sides[s]));
+            }
+        }
+    }
+
     private static final ModelSingleCube MODEL_PSD = new ModelSingleCube(36, 18, 0, 0, 0, 16, 16, 2);
     private static final ModelSingleCube MODEL_PSD_END_LEFT_1 = new ModelSingleCube(20, 18, 0, 0, 0, 8, 16, 2);
     private static final ModelSingleCube MODEL_PSD_END_RIGHT_1 = new ModelSingleCube(20, 18, 8, 0, 0, 8, 16, 2);
@@ -59,14 +77,14 @@ IBlock {
             });
             StoredMatrixTransformations storedMatrixTransformationsLight = storedMatrixTransformations.copy();
             if (half) {
-                RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(String.format("mtr:textures/block/light_%s.png", open > 0.0f ? "on" : "off")), (boolean)false, (RenderTrains.QueuedRenderLayer)(open > 0.0f ? RenderTrains.QueuedRenderLayer.LIGHT : RenderTrains.QueuedRenderLayer.EXTERIOR), (matricesNew, vertexConsumer) -> {
+                RenderTrains.scheduleRender(open > 0.0f ? LIGHT_ON : LIGHT_OFF, (boolean)false, (RenderTrains.QueuedRenderLayer)(open > 0.0f ? RenderTrains.QueuedRenderLayer.LIGHT : RenderTrains.QueuedRenderLayer.EXTERIOR), (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformationsLight.transform(matricesNew);
                     (side ? MODEL_PSD_LIGHT_RIGHT : MODEL_PSD_LIGHT_LEFT).renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();
                 });
             }
             if (end) {
-                RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_end_%s_%s_2_1.png", half ? "top" : "bottom", side ? "right" : "left")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                RenderTrains.scheduleRender((ResourceLocation)DOOR_END_TEX2[half ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformationsLight.transform(matricesNew);
                     matricesNew.translate((double)(open / 2.0f * (float)(side ? -1 : 1)), 0.0, 0.0);
                     (side ? MODEL_PSD_END_RIGHT_2 : MODEL_PSD_END_LEFT_2).renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -75,13 +93,13 @@ IBlock {
             }
             storedMatrixTransformations.add(matricesNew -> matricesNew.translate((double)(open * (float)(side ? -1 : 1)), 0.0, 0.0));
             if (end) {
-                RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_end_%s_%s_1_1.png", half ? "top" : "bottom", side ? "right" : "left")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                RenderTrains.scheduleRender((ResourceLocation)DOOR_END_TEX[half ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformations.transform(matricesNew);
                     (side ? MODEL_PSD_END_RIGHT_1 : MODEL_PSD_END_LEFT_1).renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();
                 });
             } else {
-                RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(String.format("shmetro:textures/block/sh_psd_door_%s_%s_1.png", half ? "top" : "bottom", side ? "right" : "left")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                RenderTrains.scheduleRender((ResourceLocation)DOOR_TEX[half ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformations.transform(matricesNew);
                     MODEL_PSD.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();
