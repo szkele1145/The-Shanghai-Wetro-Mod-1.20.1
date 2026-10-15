@@ -26,6 +26,21 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 public class RenderSpecialPassing
 extends BlockEntityRendererMapper<BlockEntityPassing>
 implements BlockEntityRenderer<BlockEntityPassing> {
+    // 渲染热路径缓存: 每帧最多 12 处 new ResourceLocation -> 静态化, 消除 GC 压力
+    private static final net.minecraft.resources.ResourceLocation[][] TEXTURES = new net.minecraft.resources.ResourceLocation[4][4];
+    private static final String[] PASSING_KINDS = { "2000", "2010", "2020" };
+    private static final net.minecraft.resources.ResourceLocation[][] PASSING_TEX = new net.minecraft.resources.ResourceLocation[3][4];
+    static {
+        // 闸机: [type][close=0/open=1/side=2/entrance_close=3] 实际按需
+        for (int t = 0; t < 3; t++) {
+            String kind = PASSING_KINDS[t];
+            PASSING_TEX[t][0] = new net.minecraft.resources.ResourceLocation("shmetro", "textures/block/passing_" + kind + "_entrance_close.png");
+            PASSING_TEX[t][1] = new net.minecraft.resources.ResourceLocation("shmetro", "textures/block/passing_" + kind + "_exit_close.png");
+            PASSING_TEX[t][2] = new net.minecraft.resources.ResourceLocation("shmetro", "textures/block/passing_" + kind + "_entrance_open.png");
+            PASSING_TEX[t][3] = new net.minecraft.resources.ResourceLocation("shmetro", "textures/block/passing_" + kind + "_exit_open.png");
+        }
+    }
+
     private final int type;
     private BlockbenchModel P_2000_OPEN;
     private BlockbenchModel P_2000_CLOSE;
@@ -78,28 +93,28 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     if (neighborA instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborA;
                         if (neighbour.getPassingType() != 0 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
-                            RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2000_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                            RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2000_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                                 matricesNew.popPose();
                             });
                         }
                     } else {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2000_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2000_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2000_%s_close.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2000_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2000_%s_open.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2000_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
@@ -114,28 +129,28 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     if (neighborB instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborB;
                         if (neighbour.getPassingType() != 2 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
-                            RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2010_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                            RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2010_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                                 matricesNew.popPose();
                             });
                         }
                     } else {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2010_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2010_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2010_%s_close.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2010_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2010_%s_open.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2010_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
@@ -147,28 +162,28 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     if (neighborC instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborC;
                         if (neighbour.getPassingType() != 3 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
-                            RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2020_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                            RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2020_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                                 matricesNew.popPose();
                             });
                         }
                     } else {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/passing_2020_entrance_close.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2020_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2020_%s_close.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2020_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", String.format("textures/block/passing_2020_%s_open.png", ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? "entrance" : "exit")), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2020_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
