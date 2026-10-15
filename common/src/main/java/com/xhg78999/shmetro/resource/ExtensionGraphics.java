@@ -14,8 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,19 +97,13 @@ public class ExtensionGraphics {
     }
 
     public static GraphicsCache.DynamicResource getSHRoutes(List<Long> routeIds) {
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("MD5");
+        // 热路径: mixin 每帧调用. 拼接 key (routeIds 顺序稳定) 替代 MessageDigest+String.format
+        StringBuilder keyBuilder = new StringBuilder("sh_route_square_");
+        for (Long r : routeIds) {
+            keyBuilder.append(r).append('_');
         }
-        catch (NoSuchAlgorithmException e) {
-            return null;
-        }
-        MessageDigest finalMd = md;
-        routeIds.forEach(r -> {
-            finalMd.update(r.toString().getBytes());
-            finalMd.update("0000".getBytes());
-        });
-        return GraphicsCache.CACHE.getResource(String.format("sh_route_square_%s", new BigInteger(1, finalMd.digest()).toString(16)), () -> {
+        String key = keyBuilder.toString();
+        return GraphicsCache.CACHE.getResource(key, () -> {
             try {
                 return ExtensionGraphics.getSHRoutesI(routeIds);
             }

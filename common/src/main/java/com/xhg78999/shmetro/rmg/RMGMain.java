@@ -84,15 +84,15 @@ public class RMGMain {
     }
 
     public static GraphicsCache.DynamicResource getRailMapCache(long platformId, boolean hasLeft, boolean flip, int width) {
-        return GraphicsCache.CACHE.getResource(String.format("rmg_railmap_%s_%s_%s_%s", platformId, hasLeft, flip, width), () -> RMGMain.getRailMap(platformId, hasLeft, flip, width));
+        return GraphicsCache.CACHE.getResource("rmg_railmap_" + platformId + "_" + hasLeft + "_" + flip + "_" + width, () -> RMGMain.getRailMap(platformId, hasLeft, flip, width));
     }
 
     public static GraphicsCache.DynamicResource getRuninCache(long platformId, boolean hasLeft, boolean flip) {
-        return GraphicsCache.CACHE.getResource(String.format("rmg_runin_%s_%s_%s", platformId, hasLeft, flip), () -> RMGMain.getRunin(platformId, hasLeft, flip));
+        return GraphicsCache.CACHE.getResource("rmg_runin_" + platformId + "_" + hasLeft + "_" + flip, () -> RMGMain.getRunin(platformId, hasLeft, flip));
     }
 
     public static GraphicsCache.DynamicResource getDestinationCache(long platformId, boolean hasLeft, boolean flip, int width) {
-        return GraphicsCache.CACHE.getResource(String.format("rmg_destination_%s_%s_%s_%s", platformId, hasLeft, flip, width), () -> RMGMain.getDestination(platformId, hasLeft, flip, width));
+        return GraphicsCache.CACHE.getResource("rmg_destination_" + platformId + "_" + hasLeft + "_" + flip + "_" + width, () -> RMGMain.getDestination(platformId, hasLeft, flip, width));
     }
 
     public static List<Route> getRouteStream(long platformId) {
