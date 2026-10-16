@@ -7,9 +7,12 @@ import com.xhg78999.shmetro.Blocks;
 import com.xhg78999.shmetro.network.SHMPacketTrainDataGuiServer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import mtr.RegistryObject;
 import mtr.block.IBlock;
 import mtr.mappings.BlockDirectionalMapper;
 import mtr.mappings.BlockEntityClientSerializableMapper;
@@ -224,46 +227,38 @@ IBlock {
             return this.signIds;
         }
 
+        private static final Map<Integer, RegistryObject<? extends BlockEntityType<?>>> SIGN_ODD = new HashMap<>();
+        private static final Map<Integer, RegistryObject<? extends BlockEntityType<?>>> SIGN_EVEN = new HashMap<>();
+        static {
+            SIGN_ODD.put(2, BlockEntity.SHM_SIGN_2_ODD_TILE_ENTITY);
+            SIGN_ODD.put(3, BlockEntity.SHM_SIGN_3_ODD_TILE_ENTITY);
+            SIGN_ODD.put(4, BlockEntity.SHM_SIGN_4_ODD_TILE_ENTITY);
+            SIGN_ODD.put(5, BlockEntity.SHM_SIGN_5_ODD_TILE_ENTITY);
+            SIGN_ODD.put(6, BlockEntity.SHM_SIGN_6_ODD_TILE_ENTITY);
+            SIGN_ODD.put(7, BlockEntity.SHM_SIGN_7_ODD_TILE_ENTITY);
+            SIGN_ODD.put(8, BlockEntity.SHM_SIGN_8_ODD_TILE_ENTITY);
+            SIGN_ODD.put(9, BlockEntity.SHM_SIGN_9_ODD_TILE_ENTITY);
+            SIGN_ODD.put(10, BlockEntity.SHM_SIGN_10_ODD_TILE_ENTITY);
+            SIGN_ODD.put(11, BlockEntity.SHM_SIGN_11_ODD_TILE_ENTITY);
+            SIGN_ODD.put(12, BlockEntity.SHM_SIGN_12_ODD_TILE_ENTITY);
+            SIGN_ODD.put(13, BlockEntity.SHM_SIGN_13_ODD_TILE_ENTITY);
+            SIGN_EVEN.put(2, BlockEntity.SHM_SIGN_2_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(3, BlockEntity.SHM_SIGN_3_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(4, BlockEntity.SHM_SIGN_4_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(5, BlockEntity.SHM_SIGN_5_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(6, BlockEntity.SHM_SIGN_6_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(7, BlockEntity.SHM_SIGN_7_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(8, BlockEntity.SHM_SIGN_8_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(9, BlockEntity.SHM_SIGN_9_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(10, BlockEntity.SHM_SIGN_10_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(11, BlockEntity.SHM_SIGN_11_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(12, BlockEntity.SHM_SIGN_12_EVEN_TILE_ENTITY);
+            SIGN_EVEN.put(13, BlockEntity.SHM_SIGN_13_EVEN_TILE_ENTITY);
+        }
+
         private static BlockEntityType<?> getType(int length, boolean isOdd) {
-            switch (length) {
-                case 2: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_2_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_2_EVEN_TILE_ENTITY.get();
-                }
-                case 3: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_3_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_3_EVEN_TILE_ENTITY.get();
-                }
-                case 4: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_4_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_4_EVEN_TILE_ENTITY.get();
-                }
-                case 5: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_5_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_5_EVEN_TILE_ENTITY.get();
-                }
-                case 6: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_6_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_6_EVEN_TILE_ENTITY.get();
-                }
-                case 7: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_7_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_7_EVEN_TILE_ENTITY.get();
-                }
-                case 8: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_8_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_8_EVEN_TILE_ENTITY.get();
-                }
-                case 9: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_9_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_9_EVEN_TILE_ENTITY.get();
-                }
-                case 10: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_10_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_10_EVEN_TILE_ENTITY.get();
-                }
-                case 11: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_11_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_11_EVEN_TILE_ENTITY.get();
-                }
-                case 12: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_12_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_12_EVEN_TILE_ENTITY.get();
-                }
-                case 13: {
-                    return isOdd ? (BlockEntityType)BlockEntity.SHM_SIGN_13_ODD_TILE_ENTITY.get() : (BlockEntityType)BlockEntity.SHM_SIGN_13_EVEN_TILE_ENTITY.get();
-                }
-            }
-            return null;
+            RegistryObject<? extends BlockEntityType<?>> ro = isOdd ? SIGN_ODD.get(length) : SIGN_EVEN.get(length);
+            return ro == null ? null : ro.get();
         }
     }
 }
