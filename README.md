@@ -86,6 +86,22 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.16 | 修复 Fence / PSDTop mirror / UndersignTip / Wall 的 rotate/mirror 覆盖 |
+| 1.1.15 | 版本号递增 |
+| 1.1.14 | 版本号递增 |
+| 1.1.13 | 版本号递增 |
+| 1.1.12 | 版本号递增 |
+| 1.1.11 | 为 BlockShanghaiStationNameOnWall 补 FACING 守卫 + rotate/mirror 覆盖 |
+| 1.1.10 | 同步 Main.MOD_VERSION 与 gradle.properties |
+| 1.1.9 | 版本号递增 |
+| 1.1.8 | 版本号递增；Gradle 堆内存降至 -Xmx2G（适配构建机） |
+| 1.1.7 | 修复 Fence 斜面镜像 blockstates；同步 MOD_VERSION；新增 checkModVersion 校验 |
+| 1.1.6 | 性能 batch 3：RMG 缓存键改用字符串拼接（消除 3× String.format）；getSHRoutes 键改用 StringBuilder（消除逐帧 MD5）；注意：缺字形症状仅出现在 headless runClient，正式 jar 无此问题 |
+| 1.1.5 | 性能 batch 2：PSD 门 / 栏杆门 / 指示牌渲染器静态纹理缓存；热路径 19→1 分配 |
+| 1.1.4 | 性能：缓存 RenderSpecialPassing 热路径全部 12 个逐帧 ResourceLocation 分配 |
+| 1.1.3 | 清理全部 12 处反编译 (Object) 强转产物；build.ps1 loom 预热 |
+| 1.1.2 | Forge mods.toml displayURL + 描述增强；实体工厂参数名修正 |
+| 1.1.1 | 版本号递增 |
 | 1.1.0 | shm_route_flipped 镜像路线图指示牌（对向站台） |
 | 1.0.9 | 禁止携带物品告示牌全幅 UV 显示修复 |
 | 1.0.8 | 控制台输出统一 slf4j |
