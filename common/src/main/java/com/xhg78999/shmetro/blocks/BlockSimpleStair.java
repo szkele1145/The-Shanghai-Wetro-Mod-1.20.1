@@ -10,6 +10,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.PipeBlock;
@@ -44,11 +46,22 @@ implements IBlock {
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         Direction facing = ctx.getHorizontalDirection();
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            facing = Direction.NORTH;
+        }
         Level level = ctx.getLevel();
         BlockPos blockPos = ctx.getClickedPos();
         BlockPos posRight = blockPos.relative(facing.getCounterClockWise());
         BlockPos posLeft = blockPos.relative(facing.getClockWise());
         return (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing)).setValue((Property)LEFT, (Comparable)Boolean.valueOf(level.getBlockState(posLeft).getBlock() == Blocks.FLOOR_STAIR.get()))).setValue((Property)RIGHT, (Comparable)Boolean.valueOf(level.getBlockState(posRight).getBlock() == Blocks.FLOOR_STAIR.get()));
+    }
+
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return (BlockState)state.setValue((Property)FACING, (Comparable)rotation.rotate((Direction)state.getValue((Property)FACING)));
+    }
+
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return (BlockState)state.setValue((Property)FACING, (Comparable)mirror.mirror((Direction)state.getValue((Property)FACING)));
     }
 
     public BlockState updateShape(BlockState state, Direction dir, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {

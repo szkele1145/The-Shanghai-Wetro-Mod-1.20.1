@@ -8,9 +8,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,6 +38,22 @@ extends BlockPSDGlassEnd {
                 this.connectGlass(world, pos.above(y), scanState);
             }
         });
+    }
+
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        Direction facing = ctx.getHorizontalDirection();
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            facing = Direction.NORTH;
+        }
+        return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
+    }
+
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return (BlockState)state.setValue((Property)FACING, (Comparable)rotation.rotate((Direction)state.getValue((Property)FACING)));
+    }
+
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return (BlockState)state.setValue((Property)FACING, (Comparable)mirror.mirror((Direction)state.getValue((Property)FACING)));
     }
 
     private void connectGlass(Level world, BlockPos pos, BlockState state) {
