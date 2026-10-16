@@ -51,11 +51,11 @@ extends BlockPSDDoor {
 
         public TileEntitySHPSDDoor(BlockShanghaiPSDTop.EnumPSDTop top, BlockPos pos, BlockState state) {
             super(switch (top) {
-                default -> throw new IncompatibleClassChangeError();
                 case RAILMAP -> (BlockEntityType)BlockEntity.SH_PSD_DOOR_RAILMAP_TILE_ENTITY.get();
                 case RUNIN -> (BlockEntityType)BlockEntity.SH_PSD_DOOR_RUNIN_TILE_ENTITY.get();
-                case DESTINATION -> null;
+                case DESTINATION -> (BlockEntityType)BlockEntity.SH_PSD_DOOR_BLANK_TILE_ENTITY.get();
                 case BLANK -> (BlockEntityType)BlockEntity.SH_PSD_DOOR_BLANK_TILE_ENTITY.get();
+                default -> throw new IllegalStateException("Unknown PSD door top kind: " + top);
             }, pos, state);
         }
 
