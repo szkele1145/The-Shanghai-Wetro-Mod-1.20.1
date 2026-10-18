@@ -26,12 +26,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 public class RenderSpecialPassing
 extends BlockEntityRendererMapper<BlockEntityPassing>
 implements BlockEntityRenderer<BlockEntityPassing> {
-    // 渲染热路径缓存: 每帧最多 12 处 new ResourceLocation -> 静态化, 消除 GC 压力
-    private static final net.minecraft.resources.ResourceLocation[][] TEXTURES = new net.minecraft.resources.ResourceLocation[4][4];
+    // 渲染热路径缓存: 静态化 ResourceLocation, 消除 GC 压力
+    // PASSING_TEX: [0=2000, 1=2010, 2=2020][0=entrance_close, 1=exit_close, 2=entrance_open, 3=exit_open]
     private static final String[] PASSING_KINDS = { "2000", "2010", "2020" };
     private static final net.minecraft.resources.ResourceLocation[][] PASSING_TEX = new net.minecraft.resources.ResourceLocation[3][4];
     static {
-        // 闸机: [type][close=0/open=1/side=2/entrance_close=3] 实际按需
         for (int t = 0; t < 3; t++) {
             String kind = PASSING_KINDS[t];
             PASSING_TEX[t][0] = new net.minecraft.resources.ResourceLocation("shmetro", "textures/block/passing_" + kind + "_entrance_close.png");

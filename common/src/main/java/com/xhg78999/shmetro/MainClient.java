@@ -58,8 +58,6 @@ public class MainClient {
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.TIPS_ESCALATOR.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.TIPS_ESCALATOR_BIG.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.WETFLOOR.get()));
-        RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.ERAILING_DOOR_1.get()));
-        RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.ERAILING_DOOR_2.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.ERAILING_GLASS_1.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.ERAILING_GLASS_2.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.cutout(), (Block)((Block)Blocks.ERAILING_END.get()));
