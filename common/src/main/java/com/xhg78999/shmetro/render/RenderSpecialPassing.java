@@ -13,6 +13,7 @@ import mtr.render.StoredMatrixTransformations;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -75,23 +76,26 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                 this.P_2020_SIDE = GraphicsCache.CACHE.models.get("passing_2020_side");
             }
             BlockPos pos = entity.getBlockPos();
-            if (!(world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM)) {
+            BlockState state = world.getBlockState(pos);
+            if (!(state.getBlock() instanceof BlockPassingSM)) {
                 return;
             }
+            // guard 已保证是 BlockPassingSM; 缓存引用, 避免每帧重复 getBlockState
+            BlockPassingSM self = (BlockPassingSM)state.getBlock();
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPassingSM.FACING);
             TicketSystem.EnumTicketBarrierOpen open = (TicketSystem.EnumTicketBarrierOpen)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPassingSM.OPEN);
             StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();
             storedMatrixTransformations.add(matricesNew -> {
-                matricesNew.translate(0.5 + (double)entity.getBlockPos().getX(), (double)entity.getBlockPos().getY(), 0.5 + (double)entity.getBlockPos().getZ());
+                matricesNew.translate(0.5 + (double)pos.getX(), (double)pos.getY(), 0.5 + (double)pos.getZ());
                 UtilitiesClient.rotateYDegrees((PoseStack)matricesNew, (float)(-facing.toYRot()));
                 UtilitiesClient.rotateXDegrees((PoseStack)matricesNew, (float)180.0f);
             });
             switch (this.type) {
                 case 0: {
-                    Block neighborA = world.getBlockState(entity.getBlockPos().relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborA = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
                     if (neighborA instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborA;
-                        if (neighbour.getPassingType() != 0 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
+                        if (neighbour.getPassingType() != 0 || self.getEntrance() != neighbour.getEntrance()) {
                             RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2000_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -106,14 +110,14 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][self.getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2000_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[0][self.getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2000_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
@@ -124,10 +128,10 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     throw new UnsupportedOperationException();
                 }
                 case 2: {
-                    Block neighborB = world.getBlockState(entity.getBlockPos().relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborB = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
                     if (neighborB instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborB;
-                        if (neighbour.getPassingType() != 2 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
+                        if (neighbour.getPassingType() != 2 || self.getEntrance() != neighbour.getEntrance()) {
                             RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2010_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -142,14 +146,14 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][self.getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2010_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[1][self.getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2010_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
@@ -157,10 +161,10 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     break;
                 }
                 case 3: {
-                    Block neighborC = world.getBlockState(entity.getBlockPos().relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborC = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
                     if (neighborC instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborC;
-                        if (neighbour.getPassingType() != 3 || ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() != neighbour.getEntrance()) {
+                        if (neighbour.getPassingType() != 3 || self.getEntrance() != neighbour.getEntrance()) {
                             RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                                 storedMatrixTransformations.transform(matricesNew);
                                 this.P_2020_SIDE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -175,14 +179,14 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                         });
                     }
                     if (open == TicketSystem.EnumTicketBarrierOpen.CLOSED) {
-                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                        RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][self.getEntrance() ? 0 : 1], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                             storedMatrixTransformations.transform(matricesNew);
                             this.P_2020_CLOSE.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                             matricesNew.popPose();
                         });
                         break;
                     }
-                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][world.getBlockState(entity.getBlockPos()).getBlock() instanceof BlockPassingSM && ((BlockPassingSM)world.getBlockState(entity.getBlockPos()).getBlock()).getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                    RenderTrains.scheduleRender((ResourceLocation)PASSING_TEX[2][self.getEntrance() ? 2 : 3], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                         storedMatrixTransformations.transform(matricesNew);
                         this.P_2020_OPEN.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                         matricesNew.popPose();
