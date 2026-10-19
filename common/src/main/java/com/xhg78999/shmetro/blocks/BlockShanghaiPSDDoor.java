@@ -23,7 +23,11 @@ extends BlockPSDDoor {
     public final BlockShanghaiPSDTop.EnumPSDTop top;
 
     public BlockShanghaiPSDDoor(BlockShanghaiPSDTop.EnumPSDTop top) {
-        super(114514);
+        // MTR BlockPSDDoor(int style) 的 style 只用于在它自己的 createBlockEntity 里
+        // 选择 PSD_DOOR_1/2_TILE_ENTITY; 本类完全覆写了 createBlockEntity(见下),
+        // 因此该字段在本子类中永不被读取。上游此处写的是占位魔数 114514,
+        // 这里改为语义明确的 0, 行为零变化。
+        super(0);
         this.top = top;
     }
 
