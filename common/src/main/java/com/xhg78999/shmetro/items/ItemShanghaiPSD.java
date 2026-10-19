@@ -37,7 +37,7 @@ implements IBlock {
     public InteractionResult use(UseOnContext context) {
         int horizontalBlocks;
         int n = horizontalBlocks = this.type >= 20 ? 2 : 1;
-        if (ItemShanghaiPSD.blocksNotReplaceable(context, horizontalBlocks, 3, this.getBlockStateFromItem().getBlock())) {
+        if (ItemPlacementHelper.blocksNotReplaceable(context, horizontalBlocks, 3, this.getBlockStateFromItem().getBlock())) {
             return InteractionResult.FAIL;
         }
         Level world = context.getLevel();
@@ -83,27 +83,6 @@ implements IBlock {
             case 22 -> ((Block)Blocks.SH_PSD_DOOR_BLANK.get()).defaultBlockState();
             default -> net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         };
-    }
-
-    public static boolean blocksNotReplaceable(UseOnContext context, int width, int height, Block blacklistBlock) {
-        Direction facing = context.getHorizontalDirection();
-        Level world = context.getLevel();
-        BlockPos startingPos = context.getClickedPos().relative(context.getClickedFace());
-        for (int x = 0; x < width; ++x) {
-            BlockPos offsetPos = startingPos.relative(facing.getClockWise(), x);
-            if (blacklistBlock != null) {
-                boolean isBlacklistedBelow = world.getBlockState(offsetPos.below()).is(blacklistBlock);
-                boolean isBlacklistedAbove = world.getBlockState(offsetPos.above(height)).is(blacklistBlock);
-                if (isBlacklistedBelow || isBlacklistedAbove) {
-                    return true;
-                }
-            }
-            for (int y = 0; y < height; ++y) {
-                if (world.getBlockState(offsetPos.above(y)).liquid()) continue;
-                return true;
-            }
-        }
-        return false;
     }
 }
 
