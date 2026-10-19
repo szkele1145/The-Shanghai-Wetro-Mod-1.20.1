@@ -201,6 +201,11 @@ public class SHRouteMap {
     }
 
     private static int calculateInterval(int stnCount, int width) {
+        // 单站台退化路线(stnCount<=1)原实现除零 -> ArithmeticException 被外层 catch 吞掉, 贴图空白。
+        // Loopline 版分母是 stnCountRV + 1 无此问题; 此处退化为无间隔, 只画首站。
+        if (stnCount <= 1) {
+            return 0;
+        }
         return (width - 370) / (stnCount - 1);
     }
 }
