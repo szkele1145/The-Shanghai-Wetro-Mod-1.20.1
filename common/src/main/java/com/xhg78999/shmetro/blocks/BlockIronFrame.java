@@ -46,8 +46,8 @@ implements EntityBlock {
         FluidState fluidState = context.getLevel().getFluidState(context.getClickedPos());
         BlockPos blockPos2 = blockPos.north();
         BlockPos blockPos3 = blockPos.east();
-        BlockPos blockPos4 = blockPos.below();
-        BlockPos blockPos5 = blockPos.south();
+        BlockPos blockPos4 = blockPos.south();
+        BlockPos blockPos5 = blockPos.west();
         BlockState blockState = blockGetter.getBlockState(blockPos2);
         BlockState blockState2 = blockGetter.getBlockState(blockPos3);
         BlockState blockState3 = blockGetter.getBlockState(blockPos4);
