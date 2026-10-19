@@ -42,18 +42,28 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
+        // 栅栏是贴墙/贴地薄板 (models/block/fence_line1.json z 跨度 1.0):
+        // FACING = 薄板所在的那一面 (blockstates/fence_line1.json facing=north 不旋转)。
+        // 因此取玩家点击的那一面 —— 点哪面墙就装哪面墙。
+        // 点在顶面/底面时回退为玩家水平朝向 (回退而非 null: 栅栏也要能落地放置)。
+        Direction facing = ctx.getClickedFace();
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            facing = ctx.getHorizontalDirection();
+        }
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            facing = Direction.NORTH;
+        }
         BlockState s = (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
         Level world = ctx.getLevel();
         BlockState downState = world.getBlockState(ctx.getClickedPos().below());
-        Block left = world.getBlockState(ctx.getClickedPos().relative(facing.getCounterClockWise())).getBlock();
+        Block left = world.getBlockState(ctx.getClickedPos().relative(facing.getOpposite())).getBlock();
         Block right = world.getBlockState(ctx.getClickedPos().relative(facing.getClockWise())).getBlock();
         if (downState.getBlock() instanceof StairBlock && downState.hasProperty((Property)StairBlock.FACING) && downState.hasProperty((Property)StairBlock.HALF) && IBlock.getStatePropertySafe((BlockState)downState, (Property)StairBlock.HALF) == Half.BOTTOM) {
             Direction belowFacing = (Direction)IBlock.getStatePropertySafe((BlockState)downState, (Property)BlockSimpleStair.FACING);
-            s = left instanceof StairBlock || left instanceof BlockSimpleStair ? (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE)) : (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_MIRRORED) : (belowFacing == facing.getClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN_MIRRORED) : (belowFacing == facing.getCounterClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY))));
+            s = left instanceof StairBlock || left instanceof BlockSimpleStair ? (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE)) : (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_MIRRORED) : (belowFacing == facing.getClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN_MIRRORED) : (belowFacing == facing.getOpposite() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY))));
         } else if (downState.getBlock() instanceof BlockSimpleStair) {
             Direction belowFacing = (Direction)IBlock.getStatePropertySafe((BlockState)downState, (Property)BlockSimpleStair.FACING);
-            s = left instanceof StairBlock || left instanceof BlockSimpleStair ? (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE)) : (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_MIRRORED) : (belowFacing == facing.getClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN_MIRRORED) : (belowFacing == facing.getCounterClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY))));
+            s = left instanceof StairBlock || left instanceof BlockSimpleStair ? (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE)) : (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_MIRRORED) : (belowFacing == facing.getClockWise() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN_MIRRORED) : (belowFacing == facing.getOpposite() ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_DOWN) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY))));
         } else {
             s = left instanceof StairBlock || left instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_UP) : (right instanceof StairBlock || right instanceof BlockSimpleStair ? (BlockState)s.setValue(TYPE, EnumShanghaiFence.SLOPE_TRANSITION_UP_MIRRORED) : (BlockState)s.setValue(TYPE, EnumShanghaiFence.ORDINARY));
         }

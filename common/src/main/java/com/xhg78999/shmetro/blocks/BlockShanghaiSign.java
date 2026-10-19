@@ -78,7 +78,7 @@ IBlock {
     public BlockState updateShape(BlockState state, Direction direction, BlockState newState, LevelAccessor world, BlockPos pos, BlockPos posFrom) {
         boolean isNext;
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING);
-        boolean bl = isNext = direction == facing.getClockWise() || state.is((Block)Blocks.SHM_SIGN_MIDDLE.get()) && direction == facing.getCounterClockWise();
+        boolean bl = isNext = direction == facing.getClockWise() || state.is((Block)Blocks.SHM_SIGN_MIDDLE.get()) && direction == facing.getOpposite();
         if (isNext && !(newState.getBlock() instanceof BlockShanghaiSign)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         }
@@ -163,7 +163,7 @@ IBlock {
         while (true) {
             BlockPos checkPos;
             BlockState checkState;
-            if ((checkState = world.getBlockState(checkPos = startPos.relative(direction.getCounterClockWise(), i))).getBlock() instanceof BlockShanghaiSign) {
+            if ((checkState = world.getBlockState(checkPos = startPos.relative(direction.getOpposite(), i))).getBlock() instanceof BlockShanghaiSign) {
                 Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)checkState, (Property)FACING);
                 if (!checkState.is((Block)Blocks.SHM_SIGN_MIDDLE.get()) && (facing == direction || allowOpposite && facing == direction.getOpposite())) {
                     return checkPos;

@@ -51,7 +51,7 @@ implements IBlock {
         }
         Level level = ctx.getLevel();
         BlockPos blockPos = ctx.getClickedPos();
-        BlockPos posRight = blockPos.relative(facing.getCounterClockWise());
+        BlockPos posRight = blockPos.relative(facing.getOpposite());
         BlockPos posLeft = blockPos.relative(facing.getClockWise());
         return (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing)).setValue((Property)LEFT, (Comparable)Boolean.valueOf(level.getBlockState(posLeft).getBlock() == Blocks.FLOOR_STAIR.get()))).setValue((Property)RIGHT, (Comparable)Boolean.valueOf(level.getBlockState(posRight).getBlock() == Blocks.FLOOR_STAIR.get()));
     }
@@ -66,7 +66,7 @@ implements IBlock {
 
     public BlockState updateShape(BlockState state, Direction dir, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
         Direction facing = state.cycle(FACING).getValue(FACING);
-        BlockPos posRight = pos.relative(facing.getCounterClockWise());
+        BlockPos posRight = pos.relative(facing.getOpposite());
         BlockPos posLeft = pos.relative(facing.getClockWise());
         return (BlockState)((BlockState)((BlockState)state.setValue((Property)FACING, (Comparable)facing)).setValue((Property)LEFT, (Comparable)Boolean.valueOf(world.getBlockState(posLeft).getBlock() == Blocks.FLOOR_STAIR.get()))).setValue((Property)RIGHT, (Comparable)Boolean.valueOf(world.getBlockState(posRight).getBlock() == Blocks.FLOOR_STAIR.get()));
     }

@@ -70,13 +70,13 @@ IBlock {
             if (item == mtr.Items.BRUSH.get()) {
                 world.setBlockAndUpdate(pos, (BlockState)state.cycle((Property)ARROW_DIRECTION));
                 this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getClockWise(), (Property)ARROW_DIRECTION, 1);
-                this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getCounterClockWise(), (Property)ARROW_DIRECTION, 1);
+                this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getOpposite(), (Property)ARROW_DIRECTION, 1);
             } else {
                 boolean shouldBePersistent = IBlock.getStatePropertySafe((BlockState)state, PERSISTENT) == BlockPSDTop.EnumPersistent.NONE;
                 player.displayClientMessage((Component)Text.translatable((String)(shouldBePersistent ? "gui.shmetro.psd_top_cut" : "gui.shmetro.psd_top_combine"), (Object[])new Object[0]), true);
                 this.setState(world, pos, shouldBePersistent);
                 this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getClockWise(), offsetPos -> this.setState(world, (BlockPos)offsetPos, shouldBePersistent), 1);
-                this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getCounterClockWise(), offsetPos -> this.setState(world, (BlockPos)offsetPos, shouldBePersistent), 1);
+                this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getOpposite(), offsetPos -> this.setState(world, (BlockPos)offsetPos, shouldBePersistent), 1);
             }
         }, (Runnable)null, (Item[])new Item[]{(Item)mtr.Items.BRUSH.get(), net.minecraft.world.item.Items.SHEARS});
     }

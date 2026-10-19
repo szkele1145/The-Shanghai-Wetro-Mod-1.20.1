@@ -39,7 +39,7 @@ extends BlockAPGGlass {
         return IBlock.getStatePropertySafe((BlockState)state, (Property)HALF) == DoubleBlockHalf.UPPER && y - Math.floor(y) > 0.21875 ? IBlock.checkHoldingBrush((Level)world, (Player)player, () -> {
             world.setBlockAndUpdate(pos, (BlockState)state.cycle((Property)ARROW_DIRECTION));
             this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getClockWise(), (Property)ARROW_DIRECTION, 3);
-            this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getCounterClockWise(), (Property)ARROW_DIRECTION, 3);
+            this.propagate(world, pos, ((Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING)).getOpposite(), (Property)ARROW_DIRECTION, 3);
         }) : super.use(state, world, pos, player, interactionHand, blockHitResult);
     }
 

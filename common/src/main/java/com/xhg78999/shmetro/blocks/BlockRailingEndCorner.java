@@ -42,7 +42,7 @@ extends BlockAPGGlass {
         boolean leftValid;
         boolean isTop = IBlock.getStatePropertySafe((BlockState)state, (Property)HALF) == DoubleBlockHalf.UPPER;
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING);
-        BlockState leftState = world.getBlockState(pos.relative(facing.getCounterClockWise()));
+        BlockState leftState = world.getBlockState(pos.relative(facing.getOpposite()));
         boolean bl = leftValid = leftState.getBlock() instanceof BlockRailingDoor || leftState.getBlock() instanceof BlockRailingGlass;
         return (isTop && direction == Direction.DOWN || !isTop && direction == Direction.UP) && !newState.is((Block)this) ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState() : (leftValid ? (BlockState)state.setValue((Property)MIRRORED, (Comparable)Boolean.valueOf(false)) : (BlockState)state.setValue((Property)MIRRORED, (Comparable)Boolean.valueOf(true)));
     }

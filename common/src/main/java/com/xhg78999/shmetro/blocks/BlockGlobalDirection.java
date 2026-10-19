@@ -57,7 +57,14 @@ IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
+        // 全局指示牌是贴墙薄板 (models/block/gd.json z 跨度为 0, 即纯平面):
+        // FACING = 薄板所在的那一面 (blockstates/gd.json facing=north 不旋转)。
+        // 因此取玩家点击的那一面 —— 点哪面墙就装哪面墙。
+        // 点在顶面/底面时回退为玩家水平朝向 (回退而非 null: 该方块也要能落地放置)。
+        Direction facing = ctx.getClickedFace();
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            facing = ctx.getHorizontalDirection();
+        }
         if (facing == null || facing.getAxis() == Direction.Axis.Y) {
             facing = Direction.NORTH;
         }

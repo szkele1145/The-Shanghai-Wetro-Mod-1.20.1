@@ -92,7 +92,7 @@ implements BlockEntityRenderer<BlockEntityPassing> {
             });
             switch (this.type) {
                 case 0: {
-                    Block neighborA = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborA = world.getBlockState(pos.relative(facing.getOpposite(), 1)).getBlock();
                     if (neighborA instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborA;
                         if (neighbour.getPassingType() != 0 || self.getEntrance() != neighbour.getEntrance()) {
@@ -128,7 +128,7 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     throw new UnsupportedOperationException();
                 }
                 case 2: {
-                    Block neighborB = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborB = world.getBlockState(pos.relative(facing.getOpposite(), 1)).getBlock();
                     if (neighborB instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborB;
                         if (neighbour.getPassingType() != 2 || self.getEntrance() != neighbour.getEntrance()) {
@@ -161,7 +161,7 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     break;
                 }
                 case 3: {
-                    Block neighborC = world.getBlockState(pos.relative(facing.getCounterClockWise(), 1)).getBlock();
+                    Block neighborC = world.getBlockState(pos.relative(facing.getOpposite(), 1)).getBlock();
                     if (neighborC instanceof BlockPassingSM) {
                         BlockPassingSM neighbour = (BlockPassingSM)neighborC;
                         if (neighbour.getPassingType() != 3 || self.getEntrance() != neighbour.getEntrance()) {
