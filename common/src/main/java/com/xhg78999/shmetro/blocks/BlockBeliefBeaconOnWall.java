@@ -38,9 +38,21 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
+        // 本方块是贴墙薄板: FACING 的语义是「薄板所在的那一面」
+        // (见 models/block/belief_beacon_onwall.json: 模型默认贴北面,
+        //  blockstates/belief_beacon_onwall.json: facing=north 不旋转)。
+        // 因此放置时应取玩家点击的那一面 —— 点哪面墙就贴哪面墙。
+        //
+        // 上游 shmetro 原件直接用 ctx.getClickedFace() 但未做水平化处理:
+        // 点在方块顶面/底面时会把 FACING 设成 UP/DOWN, 而 FACING 是
+        // HorizontalDirectionalBlock.FACING (只含 4 个水平方向) ->
+        // setValue 抛 IllegalArgumentException, 放置直接崩。
+        // 移植版曾改成 ctx.getHorizontalDirection() 规避崩溃, 但那是
+        // 「玩家朝向」而非「墙面所在面」, 贴墙朝向是错的。
+        // 现修正为: 取点击面, 上下面则拒绝放置 (返回 null = 放置失败)。
+        Direction facing = ctx.getClickedFace();
         if (facing == null || facing.getAxis() == Direction.Axis.Y) {
-            facing = Direction.NORTH;
+            return null;
         }
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
     }

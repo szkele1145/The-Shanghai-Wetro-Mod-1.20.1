@@ -36,7 +36,16 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
+        // 提示牌是贴墙薄板 (getShape 厚度仅 1.0/16):
+        // FACING = 薄板所在的那一面 (models/block/tips_monitor.json 默认贴北面;
+        //  blockstates/tips_monitor.json facing=north 不旋转、facing=south y=180)。
+        // 取玩家点击的那一面 —— 点哪面墙就挂哪面墙; 上下面拒绝放置。
+        // 上游原件用 ctx.getClickedFace() 但未做水平化, 点顶/底面会
+        // 把 FACING 设成 UP/DOWN -> setValue 抛 IllegalArgumentException。
+        Direction facing = ctx.getClickedFace();
+        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+            return null;
+        }
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
     }
 

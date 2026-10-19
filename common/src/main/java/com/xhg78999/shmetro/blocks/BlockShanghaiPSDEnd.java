@@ -22,7 +22,10 @@ import org.jetbrains.annotations.NotNull;
 public class BlockShanghaiPSDEnd
 extends BlockPSDGlassEnd {
     public BlockShanghaiPSDEnd() {
-        super(114514);
+        // MTR BlockPSDGlassEnd(int style) 的 style 只用于它自己的 asItem()
+        // 去选 PSD_GLASS_END_1/2; 本类覆写了 asItem()(见下), 该字段不可达。
+        // 上游此处写的是占位魔数 114514, 这里改为语义明确的 0, 行为零变化。
+        super(0);
     }
 
     public Item asItem() {
@@ -64,7 +67,11 @@ extends BlockPSDGlassEnd {
             return;
         }
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)FACING);
-        BlockPos leftPos = pos.relative(facing.getCounterClockWise());
+        // 左侧必须是 facing.getOpposite(): 玻璃柱的左右两侧是相对的两个面
+        // (facing=NORTH 时左=SOUTH, 右=EAST), 构成对称的一对。
+        // 原实现误用 getCounterClockWise() (逆时针 90 度, NORTH->WEST),
+        // 会让左右变成相对方向(WEST/EAST), 破坏连接几何。
+        BlockPos leftPos = pos.relative(facing.getOpposite());
         BlockState leftState = world.getBlockState(leftPos);
         boolean leftValid = this.canConnect(leftState);
         if (leftValid) {
