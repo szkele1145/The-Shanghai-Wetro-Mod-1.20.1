@@ -41,13 +41,14 @@ implements BlockEntityRenderer<T> {
             BlockPos pos = entity.getBlockPos();
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockShanghaiStationNameOnWall.FACING);
             Station station = RailwayData.getStation((Set)ClientData.STATIONS, (DataCache)ClientData.DATA_CACHE, (BlockPos)pos);
+            String[] cjkAndEng;
             if (station == null) {
-                cjk = StringUtil.getCjkMain(Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).toString());
-                eng = StringUtil.getEngMain(Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).toString());
+                cjkAndEng = StringUtil.getCjkAndEngMain(Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).toString());
             } else {
-                cjk = StringUtil.getCjkMain(station.name);
-                eng = StringUtil.getEngMain(station.name);
+                cjkAndEng = StringUtil.getCjkAndEngMain(station.name);
             }
+            cjk = cjkAndEng[0];
+            eng = cjkAndEng[1];
             poseStack.pushPose();
             poseStack.translate(0.5, 0.5, 0.5);
             UtilitiesClient.rotateZDegrees((PoseStack)poseStack, (float)180.0f);

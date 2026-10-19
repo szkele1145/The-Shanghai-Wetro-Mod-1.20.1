@@ -40,8 +40,9 @@ implements BlockEntityRenderer<T> {
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockStationInfoBoardSingle.FACING);
             Station station = RailwayData.getStation((Set)ClientData.STATIONS, (DataCache)ClientData.DATA_CACHE, (BlockPos)pos);
             String fullName = station == null ? Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).getString() : station.name;
-            String cjkName = StringUtil.getCjkMain(fullName);
-            String engName = StringUtil.getEngMain(fullName);
+            String[] cjkAndEng = StringUtil.getCjkAndEngMain(fullName);
+            String cjkName = cjkAndEng[0];
+            String engName = cjkAndEng[1];
             poseStack.translate(0.5, 0.5, 0.5);
             UtilitiesClient.rotateXDegrees((PoseStack)poseStack, (float)180.0f);
             UtilitiesClient.rotateYDegrees((PoseStack)poseStack, (float)facing.toYRot());

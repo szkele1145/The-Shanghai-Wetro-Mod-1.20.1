@@ -52,4 +52,32 @@ public class StringUtil {
             return "";
         }
     }
+
+    /**
+     * 一次性解析出中文主名与英文主名。
+     *
+     * <p>热路径说明：站名渲染器（{@code RenderStationInfoSingle} /
+     * {@code RenderStationInfoDouble} / {@code RenderStationNameWall}）每帧都会
+     * 对<b>同一个</b>站名字符串先后调用 {@link #getCjkMain} 和 {@link #getEngMain}，
+     * 两个方法各自独立做一次 {@code split("\\|\\|")} + 一次 {@code split("\\|")}，
+     * 等于把同一份解析工作做了两遍。调用方若只需要中英文两段，用本方法
+     * 一次解析即可拿到两个结果。</p>
+     *
+     * <p>行为与逐个调用 {@code getCjkMain} / {@code getEngMain} <b>完全一致</b>：
+     * 两者的异常回退分别是「原名」与「空串」，本方法保持同样的回退值。
+     * 本方法只做解析、不改变任何可观察结果。</p>
+     *
+     * @param name 原始站名，形如 {@code "人民广场|People's Square||换乘 1 号线"}
+     * @return 长度为 2 的数组：[0] = 中文主名，[1] = 英文主名
+     */
+    public static String[] getCjkAndEngMain(String name) {
+        try {
+            String main = ANNOTATION_SEPARATOR.split(name)[0];
+            String[] cjkAndEng = main.split("\\|");
+            return new String[]{cjkAndEng[0], cjkAndEng[1]};
+        }
+        catch (Exception e) {
+            return new String[]{name, ""};
+        }
+    }
 }
