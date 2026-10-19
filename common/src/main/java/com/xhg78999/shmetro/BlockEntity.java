@@ -16,6 +16,7 @@ import com.xhg78999.shmetro.entity.BlockEntityStationInfoBoardDouble;
 import com.xhg78999.shmetro.entity.BlockEntityStationInfoBoardSingle;
 import mtr.RegistryObject;
 import mtr.block.BlockPSDAPGDoorBase;
+import mtr.block.BlockPSDTop;
 import mtr.mappings.RegistryUtilities;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,7 +32,7 @@ public interface BlockEntity {
     public static final RegistryObject<BlockEntityType<BlockEntitySecurityCheckPole>> SECURITY_CHECK_POLE_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType(BlockEntitySecurityCheckPole::new, (Block)((Block)Blocks.SECURITY_CHECK_POLE.get())));
     public static final RegistryObject<BlockEntityType<BlockEntityAC>> AC_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType(BlockEntityAC::new, (Block)((Block)Blocks.AC.get())));
     public static final RegistryObject<BlockEntityType<BlockEntityGlobalPosition>> GD_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType(BlockEntityGlobalPosition::new, (Block)((Block)Blocks.GD.get())));
-    public static final RegistryObject<BlockEntityType<BlockEntityGlobalPosition>> SH_PSD_TOP_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType(BlockShanghaiPSDTop.TileEntityShanghaiPSDTop::new, (Block)((Block)Blocks.SH_PSD_TOP.get())));
+    public static final RegistryObject<BlockEntityType<BlockPSDTop.TileEntityRouteBase>> SH_PSD_TOP_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType(BlockShanghaiPSDTop.TileEntityShanghaiPSDTop::new, (Block)((Block)Blocks.SH_PSD_TOP.get())));
     public static final RegistryObject<BlockEntityType<BlockEntityPassing>> PASSING_2000_IN_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType((pos, state) -> new BlockEntityPassing(pos, state, 0, true), (Block)((Block)Blocks.SH_PASS_2000_ENTRANCE.get())));
     public static final RegistryObject<BlockEntityType<BlockEntityPassing>> PASSING_2000_OUT_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType((pos, state) -> new BlockEntityPassing(pos, state, 0, false), (Block)((Block)Blocks.SH_PASS_2000_EXIT.get())));
     public static final RegistryObject<BlockEntityType<BlockEntityPassing>> PASSING_2008_IN_TILE_ENTITY = new RegistryObject(() -> RegistryUtilities.getBlockEntityType((pos, state) -> new BlockEntityPassing(pos, state, 1, true), (Block)((Block)Blocks.SH_PASS_2008_ENTRANCE.get())));
