@@ -97,8 +97,12 @@ public class GraphicsHelper {
     }
 
     public static Color foreground(int color) {
+        // 亮度选对比色。原实现两处错误(反编译原件同错):
+        // 1) 蓝色系数 0.514 应为 0.114(标准亮度公式);
+        // 2) RGB 是 0-255 量纲, 阈值却是 0.5 —— 结果除纯黑线色外恒返回 WHITE,
+        //    亮线色(黄/白/浅灰)上白字不可读。按 YIQ 亮度中点 127 判定。
         Color c = new Color(color);
-        return (double)c.getRed() * 0.299 + (double)c.getGreen() * 0.587 + (double)c.getBlue() * 0.514 < 0.5 ? Color.BLACK : Color.WHITE;
+        return (double)c.getRed() * 0.299 + (double)c.getGreen() * 0.587 + (double)c.getBlue() * 0.114 < 127.5 ? Color.BLACK : Color.WHITE;
     }
 }
 
