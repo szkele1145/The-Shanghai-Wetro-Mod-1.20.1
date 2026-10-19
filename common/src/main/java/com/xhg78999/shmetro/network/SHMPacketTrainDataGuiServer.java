@@ -14,6 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SHMPacketTrainDataGuiServer
 extends PacketTrainDataBase {
+    /** 单个指示牌的最大格数(BlockShanghaiSign.length 的合法上界)。 */
+    private static final int MAX_SIGN_LENGTH = 13;
+    /** 选中线路 ID 的合理上限(实际线路数量级远小于此)。 */
+    private static final int MAX_SELECTED_IDS = 4096;
+
     public static void openSHMSignScreenS2C(ServerPlayer player, BlockPos signPos) {
         FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeBlockPos(signPos);
@@ -22,12 +27,23 @@ extends PacketTrainDataBase {
 
     public static void receiveSHMSignIdsC2S(MinecraftServer minecraftServer, ServerPlayer player, FriendlyByteBuf packet) {
         BlockPos signPos = packet.readBlockPos();
+        // 长度字段完全由客户端提供: 原实现直接 new String[signLength],
+        // 恶意客户端发送 Integer.MAX_VALUE 会抛 OutOfMemoryError(Error, 无法被
+        // catch 捕获)导致服务端崩溃。此处加上限校验, 超限直接丢弃该包。
         int selectedIdsLength = packet.readInt();
+        if (selectedIdsLength < 0 || selectedIdsLength > MAX_SELECTED_IDS) {
+            com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃非法指示牌包(selectedIdsLength=" + selectedIdsLength + ", player=" + player.getName().getString() + ")");
+            return;
+        }
         java.util.HashSet<Long> selectedIds = new java.util.HashSet<Long>();
         for (int i = 0; i < selectedIdsLength; ++i) {
             selectedIds.add(packet.readLong());
         }
         int signLength = packet.readInt();
+        if (signLength < 0 || signLength > MAX_SIGN_LENGTH) {
+            com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃非法指示牌包(signLength=" + signLength + ", player=" + player.getName().getString() + ")");
+            return;
+        }
         String[] signIds = new String[signLength];
         for (int i = 0; i < signLength; ++i) {
             String signId = packet.readUtf(Short.MAX_VALUE);
