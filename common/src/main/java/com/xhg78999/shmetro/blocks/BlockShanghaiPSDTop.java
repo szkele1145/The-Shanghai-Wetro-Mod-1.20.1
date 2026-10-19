@@ -82,15 +82,18 @@ IBlock {
     }
 
     private void setState(Level world, BlockPos pos, boolean shouldBePersistent) {
-        world.setBlockAndUpdate(pos, (BlockState)world.getBlockState(pos).setValue(PERSISTENT, BlockPSDTop.EnumPersistent.NONE));
+        // 合并为一次 setBlockAndUpdate: 原实现先无条件设为 NONE, 再按下方方块类型
+        // 二次设置, 中间态多余, 每次 setState 会多触发一次方块更新通知
+        // (区块重标号 + 邻居链式 updateShape)。一次操作会经 propagate 影响
+        // 左右各一格共 3 个顶盖, 合并后每次操作省 3 次更新通知。
         Block blockBelow = world.getBlockState(pos.below()).getBlock();
+        BlockPSDTop.EnumPersistent persistent = BlockPSDTop.EnumPersistent.NONE;
         if (blockBelow instanceof BlockShanghaiPSDDoor || blockBelow instanceof BlockShanghaiPSDGlass || blockBelow instanceof BlockShanghaiPSDEnd) {
             if (shouldBePersistent) {
-                world.setBlockAndUpdate(pos, (BlockState)world.getBlockState(pos).setValue(PERSISTENT, blockBelow instanceof BlockPSDDoor ? BlockPSDTop.EnumPersistent.ARROW : (blockBelow instanceof BlockPSDGlass ? BlockPSDTop.EnumPersistent.ROUTE : BlockPSDTop.EnumPersistent.BLANK)));
-            } else {
-                world.setBlockAndUpdate(pos, (BlockState)world.getBlockState(pos).setValue(PERSISTENT, BlockPSDTop.EnumPersistent.NONE));
+                persistent = blockBelow instanceof BlockPSDDoor ? BlockPSDTop.EnumPersistent.ARROW : (blockBelow instanceof BlockPSDGlass ? BlockPSDTop.EnumPersistent.ROUTE : BlockPSDTop.EnumPersistent.BLANK);
             }
         }
+        world.setBlockAndUpdate(pos, (BlockState)world.getBlockState(pos).setValue((Property)PERSISTENT, (Comparable)persistent));
     }
 
     public BlockState rotate(BlockState state, Rotation rotation) {
