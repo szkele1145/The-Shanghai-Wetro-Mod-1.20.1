@@ -70,7 +70,11 @@ extends EntityModel<Entity> {
     private static <T> void getArrayFromValue(T[] array, JsonObject jsonObject, String key, Function<JsonElement, T> function) {
         if (jsonObject.has(key)) {
             JsonArray jsonArray = jsonObject.getAsJsonArray(key);
-            for (int i = 0; i < array.length; ++i) {
+            // 数组长度不足时直接忽略该字段: 原实现 jsonArray.get(i) 会抛
+            // IndexOutOfBoundsException, 该异常会中断 elements 的 forEach,
+            // 导致该 bbmodel 后续所有元素丢失(整个模型渲染不完整)。
+            int n = Math.min(array.length, jsonArray.size());
+            for (int i = 0; i < n; ++i) {
                 array[i] = function.apply(jsonArray.get(i));
             }
         }
