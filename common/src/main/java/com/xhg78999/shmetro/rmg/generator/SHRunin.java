@@ -81,7 +81,15 @@ public class SHRunin {
     }
 
     private static void drawPrevStn(Graphics2D g2d, boolean direction, Station next, Station prev, Station now, Route line, boolean flip) {
-        if ((flip ? prev : next) == null) {
+        // 守卫必须与各分支实际绘制的站一致: 两个 direction 分支取值互补, 需分别检查。
+        // 原实现的守卫 (flip ? prev : next) 只匹配 direction=false 分支;
+        // direction=true(箭头朝左)时查的是不画的那个站, 路线端点站会
+        // 画空白站名(画 null)或让该显示的面板整块缺失。上游反编译原件同错。
+        if (direction) {
+            if ((flip ? next : prev) == null) {
+                return;
+            }
+        } else if ((flip ? prev : next) == null) {
             return;
         }
         Font fontCjk = GraphicsCache.CACHE.fontCjk.deriveFont(48.0f);
@@ -103,7 +111,13 @@ public class SHRunin {
     }
 
     private static void drawNextStn(Graphics2D g2d, boolean direction, Station next, Station prev, Station now, Route line, boolean flip) {
-        if ((flip ? next : prev) == null) {
+        // 同 drawPrevStn: 守卫需按 direction 分支各自检查实际绘制的站。
+        // 原实现的守卫 (flip ? next : prev) 只匹配 direction=false 分支。
+        if (direction) {
+            if ((flip ? prev : next) == null) {
+                return;
+            }
+        } else if ((flip ? next : prev) == null) {
             return;
         }
         Font fontCjk = GraphicsCache.CACHE.fontCjk.deriveFont(48.0f);
