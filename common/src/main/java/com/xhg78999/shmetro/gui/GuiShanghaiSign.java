@@ -111,8 +111,13 @@ implements IGui {
         if (world != null) {
             BlockEntity entity = world.getBlockEntity(signPos);
             if (entity instanceof BlockShanghaiSign.TileEntityRailwaySign) {
-                this.signIds = ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds();
-                this.selectedIds = ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSelectedIds();
+                // 取副本而非 TE 内部引用: GUI 后续会直接改这两个容器
+                // (edit() 改 signIds、选中项切换改 selectedIds)。
+                // 若持有 TE 的引用, 客户端的编辑会直接写进客户端侧 TE:
+                //  - 未点「保存」就关掉 GUI 时, 本地 TE 与服务端不一致
+                //  - 单机档里客户端保存区块时, 会把未提交的编辑写进存档
+                this.signIds = ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds().clone();
+                this.selectedIds = new HashSet<Long>(((BlockShanghaiSign.TileEntityRailwaySign)entity).getSelectedIds());
                 this.isRailwaySign = true;
             } else {
                 this.signIds = new String[0];

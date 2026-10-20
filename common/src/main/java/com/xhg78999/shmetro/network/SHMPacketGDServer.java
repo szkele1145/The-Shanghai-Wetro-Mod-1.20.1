@@ -13,6 +13,24 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SHMPacketGDServer
 extends PacketTrainDataBase {
+    /**
+     * GD 编号的最大长度。
+     *
+     * <p>实际取值形如 {@code "GD 000000"}, 8 个字符足够。</p>
+     *
+     * <p>原实现用 {@code packet.readUtf()}(无参)读取, 长度上限是
+     * {@code FriendlyByteBuf} 的 32767 字符。服务端拿到的是客户端完全可控的
+     * 字符串, 而 {@code code} 会被:</p>
+     * <ul>
+     *   <li>{@code syncData()} 广播给附近所有客户端;</li>
+     *   <li>{@code RenderGlobalPosition} 用 {@code drawTextFont} 逐字符绘制,
+     *       32767 字符意味着每帧生成 32767 个文本四边形 -&gt; 客户端渲染卡死。</li>
+     * </ul>
+     * <p>因此在协议层就限长: 超长的包无法通过 {@code readUtf(maxLength)}
+     * 解析, 会被 MC 的网络层当作非法包断开连接。</p>
+     */
+    private static final int MAX_GD_CODE_LENGTH = SHMPacketDefine.MAX_GD_CODE_LENGTH;
+
     public static void openSHMGDScreenS2C(ServerPlayer player, BlockPos signPos) {
         FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeBlockPos(signPos);
@@ -21,7 +39,15 @@ extends PacketTrainDataBase {
 
     public static void receiveSHMGDUpdateC2S(MinecraftServer minecraftServer, ServerPlayer player, FriendlyByteBuf packet) {
         BlockPos gdPos = packet.readBlockPos();
-        String gdId = packet.readUtf();
+        // 限长读取: 超过 MAX_GD_CODE_LENGTH 的字符串会抛 DecoderException,
+        // 由 MC 网络层断开该连接, 避免超长文本被广播 + 逐字渲染。
+        String gdId = packet.readUtf(MAX_GD_CODE_LENGTH);
+        // 二次校验: 控制字符(换行/方向键等)会让 3D 文本渲染错乱,
+        // 也可能被用来在标识牌上画不可见字符。直接丢弃该包, 保持原值不变。
+        if (containsControlCharacter(gdId)) {
+            com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃含控制字符的 GD 编号(player=" + player.getName().getString() + ")");
+            return;
+        }
         minecraftServer.execute(() -> {
             BlockEntity entity = player.serverLevel().getBlockEntity(gdPos);
             if (entity instanceof BlockEntityGlobalPosition) {
@@ -31,5 +57,16 @@ extends PacketTrainDataBase {
                 }, new BlockEntityGlobalPosition[]{(BlockEntityGlobalPosition) entity});
             }
         });
+    }
+
+    /** 判断字符串是否含有 ASCII 控制字符(C0 区与 DEL)。空格(0x20)及以上视为正常字符。 */
+    private static boolean containsControlCharacter(String text) {
+        for (int i = 0; i < text.length(); ++i) {
+            char c = text.charAt(i);
+            if (c < 0x20 || c == 0x7F) {
+                return true;
+            }
+        }
+        return false;
     }
 }

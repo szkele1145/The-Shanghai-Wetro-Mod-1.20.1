@@ -26,7 +26,14 @@ extends PacketTrainDataBase {
     public static void sendGDUpdateC2S(BlockPos pos, String id) {
         FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeBlockPos(pos);
-        packet.writeUtf(id);
+        // 与服务端 SHMPacketGDServer.MAX_GD_CODE_LENGTH 保持一致。
+        // GUI 已用 setMaxLength(16) 限住输入, 这里再截一次是防御性的:
+        // 万一有其它调用方绕过 GUI, 也不至于发出一个服务端必然拒绝的包。
+        String safeId = id == null ? "" : id;
+        if (safeId.length() > SHMPacketDefine.MAX_GD_CODE_LENGTH) {
+            safeId = safeId.substring(0, SHMPacketDefine.MAX_GD_CODE_LENGTH);
+        }
+        packet.writeUtf(safeId);
         RegistryClient.sendToServer((ResourceLocation)SHMPacketDefine.PACKET_SHM_GD_UPDATE, (FriendlyByteBuf)packet);
     }
 }

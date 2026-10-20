@@ -2,6 +2,7 @@ package com.xhg78999.shmetro.gui;
 
 import com.xhg78999.shmetro.entity.BlockEntityGlobalPosition;
 import com.xhg78999.shmetro.network.SHMPacketGDClient;
+import com.xhg78999.shmetro.network.SHMPacketDefine;
 import mtr.client.IDrawing;
 import mtr.data.IGui;
 import mtr.mappings.ScreenMapper;
@@ -28,6 +29,9 @@ implements IGui {
         super((Component)Text.literal((String)String.valueOf(Text.translatable((String)"gui.shmetro.global_position", (Object[])new Object[0]))));
         this.pos = pos;
         this.gdid = new WidgetBetterTextField("GD 000000");
+        // 限制输入长度: 服务端 SHMPacketGDServer 只接受 <= MAX_GD_CODE_LENGTH
+        // 字符的编号, 这里在输入端就限住, 避免用户输入超长内容后发包被服务端拒绝。
+        this.gdid.setMaxLength(SHMPacketDefine.MAX_GD_CODE_LENGTH);
         this.confirm = UtilitiesClient.newButton((Component)Text.translatable((String)"gui.yes", (Object[])new Object[0]), btn -> this.onClose());
     }
 
