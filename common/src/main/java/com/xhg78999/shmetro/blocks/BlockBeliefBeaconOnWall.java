@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 public class BlockBeliefBeaconOnWall
 extends HorizontalDirectionalBlock
@@ -50,8 +51,8 @@ implements IBlock {
         // 移植版曾改成 ctx.getHorizontalDirection() 规避崩溃, 但那是
         // 「玩家朝向」而非「墙面所在面」, 贴墙朝向是错的。
         // 现修正为: 取点击面, 上下面则拒绝放置 (返回 null = 放置失败)。
-        Direction facing = ctx.getClickedFace();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+        Direction facing = WallPlacementUtil.getWallFacingOrNull(ctx);
+        if (facing == null) {
             return null;
         }
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);

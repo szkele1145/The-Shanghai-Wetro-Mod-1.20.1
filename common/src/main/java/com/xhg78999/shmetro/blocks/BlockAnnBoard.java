@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 public class BlockAnnBoard
 extends BlockDirectionalMapper
@@ -38,12 +39,12 @@ implements IBlock {
         // (models/block/annboard.json 默认贴北面; blockstates/annboard.json
         //  facing=north 不旋转、facing=south y=180)。
         // 因此取玩家点击的那一面 —— 点哪面墙就挂哪面墙。
-        // 上游原件用 ctx.getClickedFace() 但未做水平化: 点顶/底面时会把
+        // 上游原件直接用 ctx.getClickedFace() 但未做水平化: 点顶/底面时会把
         // FACING 设成 UP/DOWN, 而 FACING 只含 4 个水平方向 ->
-        // setValue 抛 IllegalArgumentException。这里补上水平检查,
-        // 上下面直接拒绝放置 (返回 null = 放置失败)。
-        Direction facing = ctx.getClickedFace();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+        // setValue 抛 IllegalArgumentException。这里用 getWallFacingOrNull
+        // 补齐水平检查, 上下面拒绝放置 (返回 null = 放置失败)。
+        Direction facing = WallPlacementUtil.getWallFacingOrNull(ctx);
+        if (facing == null) {
             return null;
         }
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);

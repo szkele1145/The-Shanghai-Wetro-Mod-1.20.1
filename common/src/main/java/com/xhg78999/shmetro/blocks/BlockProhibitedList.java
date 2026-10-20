@@ -15,6 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.core.BlockPos;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 /**
  * 上海地铁“禁止携带物品”公告牌。
@@ -41,8 +42,8 @@ public class BlockProhibitedList extends BlockDirectionalMapper {
         // 取玩家点击的那一面 —— 点哪面墙就挂哪面墙; 上下面拒绝放置。
         // 上游原件用 ctx.getClickedFace() 但未做水平化, 点顶/底面会
         // 把 FACING 设成 UP/DOWN -> setValue 抛 IllegalArgumentException。
-        Direction facing = ctx.getClickedFace();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
+        Direction facing = WallPlacementUtil.getWallFacingOrNull(ctx);
+        if (facing == null) {
             return null;
         }
         return this.defaultBlockState().setValue((Property) FACING, (Comparable) facing);

@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 public class BlockEmergencyStop
 extends HorizontalDirectionalBlock {
@@ -28,13 +29,9 @@ extends HorizontalDirectionalBlock {
         // FACING = 薄板所在的那一面 (blockstates/emergency_stop.json facing=north 不旋转)。
         // 因此取玩家点击的那一面 —— 点哪面墙就装哪面墙。
         // 点在顶面/底面时回退为玩家水平朝向 (回退而非 null: 该方块也要能落地放置)。
-        Direction facing = ctx.getClickedFace();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
-            facing = ctx.getHorizontalDirection();
-        }
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
-            facing = Direction.NORTH;
-        }
+        // 用统一工具保证: 点顶/底面时回退为玩家水平朝向 (回退而非 null),
+        // 兼顾「贴墙正确」与「也能落地放置」。
+        Direction facing = WallPlacementUtil.getWallFacing(ctx);
         return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
     }
 
