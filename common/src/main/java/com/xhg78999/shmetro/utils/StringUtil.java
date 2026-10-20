@@ -64,8 +64,14 @@ public class StringUtil {
      * 一次解析即可拿到两个结果。</p>
      *
      * <p>行为与逐个调用 {@code getCjkMain} / {@code getEngMain} <b>完全一致</b>：
-     * 两者的异常回退分别是「原名」与「空串」，本方法保持同样的回退值。
-     * 本方法只做解析、不改变任何可观察结果。</p>
+     * 两个方法的异常回退分别是「原名」与「空串」。
+     * {@code getEngMain} 在「主名里没有英文段」时（如 {@code "某某站||注释"}，
+     * 切开 {@code ||} 后只剩一段中文）走的是异常回退 {@code ""}，
+     * <b>不是</b>把整段连同注释当英文名返回 —— 旧实现的
+     * {@code cjkAndEng[1]} 越界后整体走 catch，返回 {原名, ""}，
+     * 会把 {@code "某某站||注释"} 原样显示到站名牌上，与上游行为不符。
+     * 修复：英文段缺位时显式回退 {@code ""}，与 {@code getEngMain} 的
+     * 异常回退保持一致。</p>
      *
      * @param name 原始站名，形如 {@code "人民广场|People's Square||换乘 1 号线"}
      * @return 长度为 2 的数组：[0] = 中文主名，[1] = 英文主名
@@ -74,7 +80,8 @@ public class StringUtil {
         try {
             String main = ANNOTATION_SEPARATOR.split(name)[0];
             String[] cjkAndEng = main.split("\\|");
-            return new String[]{cjkAndEng[0], cjkAndEng[1]};
+            // 与 getEngMain 的异常回退一致: 无英文段 -> ""(而不是整段带注释原名)。
+            return new String[]{cjkAndEng[0], cjkAndEng.length > 1 ? cjkAndEng[1] : ""};
         }
         catch (Exception e) {
             return new String[]{name, ""};
