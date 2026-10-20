@@ -44,11 +44,33 @@ extends BlockPSDGlassEnd {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
-            facing = Direction.NORTH;
+        // 【1.1.50 修缺失的空间检查】
+        // MTR 基类 BlockDirectionalDoubleBlockBase.getStateForPlacement 的字节码:
+        //     Direction dir = ctx.getHorizontalDirection();
+        //     if (IBlock.isReplaceable(ctx, Direction.UP, 2)) {
+        //         return getAdditionalState(ctx.getClickedPos(), dir)
+        //                      .setValue(FACING, dir).setValue(HALF, DoubleBlockHalf.LOWER);
+        //     }
+        //     return null;                 // 上方不足 2 格空位 -> 拒绝放置
+        //
+        // 之前的移植版**覆写**了这个方法却只设了 FACING, 把 isReplaceable 的
+        // 空间检查整个丢了 —— 屏蔽门端头是 **2 格高**的方块(门体 + 顶端封头),
+        // 于是可以把它放在只有 1 格净空的地方, 半截卡在地板/天花板里。
+        //
+        // 这里改为委托 super: 基类已经用 getHorizontalDirection() 设 FACING
+        // 并做 LOWER/HALF 设定, 与本类需要的行为完全一致, 只需要把空间检查
+        // 补回来。getAdditionalState 在整条继承链上无人覆写, 等价于
+        // defaultBlockState(), 因此委托 super 不会丢任何附加状态。
+        BlockState state = super.getStateForPlacement(ctx);
+        if (state == null) {
+            // 上方空间不足 -> 拒绝放置(与基类一致: 返回 null 让 MC 判定放置失败)
+            return null;
         }
-        return (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing);
+        // FACING 语义与基类一致(玩家水平朝向) —— 端头是**立式**方块(与 PSD 玻璃门
+        // 门体对齐), 不是贴墙薄板, 故沿用 getHorizontalDirection()。
+        // 上面的 null/Axis.Y 检查同样是死代码: getHorizontalDirection() 只会返回
+        // 4 个水平方向, 既不会 null 也不会是 Y 轴。
+        return state;
     }
 
     public BlockState rotate(BlockState state, Rotation rotation) {
