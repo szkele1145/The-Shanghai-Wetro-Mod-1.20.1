@@ -21,6 +21,21 @@ import mtr.data.Station;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class RMGMain {
+    /**
+     * 中文排序用的比较器。
+     *
+     * <p>{@link Collator#getInstance(Locale)} 每次调用都会新建一个 Collator 对象
+     * (底层规则表是共享的, 但对象本身不是), 而原实现把它写在
+     * {@code sorted(...)} 的 comparator 里 —— 比较器每比较一次就调一次,
+     * 于是排序 n 个元素会创建 O(n log n) 个 Collator。
+     *
+     * <p>线路图贴图生成会对每条线路的每个站调用
+     * {@link #getInterchangeRoutes}, 一条 20 站的线路就是几百次创建。
+     * {@code Collator} 实例是不可变的、且 compare 方法线程安全, 因此可以
+     * 提成静态常量共享 —— 排序结果与原来完全一致。
+     */
+    private static final Collator CHINA_COLLATOR = Collator.getInstance(Locale.CHINA);
+
     public static NativeImage getRunin(long platformId, boolean hasLeft, boolean flip) {
         Route route = null;
         try {
@@ -157,7 +172,7 @@ public class RMGMain {
                 res.add(rc);
             }
         });
-        return res.stream().sorted((route1, route2) -> Collator.getInstance(Locale.CHINA).compare(route1.name, route2.name)).collect(Collectors.toList());
+        return res.stream().sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).collect(Collectors.toList());
     }
 
     public static boolean isDigitLine(String name) {

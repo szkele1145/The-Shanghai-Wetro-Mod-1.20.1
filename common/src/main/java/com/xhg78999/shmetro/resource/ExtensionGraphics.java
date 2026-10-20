@@ -24,10 +24,20 @@ import mtr.data.Route;
 import com.mojang.blaze3d.platform.NativeImage;
 
 public class ExtensionGraphics {
+    /**
+     * 中文排序用的比较器。
+     *
+     * <p>{@link Collator#getInstance(Locale)} 每次调用都会新建一个 Collator 对象,
+     * 而原实现把它写在 {@code sorted(...)} 的 comparator 里 —— 比较器每比较一次
+     * 就调一次, 排序 n 个元素会创建 O(n log n) 个 Collator。这里提到静态常量
+     * 共享: {@code Collator} 实例不可变、compare 线程安全, 排序结果完全一致。
+     */
+    private static final Collator CHINA_COLLATOR = Collator.getInstance(Locale.CHINA);
+
     private static NativeImage getSHRoutesI(List<Long> routeIds) throws IOException {
         ByteArrayInputStream ist;
         int i;
-        List<Route> routes = routeIds.stream().map(ClientData.DATA_CACHE.routeIdMap::get).sorted((route1, route2) -> Collator.getInstance(Locale.CHINA).compare(route1.name, route2.name)).toList();
+        List<Route> routes = routeIds.stream().map(ClientData.DATA_CACHE.routeIdMap::get).sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).toList();
         int width = 15;
         boolean dlflag = false;
         ArrayList<String> blocks = new ArrayList<String>();
