@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 public class BlockEmergencyExit
 extends BlockDirectionalMapper
@@ -33,10 +34,24 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
-        if (facing == null || facing.getAxis() == Direction.Axis.Y) {
-            facing = Direction.NORTH;
-        }
+        // 【1.1.49 修朝向】上游 1.19.4 原件用的是 `ctx.getClickedFace()` —— 语义正确
+        // (点哪面墙, 出口灯的正面就朝哪边; 见 models/block/emergency_exit_left.json:
+        //  薄板 x 跨度仅 0.4 而 z 跨度 6.4, 即**垂直于 X 轴**, 而
+        //  blockstates/emergency_exit.json 里 facing=west 不带 y 旋转 ——
+        //  默认模型正面朝西, 与 facing=west 精确吻合)。
+        //
+        // 移植时换成了 `ctx.getHorizontalDirection()`(玩家面朝的方向) —— 贴墙朝向整个错位:
+        // 玩家面朝北、点西墙, 结果出口灯装到北墙去。
+        // 同一批 1.1.36/1.1.37 已经把 BlockEmergencyStop 等 9 个类改用
+        // WallPlacementUtil.getWallFacing, 这里是**漏网的一个**。
+        //
+        // 另外原代码的 `facing == null || facing.getAxis() == Axis.Y` 是死代码:
+        // BlockPlaceContext.getHorizontalDirection() 只会返回 4 个水平方向,
+        // 既不会 null 也不会是 Y 轴。而直接用 getClickedFace() 又会在点顶/底面时
+        // 拿到 UP/DOWN —— FACING 属性只接受水平四方向, setValue 会抛
+        // IllegalArgumentException(上游缺陷)。getWallFacing 两者都兼顾:
+        // 优先取水平点击面, 点顶/底面则回退为玩家水平朝向。
+        Direction facing = WallPlacementUtil.getWallFacing(ctx);
         return (BlockState)((BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing)).setValue((Property)LOCATION, (Comparable)Integer.valueOf(0));
     }
 

@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 
 public class BlockPlatformMonitor
 extends BlockDirectionalMapper
@@ -44,7 +45,20 @@ implements IBlock {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        Direction facing = ctx.getHorizontalDirection();
+        // 【1.1.49 修朝向】站台监视器是**贴墙的 2 格高屏幕**:
+        //   models/block/platform_monitor.json 的 z 跨度只有 0.25~3 (极薄板),
+        //   blockstates/platform_monitor.json 里 facing=north 带 y=180,
+        //   说明模型默认朝南、facing 指**正面朝向** = 贴在哪面墙的外侧。
+        //
+        // 上游 1.19.4 原件用 `ctx.getClickedFace()` —— 语义正确(点哪面墙就贴哪面)。
+        // 移植时换成了 `ctx.getHorizontalDirection()`(玩家面朝的方向) —— 贴墙朝向错位:
+        // 玩家面朝北、点西墙, 监视器装到北墙上。
+        // 与 BlockEmergencyExit 是同一批漏网的类(1.1.36/1.1.37 已修过其中 9 个)。
+        //
+        // 直接用 getClickedFace() 在点顶/底面时会拿到 UP/DOWN, 而 FACING 只接受
+        // 水平四方向 -> setValue 抛 IllegalArgumentException(上游缺陷);
+        // getWallFacing 两者兼顾: 优先水平点击面, 点顶/底面回退玩家水平朝向。
+        Direction facing = WallPlacementUtil.getWallFacing(ctx);
         return (BlockState)((BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing)).setValue((Property)MIRRORED, (Comparable)Boolean.valueOf(false));
     }
 
