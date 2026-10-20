@@ -71,6 +71,17 @@ public class GraphicsCache {
 
     public void reloadDynamic() {
         com.xhg78999.shmetro.Main.LOGGER.info("Reloading dynamic resources");
+        // 标记重载时刻: 之前启动的异步任务结果作废, 不得覆盖重载后的新条目。
+        //
+        // 必须在所有清理动作之前递增。原实现把它放在最后, 于是存在这样的竞态:
+        //   1) 异步任务 T 启动, 捕获 epoch = 5
+        //   2) reloadDynamic() 执行完「清队列 / 排队释放 / clear map」, 此时 epoch 仍是 5
+        //   3) 任务 T 恰好在此刻完成 -> epoch 检查 5 == 5 通过 -> 把「基于重载前资源
+        //      生成」的纹理注册进 TextureManager 并写回 dynamicResources
+        //   4) reloadDynamic() 才把 epoch 递增到 6
+        // 结果: 一张过期纹理被注册并留存, 而 epoch 已变, 后续任何任务都不会修正它,
+        // 直到下一次资源重载。同 1.1.40 修的 getResource 里的次序问题同源。
+        this.reloadEpoch.incrementAndGet();
         // 资源重载时: 已排队但未执行的纹理任务作废(它们基于旧资源),
         // 队列清空, 避免旧纹理在重载后被注册回来。
         this.textureRegistryQueue.clear();
@@ -82,8 +93,6 @@ public class GraphicsCache {
             }
         }
         this.dynamicResources.clear();
-        // 标记重载时刻: 之前启动的异步任务结果作废, 不得覆盖重载后的新条目。
-        this.reloadEpoch.incrementAndGet();
     }
 
     public void reload(ResourceManager resourceManager) {
@@ -255,15 +264,28 @@ public class GraphicsCache {
             }
         }
 
+        /**
+         * 释放本动态纹理。
+         *
+         * <p>只需调用 {@link TextureManager#release(ResourceLocation)}：它内部已经
+         * 完成了「从 {@code byPath} 移除 → {@code safeClose}（{@code close()} + {@code releaseId()}）」全部三件事。</p>
+         *
+         * <p><b>不要再补 {@code getTexture()} + {@code releaseId()} + {@code close()}</b>（上游原实现与
+         * MTR 3.2.2 官方 {@code ClientCache$DynamicResource.remove()} 都这么写，是一段真实缺陷）：</p>
+         * <ul>
+         *   <li>{@code release()} 已把纹理从 {@code byPath} 移除，随后 {@code getTexture()} 必然找不到，
+     *       于是 MC 会 <b>new 出一个 {@code SimpleTexture} 占位并把它重新注册回 {@code byPath}</b>；</li>
+         *   <li>该占位加载不到资源，{@code register()} 便返回 <b>全局共享的</b>
+         *       {@code MissingTextureAtlasSprite.getTexture()}（紫黑格单例）；</li>
+         *   <li>于是 {@code if (abstractTexture != null)} 成立，代码对这个<b>全局单例</b>
+         *       调用了 {@code releaseId()} + {@code close()} —— 释放了全游戏共用的紫黑格纹理，
+     *       导致所有「加载失败」的纹理（含其他 mod 的）一起不可渲染。</li>
+         * </ul>
+         */
         private void remove() {
             if (!this.resourceLocation.equals(DEFAULT_WHITE_RESOURCE)) {
                 TextureManager textureManager = Minecraft.getInstance().getTextureManager();
                 textureManager.release(this.resourceLocation);
-                AbstractTexture abstractTexture = textureManager.getTexture(this.resourceLocation);
-                if (abstractTexture != null) {
-                    abstractTexture.releaseId();
-                    abstractTexture.close();
-                }
             }
         }
     }
