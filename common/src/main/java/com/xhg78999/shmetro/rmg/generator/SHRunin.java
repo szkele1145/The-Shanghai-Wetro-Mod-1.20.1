@@ -30,11 +30,20 @@ public class SHRunin {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         if (line.circularState != Route.CircularState.NONE) {
-            if (prev == null) {
-                prev = (Station)ClientData.DATA_CACHE.platformIdToStation.get(((Route.RoutePlatform)line.platformIds.get((int)(line.platformIds.size() - 2))).platformId);
+            // 【1.1.46】环线回退取站台时的两道防护:
+            //   1) platformIds.size() < 2 时 line.platformIds.get(size-2) / get(1) 会越界;
+            //      站台数为 1 的环线 (现实中不存在, 但 MTR 允许加载) 就会抛
+            //      IndexOutOfBoundsException。
+            //   2) platformIdToStation.get() 对不存在的 key 返回 null, 再取
+            //      .platformId 会 NPE。
+            // 两种情况都让「上一站/下一站」取不到, 此时保持 null 即可 ——
+            // drawPrevStn / drawNextStn 已有 null 守卫, 会跳过对应面板,
+            // 而不是整张图生成失败。
+            if (prev == null && line.platformIds.size() >= 2) {
+                prev = RMGMain.getStationFromPlatform(((Route.RoutePlatform)line.platformIds.get((int)(line.platformIds.size() - 2))).platformId);
             }
-            if (next == null) {
-                next = (Station)ClientData.DATA_CACHE.platformIdToStation.get(((Route.RoutePlatform)line.platformIds.get((int)1)).platformId);
+            if (next == null && line.platformIds.size() >= 2) {
+                next = RMGMain.getStationFromPlatform(((Route.RoutePlatform)line.platformIds.get((int)1)).platformId);
             }
         }
         SHRunin.drawGeneralStation(g2d, direction, next, prev, now, line, flip);

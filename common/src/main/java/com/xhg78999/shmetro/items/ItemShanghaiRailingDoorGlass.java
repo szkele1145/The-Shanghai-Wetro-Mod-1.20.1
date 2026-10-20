@@ -38,7 +38,11 @@ implements IBlock {
             return InteractionResult.FAIL;
         }
         Level world = context.getLevel();
-        Direction playerFacing = context.getHorizontalDirection();
+        // 【1.1.46】朝向改用「玩家点击的那一面」(与上游 getClickedFace() 一致),
+        // 点顶/底面时回退玩家水平朝向, 避免 getClockWise() 对竖直方向抛异常。
+        // 必须与 ItemPlacementHelper.blocksNotReplaceable 用同一个值,
+        // 否则「检查区域」与「实际放置区域」会错位。
+        Direction playerFacing = ItemPlacementHelper.getPlacementFacing(context);
         BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
         for (int x = 0; x < horizontalBlocks; ++x) {
             BlockPos newPos = pos.relative(playerFacing.getClockWise(), x);
