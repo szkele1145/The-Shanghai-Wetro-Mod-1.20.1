@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.SoundType;
 import com.xhg78999.shmetro.BlockEntity;
 import com.xhg78999.shmetro.Blocks;
 import com.xhg78999.shmetro.network.SHMPacketTrainDataGuiServer;
+import com.xhg78999.shmetro.utils.WallPlacementUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,8 +86,27 @@ IBlock {
         return state;
     }
 
-    public BlockState rotate(BlockPlaceContext blockPlaceContext) {
-        Direction facing = blockPlaceContext.getClickedFace();
+    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        // 【1.1.45 修正】此方法原先被误命名为 rotate(BlockPlaceContext)。
+        // 上游 1.19.4 原件里它是 method_9605 —— 经 intermediary 映射查证,
+        // method_9605 == getStateForPlacement (BlockPlaceContext)BlockState,
+        // 而 Block.rotate 的 intermediary 是 method_26388, 两者不同名。
+        // CFR 反编译时把 method_9605 错还原成了 "rotate", 移植时照抄,
+        // 导致本方法不覆盖任何基类方法 —— MC 永远不会调用它:
+        //   1) 指示牌放置时 FACING 恒为默认的 NORTH (点哪面墙都朝北);
+        //   2) isReplaceable 的空间预检彻底失效, 指示牌可以塞进实体方块里;
+        //   3) setPlacedBy 里沿 facing.getClockWise() 延伸整排指示牌的逻辑
+        //      全部按 NORTH 方向展开。
+        // 改回 getStateForPlacement 后 MC 才会真正调用它。
+        //
+        // 另外上游直接用 ctx.getClickedFace(): 点中顶面/底面时返回 UP/DOWN,
+        // 而 FACING 是水平方向属性 (HorizontalDirectionalBlock.FACING 只含
+        // 四个水平方向), setValue 会抛 IllegalArgumentException。
+        // 指示牌是壁挂薄板, 点顶/底面在几何上毫无意义, 直接拒绝放置。
+        Direction facing = WallPlacementUtil.getWallFacingOrNull(blockPlaceContext);
+        if (facing == null) {
+            return null;
+        }
         return IBlock.isReplaceable((BlockPlaceContext)blockPlaceContext, (Direction)facing.getClockWise(), (int)(this.getMiddleLength() + 2)) ? (BlockState)this.defaultBlockState().setValue((Property)FACING, (Comparable)facing) : null;
     }
 
