@@ -34,6 +34,22 @@ public class GraphicsCache {
     // 普通 HashMap —— 两处线程安全隐患。队列由主线程 getResource/reloadDynamic 消费。
     private final ConcurrentHashMap<String, DynamicResource> dynamicResources = new ConcurrentHashMap();
     private final ConcurrentLinkedQueue<Runnable> textureRegistryQueue = new ConcurrentLinkedQueue();
+    /**
+     * 已生成、但还没在主线程注册进 TextureManager 的纹理。
+     *
+     * <p>纹理生成分两步: 先在异步线程把 {@link NativeImage} 转成
+     * {@link DynamicTexture}, 再把「注册」任务排队到主线程执行。</p>
+     *
+     * <p>若排队之后发生了资源重载({@link #reloadDynamic()} 会清空注册队列),
+     * 那个注册任务就被丢弃了 —— 纹理永远进不了 TextureManager, 也就
+     * 永远没有人调它的 {@code close()}。</p>
+     *
+     * <p>{@link DynamicTexture} 持有的 {@link NativeImage} 是
+     * {@code MemoryUtil.memAlloc} 分配的<b>堆外</b>内存, <b>不受 GC 管理</b>
+     * ⇒ 每丢弃一个纹理就永久泄漏一块图像内存(线路图/进站图动辄几百 KB)。
+     * 这个集合用来跟踪「已生成未注册」的纹理, 重载时统一关闭。</p>
+     */
+    private final java.util.Set<DynamicTexture> pendingTextures = ConcurrentHashMap.newKeySet();
     // 资源重载代号: 异步生成任务捕获当时的代号, 完成后若代号已变则丢弃结果,
     // 避免重载前的旧结果覆盖重载后的新条目(对齐 MTR resourcesToRefresh 机制)。
     private final java.util.concurrent.atomic.AtomicLong reloadEpoch = new java.util.concurrent.atomic.AtomicLong();
@@ -84,6 +100,11 @@ public class GraphicsCache {
         this.reloadEpoch.incrementAndGet();
         // 资源重载时: 已排队但未执行的纹理任务作废(它们基于旧资源),
         // 队列清空, 避免旧纹理在重载后被注册回来。
+        //
+        // 队列里可能有「注册 DynamicTexture」的任务。清空队列 = 这些任务
+        // 永远不会执行 = 那些 DynamicTexture 永远不会被注册、也就永远
+        // 不会被 close() -> NativeImage 的堆外内存永久泄漏。
+        // 被丢弃的纹理都登记在 pendingTextures 里, 本方法末尾统一关闭。
         this.textureRegistryQueue.clear();
         // 释放旧纹理: 直接 clear() 会丢弃引用导致 GL 纹理泄漏,
         // 故逐个排入主线程队列执行 remove()。
@@ -93,6 +114,12 @@ public class GraphicsCache {
             }
         }
         this.dynamicResources.clear();
+        // 关闭所有「已生成但还没注册进 TextureManager」的纹理。
+        // 它们的注册任务刚刚被清空丢弃, 现在必须释放堆外内存。
+        for (DynamicTexture dt : this.pendingTextures) {
+            closeTextureQuietly(dt);
+        }
+        this.pendingTextures.clear();
     }
 
     public void reload(ResourceManager resourceManager) {
@@ -167,6 +194,10 @@ public class GraphicsCache {
                 dynamicResourceNew = DEFAULT_WHITE_DYN_RESOURCE;
             } else {
                 DynamicTexture dynamicTexture = new DynamicTexture(nativeImage);
+                // 登记到 pendingTextures: 从这里到「主线程注册完成」之间,
+                // 若发生资源重载导致注册任务被丢弃, 这个纹理就再也没人 close()
+                // -> NativeImage 堆外内存永久泄漏。登记后由重载流程兜底关闭。
+                this.pendingTextures.add(dynamicTexture);
                 String newKey = keyFinal;
                 try {
                     newKey = URLEncoder.encode(keyFinal, StandardCharsets.UTF_8);
@@ -177,7 +208,12 @@ public class GraphicsCache {
                 String newKeyLower = newKey.toLowerCase(Locale.ENGLISH);
                 ResourceLocation resourceLocation = new ResourceLocation("shmetro", "dynamic_texture_" + newKeyLower.replaceAll("[^0-9a-z_]", "_"));
                 // register 与旧纹理 release 排入主线程队列执行(对齐 MTR 架构)。
-                this.textureRegistryQueue.add(() -> minecraftClient.getTextureManager().register(resourceLocation, (AbstractTexture)dynamicTexture));
+                this.textureRegistryQueue.add(() -> {
+                    minecraftClient.getTextureManager().register(resourceLocation, (AbstractTexture)dynamicTexture);
+                    // 注册完成: 该纹理已交给 TextureManager 托管, 不再需要
+                    // 由重载流程兜底关闭(之后的释放走 DynamicResource.remove)。
+                    this.pendingTextures.remove(dynamicTexture);
+                });
                 dynamicResourceNew = new DynamicResource(resourceLocation, dynamicTexture);
             }
             this.dynamicResources.put(keyFinal, dynamicResourceNew);
@@ -200,6 +236,27 @@ public class GraphicsCache {
         }
         try {
             nativeImage.close();
+        }
+        catch (Exception e) {
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
+        }
+    }
+
+    /**
+     * 关闭一张「已生成但从未注册进 TextureManager」的动态纹理。
+     *
+     * <p>{@link DynamicTexture#close()} 会释放它持有的 {@link NativeImage}
+     * 的堆外内存。由于它从未被注册, 也不会被 {@link TextureManager#release}
+     * 回收, 所以只能在这里显式关闭。</p>
+     *
+     * @param dynamicTexture 待关闭的纹理，可为 {@code null}
+     */
+    private static void closeTextureQuietly(DynamicTexture dynamicTexture) {
+        if (dynamicTexture == null) {
+            return;
+        }
+        try {
+            dynamicTexture.close();
         }
         catch (Exception e) {
             com.xhg78999.shmetro.Main.LOGGER.catching(e);
