@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +41,20 @@ public class GraphicsCache {
     private static final DynamicResource DEFAULT_WHITE_DYN_RESOURCE = new DynamicResource(DEFAULT_WHITE_RESOURCE, null);
     public Font font;
     public Font fontCjk;
-    public final HashMap<String, BlockbenchModel> models = new HashMap();
+    // 与 dynamicResources 同理: models 由渲染线程每帧读(13 处 models.get,
+    // 分布在 RenderSpecialPassing / RenderERailingDoor / RenderEntityAC /
+    // RenderEntityBelief / RenderEntityIronFrame / RenderEntitySecurityCheckPole),
+    // 而 reload() 会在资源重载时重建这张表。
+    //
+    // 单靠 ConcurrentHashMap 不够: reload() 若「先 clear() 再逐个 put()」,
+    // 渲染线程在 clear 与 put 之间会读到 null, 而渲染器拿到 null 后直接
+    // 解引用 (models.get("ac").renderToBuffer(...)) -> 每次 F3+T 都有一次 NPE 窗口。
+    //
+    // 因此改为 volatile 引用的「原子整体替换」: reload() 先把新表填满,
+    // 最后一步才把这个引用换掉。渲染线程要么看到旧的完整表, 要么看到新的
+    // 完整表, 永远看不到中间态。
+    // 1.1.27 修 dynamicResources 时漏掉了这张表, 此处补上。
+    public volatile ConcurrentHashMap<String, BlockbenchModel> models = new ConcurrentHashMap();
 
     /** 在主线程消费待注册的纹理任务(对齐 MTR 的 resourceRegistryQueue)。 */
     public void runTextureRegistryQueue() {
@@ -77,7 +89,9 @@ public class GraphicsCache {
     public void reload(ResourceManager resourceManager) {
         com.xhg78999.shmetro.Main.LOGGER.info("Reloading resources");
         this.reloadDynamic();
-        this.models.clear();
+        // 先把新表填满, 最后一步才整体替换引用 —— 渲染线程读到的永远是
+        // 一张完整的表(旧的或新的), 不会看到「已 clear 尚未 put 完」的中间态。
+        ConcurrentHashMap<String, BlockbenchModel> newModels = new ConcurrentHashMap<>();
         try {
             this.font = Font.createFont(0, Utilities.getInputStream((Optional)resourceManager.getResource(new ResourceLocation("shmetro", "font/arial.ttf"))));
             this.fontCjk = Font.createFont(0, Utilities.getInputStream((Optional)resourceManager.getResource(new ResourceLocation("shmetro", "font/simhei.ttf"))));
@@ -90,7 +104,7 @@ public class GraphicsCache {
                 GraphicsCache.read(resourceManager, id.toString(), content -> {
                     String name = id.getPath().replace("models/dynamic/", "").replace(".bbmodel", "");
                     Main.LOGGER.info(String.format("Load Blockbench model %s", name));
-                    this.models.put(name, new BlockbenchModel((String)content));
+                    newModels.put(name, new BlockbenchModel((String)content));
                 });
             }
             catch (Exception e) {
@@ -98,6 +112,8 @@ public class GraphicsCache {
                 com.xhg78999.shmetro.Main.LOGGER.catching(e);
             }
         }
+        // 原子替换: volatile 写, 渲染线程的下一次读即可看到完整的新表。
+        this.models = newModels;
     }
 
     public DynamicResource getResource(String key, Supplier<NativeImage> supplier) {
@@ -123,13 +139,20 @@ public class GraphicsCache {
             catch (Exception e) {
                 com.xhg78999.shmetro.Main.LOGGER.catching(e);
             }
+            // 先判 epoch 再决定是否释放旧纹理:
+            // 原实现把「释放旧纹理」放在 epoch 检查之前, 若本任务启动后发生了
+            // 资源重载, 而重载后的新任务已经完成并 put 了有效的新纹理,
+            // 这里的 remove 会把它排进队列释放掉 -> 该 key 永久退化成白图。
+            if (this.reloadEpoch.get() != epoch) {
+                // 重载发生: 丢弃本任务结果(基于旧资源), 不注册纹理、不覆盖新条目。
+                // NativeImage 是堆外内存(allocateMemory), 不受 GC 管理,
+                // 必须显式 close, 否则每次重载期间的过期任务都会泄漏一块图像内存。
+                closeQuietly(nativeImage);
+                return;
+            }
             DynamicResource staticTextureProviderOld = this.dynamicResources.get(keyFinal);
             if (staticTextureProviderOld != null && staticTextureProviderOld != DEFAULT_WHITE_DYN_RESOURCE) {
                 this.textureRegistryQueue.add(staticTextureProviderOld::remove);
-            }
-            if (this.reloadEpoch.get() != epoch) {
-                // 重载发生: 丢弃本任务结果(基于旧资源), 不注册纹理、不覆盖新条目。
-                return;
             }
             if (nativeImage == null) {
                 dynamicResourceNew = DEFAULT_WHITE_DYN_RESOURCE;
@@ -153,8 +176,28 @@ public class GraphicsCache {
         return DEFAULT_WHITE_DYN_RESOURCE;
     }
 
-    public static void read(ResourceManager manager, String path, Consumer<String> callback) {
+    /**
+     * 释放一张 NativeImage，吞掉关闭时的异常。
+     *
+     * <p>{@link NativeImage} 的图像数据由 {@code MemoryUtil.memAlloc} 分配在堆外，
+     * 不受 GC 管理；丢弃引用而不 close 就是永久泄漏。此处用于「任务结果已作废」
+     * 的分支 —— 图像不会被注册成纹理，必须自己回收。</p>
+     *
+     * @param nativeImage 待释放的图像，可为 {@code null}
+     */
+    private static void closeQuietly(NativeImage nativeImage) {
+        if (nativeImage == null) {
+            return;
+        }
         try {
+            nativeImage.close();
+        }
+        catch (Exception e) {
+            com.xhg78999.shmetro.Main.LOGGER.catching(e);
+        }
+    }
+
+    public static void read(ResourceManager manager, String path, Consumer<String> callback) {        try {
             UtilitiesClient.getResources((ResourceManager)manager, (ResourceLocation)new ResourceLocation(path)).forEach(resource -> {
                 try {
                     InputStream stream = Utilities.getInputStream((Resource)resource);

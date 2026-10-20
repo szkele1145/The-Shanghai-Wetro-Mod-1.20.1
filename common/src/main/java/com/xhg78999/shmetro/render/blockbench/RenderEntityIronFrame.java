@@ -30,6 +30,11 @@ implements BlockEntityRenderer<BlockEntityIronFrame> {
         if (this.model == null) {
             this.model = GraphicsCache.CACHE.models.get("iron_frame");
         }
+        // 模型缺失(资源包损坏 / 该模型被移除)时直接跳过渲染:
+        // 原实现会在下一行无条件解引用 this.model -> NPE 崩溃客户端。
+        if (this.model == null) {
+            return;
+        }
         if (world != null) {
             BlockPos pos = entity.getBlockPos();
             StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();

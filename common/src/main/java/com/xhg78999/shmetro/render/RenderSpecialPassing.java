@@ -75,6 +75,17 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                 this.P_2020_CLOSE = GraphicsCache.CACHE.models.get("passing_2020_close");
                 this.P_2020_SIDE = GraphicsCache.CACHE.models.get("passing_2020_side");
             }
+            // 模型缺失(资源包损坏 / 该模型被移除)时直接跳过渲染:
+            // 下面会无条件解引用这些模型 -> null 会导致 NPE 崩溃客户端。
+            if (this.type == 0 && this.P_2000_OPEN == null) {
+                return;
+            }
+            if (this.type == 2 && this.P_2010_OPEN == null) {
+                return;
+            }
+            if (this.type == 3 && this.P_2020_OPEN == null) {
+                return;
+            }
             BlockPos pos = entity.getBlockPos();
             BlockState state = world.getBlockState(pos);
             if (!(state.getBlock() instanceof BlockPassingSM)) {

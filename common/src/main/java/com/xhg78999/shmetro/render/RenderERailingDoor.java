@@ -38,6 +38,9 @@ IBlock {
     }
 
     private final int type;
+    // 模型引用缓存: 原实现在 render() 里每帧都 models.get("erailing_door"),
+    // 既是多余的哈希查找, 也在模型缺失时每帧解引用 null -> NPE 崩溃客户端。
+    private EntityModel model;
 
     public RenderERailingDoor(BlockEntityRenderDispatcher dispatcher, int type) {
         super(dispatcher, type);
@@ -47,6 +50,13 @@ IBlock {
     public void render(BlockPSDAPGDoorBase.TileEntityPSDAPGDoorBase entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
         Level world = entity.getLevel();
         if (world != null) {
+            if (this.model == null) {
+                this.model = (EntityModel)GraphicsCache.CACHE.models.get("erailing_door");
+            }
+            // 模型缺失(资源包损坏 / 该模型被移除)时直接跳过渲染, 避免 NPE。
+            if (this.model == null) {
+                return;
+            }
             BlockPos pos = entity.getBlockPos();
             boolean half = IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPSDAPGDoorBase.HALF) == DoubleBlockHalf.UPPER;
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockPSDAPGDoorBase.FACING);
@@ -63,7 +73,7 @@ IBlock {
             if (!half) {
                 RenderTrains.scheduleRender((ResourceLocation)RAILING_TEX[this.type == 114514 ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformations.transform(matricesNew);
-                    ((EntityModel)GraphicsCache.CACHE.models.get("erailing_door")).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
+                    this.model.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();
                 });
             }
