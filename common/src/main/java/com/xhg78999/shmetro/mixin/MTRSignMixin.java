@@ -68,7 +68,17 @@ public class MTRSignMixin {
                 .map(Integer::longValue)
                 .collect(Collectors.toSet());
 
-        final float maxWidth = Math.max(0.0F, (flipCustomText ? maxWidthLeft : maxWidthRight) + 1.0F * size - margin * 2);
+        // 【1.1.48 修单位混用】MTR 的 RenderRailwaySign.getMaxWidth 返回的是
+        // **格数**(每格 +1, 有 custom text 的格 +0.5 —— 见其字节码: fconst_1/fadd
+        // 与 fconst_2/fdiv), 不是像素。上游 1.19.4 的公式是
+        //     start = Math.max(0, ((flip ? maxWidthLeft : maxWidthRight) + 1.0F) * size - margin * 2)
+        // 即「(相邻格数 + 自身 1 格) * 每格尺寸 - 左右边距」, 是正确的格数→像素换算。
+        // 移植时被误写成
+        //     (flip ? maxWidthLeft : maxWidthRight) + 1.0F * size - margin * 2
+        // —— 格数直接加像素, 单位混用: maxWidthLeft=2、size=32 时上游得 96,
+        // 移植版得 34。该值经 finalWidth = Math.min(width, maxWidth) 压缩线路图
+        // 贴图宽度 → 线路图被压到约 1 格宽, 严重过窄。
+        final float maxWidth = Math.max(0.0F, ((flipCustomText ? maxWidthLeft : maxWidthRight) + 1.0F) * size - margin * 2);
         final float height = size - margin * 2;
 
         final GraphicsCache.DynamicResource resourceLocation = ExtensionGraphics.getSHRoutes(filtered.stream().collect(Collectors.toList()));
@@ -80,12 +90,27 @@ public class MTRSignMixin {
         final StoredMatrixTransformations storedMatrixTransformations2 = storedMatrixTransformations.copy();
         storedMatrixTransformations2.add(matricesNew -> matricesNew.translate(flipCustomText ? x + size - margin : x + margin, 0.0F, 0.0F));
 
+        // 【1.1.48 等比缩放】原写法 finalWidth = Math.min(width, maxWidth) 只截宽度、
+        // 高度不变 → 线路图被**非等比压扁**。改为等比: 宽度超限时按比例缩高度,
+        // 两者都不超格子。drawTexture 的起点也随缩放后的实际宽度对齐,
+        // 保证 flip 侧从 -finalWidth 起画、非 flip 侧从 0 起画时,
+        // 贴图始终贴住本格内侧边缘。
         final float width = height * (float) resourceLocation.width / (float) resourceLocation.height;
-        final float finalWidth = Math.min(width, maxWidth);
+        float drawWidth = width;
+        float drawHeight = height;
+        if (width > maxWidth && width > 0.0F) {
+            final float scale = maxWidth / width;
+            drawWidth = maxWidth;
+            drawHeight = height * scale;
+        }
 
+        final float finalDrawWidth = drawWidth;
+        final float finalDrawHeight = drawHeight;
+        final float verticalOffset = (height - drawHeight) / 2.0F;
         RenderTrains.scheduleRender(resourceLocation.resourceLocation, true, RenderTrains.QueuedRenderLayer.LIGHT, (matricesNew, vertexConsumer) -> {
             storedMatrixTransformations2.transform(matricesNew);
-            IDrawing.drawTexture(matricesNew, vertexConsumer, flipCustomText ? -finalWidth : 0.0F, margin, finalWidth, height, Direction.UP, 0xF000F0);
+            matricesNew.translate(0.0F, verticalOffset, 0.0F);
+            IDrawing.drawTexture(matricesNew, vertexConsumer, flipCustomText ? -finalDrawWidth : 0.0F, margin, finalDrawWidth, finalDrawHeight, Direction.UP, 0xF000F0);
             matricesNew.popPose();
         });
         ci.cancel();
