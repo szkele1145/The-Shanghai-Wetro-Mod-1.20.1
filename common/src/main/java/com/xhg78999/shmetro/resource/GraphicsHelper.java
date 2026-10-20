@@ -30,11 +30,41 @@ public class GraphicsHelper {
         float xOffset = IGui.HorizontalAlignment.CENTER.getOffset(IGui.HorizontalAlignment.CENTER.getOffset(x, (float)totalWidth), 0.0f);
         float ratio = 1.0f;
         if (maxwidth != 0 && totalWidth > maxwidth) {
-            ratio = maxwidth / totalWidth;
+            // 【1.1.47】上游这里是 `ratio = maxwidth / totalWidth;` —— 两个 int 相除,
+            // 走的是**整数除法**: maxwidth=1 / totalWidth=50 得到 0, 赋给 float 后
+            // ratio 变成 0.0f, 随后的
+            //     poseStack.scale(sx * ratio, ...)      -> 缩放为 0, 文字不渲染
+            //     poseStack.scale(1.0f / sx / ratio, ...) -> **除以 0 -> Infinity/NaN**
+            // 会把 NaN 写进 PoseStack 的矩阵, 污染同一批次后续所有渲染。
+            //
+            // 上游唯一传非零 maxwidth 的调用点是 RenderStationNameWall(传 1),
+            // 而 STN_NAME_WALL 本身从未被注册(死方块), 所以这条路径不可达 ——
+            // 但缺陷本身是真实的, 任何未来调用者传非零 maxwidth 都会踩到。
+            //
+            // 这里改成浮点除法, 并保证 ratio 落在 (0, 1] 区间, 从根上杜绝
+            // 0 与 NaN/Inf 出现在缩放矩阵里。
+            ratio = (float)maxwidth / (float)totalWidth;
+            if (ratio <= 0.0f) {
+                ratio = 1.0f;
+            }
+            else if (ratio > 1.0f) {
+                ratio = 1.0f;
+            }
         }
+        // 【1.1.47】原本这里手工做「缩放 -> 画 -> 反向缩放」:
+        //     poseStack.scale(sx * ratio, sy * ratio, sz);
+        //     ... draw ...
+        //     poseStack.scale(1.0f / sx / ratio, 1.0f / sy / ratio, 1.0f / sz);
+        // 手写逆变换有两个隐患:
+        //   1) sx/sy 为 0 时, 1.0f / 0 = Infinity -> 矩阵被写成 NaN/Inf,
+        //      污染同一批次后续的所有渲染;
+        //   2) 中间任何异常都会让逆变换不执行, 矩阵状态错乱。
+        // 改用 pushPose/popPose 配对, 由 PoseStack 自己保证还原,
+        // 既杜绝 Infinity/NaN, 也让异常安全。
+        poseStack.pushPose();
         poseStack.scale(sx * ratio, sy * ratio, sz);
         UtilitiesClient.drawInBatch((net.minecraft.client.gui.Font) Minecraft.getInstance().font, (FormattedCharSequence)orderedText, (float)xOffset, (float)offset, (int)((r << 16) + (g << 8) + b), (boolean)false, (Matrix4f)poseStack.last().pose(), (MultiBufferSource)buffer, (int)0, (int)light);
-        poseStack.scale(1.0f / sx / ratio, 1.0f / sy / ratio, 1.0f / sz);
+        poseStack.popPose();
     }
 
     public static void drawText(PoseStack poseStack, MultiBufferSource buffer, BlockEntityRenderDispatcher dispatcher, String text, float x, float y, int r, int g, int b, int light, float sx, float sy, float sz) {
@@ -72,7 +102,21 @@ public class GraphicsHelper {
     public static void pasteImage(Graphics2D gph, ResourceLocation res, int x, int y) {
         ResourceManager rm = Minecraft.getInstance().getResourceManager();
         try {
-            BufferedImage bfi = ImageIO.read(Utilities.getInputStream((Optional)rm.getResource(res)));
+            Optional<net.minecraft.server.packs.resources.Resource> resource = rm.getResource(res);
+            if (!resource.isPresent()) {
+                // 资源不存在: 贴图缺失是常态(玩家没装对应资源包/资源包版本不匹配),
+                // 不该走异常路径 —— 异常会构造带完整栈追踪的对象, 而这里在
+                // RMG 贴图生成时被反复调用,徒增 GC 压力。
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 贴图资源缺失, 已跳过: " + res);
+                return;
+            }
+            BufferedImage bfi = ImageIO.read(Utilities.getInputStream(resource));
+            if (bfi == null) {
+                // ImageIO.read 在「数据不是合法图片」时返回 null 而不是抛异常,
+                // 直接 drawImage(null, ...) 会 NPE。
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 贴图资源无法解码, 已跳过: " + res);
+                return;
+            }
             gph.drawImage((Image)bfi, x, y, null);
         }
         catch (Exception e) {
