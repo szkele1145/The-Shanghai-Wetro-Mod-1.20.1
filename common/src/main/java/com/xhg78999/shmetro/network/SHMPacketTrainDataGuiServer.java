@@ -49,7 +49,18 @@ extends PacketTrainDataBase {
             String signId = packet.readUtf(Short.MAX_VALUE);
             signIds[i] = signId.isEmpty() ? null : signId;
         }
+        // 距离校验: signPos 完全由客户端提供, 原实现照单全收 ⇒ 恶意客户端
+        // 可以改写世界任意位置的指示牌。正常玩法下这个界面是右键指示牌
+        // 打开的, 玩家就在牌子旁边(发过来的是牌子的某一端端头), 所以这个
+        // 限制不会影响正常使用。详见 SHMPacketDefine 的常量说明。
+        //
+        // 放在 execute 里面做: 玩家坐标由主线程更新, 在网络线程读它
+        // 不是线程安全的。
         minecraftServer.execute(() -> {
+            if (!SHMPacketGDServer.isNear(player, signPos)) {
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃距离过远的指示牌包(player=" + player.getName().getString() + ", pos=" + signPos + ")");
+                return;
+            }
             BlockEntity entity = player.serverLevel().getBlockEntity(signPos);
             if (entity instanceof BlockShanghaiSign.TileEntityRailwaySign) {
                 SHMNetUtils.setTileEntityDataAndWriteUpdate(player, entity2 -> entity2.setData(selectedIds, signIds),

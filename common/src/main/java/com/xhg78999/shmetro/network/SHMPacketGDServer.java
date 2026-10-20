@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
 public class SHMPacketGDServer
 extends PacketTrainDataBase {
@@ -48,7 +49,17 @@ extends PacketTrainDataBase {
             com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃含控制字符的 GD 编号(player=" + player.getName().getString() + ")");
             return;
         }
+        // 距离校验: gdPos 完全由客户端提供, 原实现照单全收 ⇒ 恶意客户端
+        // 可以改写世界任意位置的 GD 编号。正常玩法下这个界面是右键方块
+        // 打开的, 玩家就在方块旁边, 所以这个限制不会影响正常使用。
+        //
+        // 放在 execute 里面做: 玩家坐标由主线程更新, 在网络线程读它
+        // 不是线程安全的(读到的可能是略旧的位置, 极端情况下会误判)。
         minecraftServer.execute(() -> {
+            if (!isNear(player, gdPos)) {
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃距离过远的 GD 编号包(player=" + player.getName().getString() + ", pos=" + gdPos + ")");
+                return;
+            }
             BlockEntity entity = player.serverLevel().getBlockEntity(gdPos);
             if (entity instanceof BlockEntityGlobalPosition) {
                 SHMNetUtils.setTileEntityDataAndWriteUpdate(player, entity2 -> {
@@ -57,6 +68,16 @@ extends PacketTrainDataBase {
                 }, new BlockEntityGlobalPosition[]{(BlockEntityGlobalPosition) entity});
             }
         });
+    }
+
+    /**
+     * 判断玩家是否离目标方块足够近, 可以修改它的数据。
+     *
+     * <p>用方块中心点的距离算, 阈值见
+     * {@link SHMPacketDefine#MAX_EDIT_DISTANCE_SQUARED}。</p>
+     */
+    public static boolean isNear(ServerPlayer player, BlockPos pos) {
+        return player.distanceToSqr(Vec3.atCenterOf(pos)) <= SHMPacketDefine.MAX_EDIT_DISTANCE_SQUARED;
     }
 
     /** 判断字符串是否含有 ASCII 控制字符(C0 区与 DEL)。空格(0x20)及以上视为正常字符。 */
