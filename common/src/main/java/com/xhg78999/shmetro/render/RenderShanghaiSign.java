@@ -1,6 +1,7 @@
 package com.xhg78999.shmetro.render;
 
 import com.xhg78999.shmetro.blocks.BlockShanghaiSign;
+import com.xhg78999.shmetro.utils.SignCache;
 import mtr.block.BlockStationNameBase;
 import mtr.block.IBlock;
 import mtr.client.CustomResources;
@@ -54,13 +55,15 @@ IDrawing {
         if (((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds().length != block.length) {
             return;
         }
+        // 首次渲染时确保资源重载回调已注册(之后只是一次布尔判断)。
+        SignCache.ensureReloadListenerRegistered();
         Direction facing = (Direction)IBlock.getStatePropertySafe((BlockState)state, (Property)BlockStationNameBase.FACING);
         String[] signIds = ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSignIds();
         boolean renderBackground = false;
         int backgroundColor = 0;
         for (String signId : signIds) {
             CustomResources.CustomSign sign;
-            if (signId == null || (sign = RenderRailwaySign.getSign((String)signId)) == null) continue;
+            if (signId == null || (sign = SignCache.getSign(signId)) == null) continue;
             renderBackground = true;
             if (sign.backgroundColor == 0) continue;
             backgroundColor = sign.backgroundColor;

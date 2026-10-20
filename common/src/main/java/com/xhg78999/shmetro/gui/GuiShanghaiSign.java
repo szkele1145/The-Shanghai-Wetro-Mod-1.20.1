@@ -3,6 +3,7 @@ package com.xhg78999.shmetro.gui;
 import net.minecraft.client.gui.GuiGraphics;
 import com.xhg78999.shmetro.blocks.BlockShanghaiSign;
 import com.xhg78999.shmetro.network.SHMPacketTrainDataGuiClient;
+import com.xhg78999.shmetro.utils.SignCache;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,6 +73,8 @@ implements IGui {
     public GuiShanghaiSign(BlockPos signPos) {
         super((Component)Text.literal((String)""));
         this.signPos = signPos;
+        // 确保资源重载回调已注册: 玩家换资源包后, 指示牌外观缓存要能失效。
+        SignCache.ensureReloadListenerRegistered();
         ClientLevel world = Minecraft.getInstance().level;
         BlockRailwaySign.SignType[] var3 = BlockRailwaySign.SignType.values();
         int i = var3.length;
@@ -202,7 +205,7 @@ implements IGui {
                 int finalXOffsetSmall = xOffsetSmall;
                 this.loopSigns((index, x, y, isBig) -> {
                     String signId = this.allSignIds.get(index);
-                    CustomResources.CustomSign sign = RenderRailwaySign.getSign((String)signId);
+                    CustomResources.CustomSign sign = SignCache.getSign(signId);
                     if (sign != null) {
                         boolean moveRight = sign.hasCustomText() && sign.flipCustomText;
                         RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, this.font, this.signPos, signId, (isBig ? xOffsetBig : finalXOffsetSmall) + x + (moveRight ? 32 : 0), 62 + y, 16.0f, 2.0f, 2.0f, this.selectedIds, Direction.UP, 0, (textureId, x1, y1, size, flipTexture) -> guiGraphics.blit(textureId, (int)x1, (int)y1, 0.0f, 0.0f, (int)size, (int)size, (int)(flipTexture ? -size : size), (int)size));
@@ -240,6 +243,12 @@ implements IGui {
             button.visible = false;
         }
         this.editingIndex = -1;
+        // 重置到第一页: 窗口尺寸变化会让 init() 重新计算 rows/columns 与
+        // totalPages, 新的每页容量通常更小 -> 旧的 this.page 可能超出新范围。
+        // 而 init() 里的 loopSigns 是用旧 page 计算按钮可见性的, 超出范围时
+        // 所有指示牌选项都会算成「不在当前页」-> 整个选项列表凭空消失。
+        this.page = 0;
+        this.setPage(0);
     }
 
     private int loopSigns(LoopSignsCallback loopSignsCallback, boolean ignorePage) {
@@ -254,7 +263,7 @@ implements IGui {
         int totalPagesBigCount = 1;
         for (int i = 0; i < this.allSignIds.size(); ++i) {
             boolean onPage;
-            CustomResources.CustomSign sign = RenderRailwaySign.getSign((String)this.allSignIds.get(i));
+            CustomResources.CustomSign sign = SignCache.getSign((String)this.allSignIds.get(i));
             boolean isBig = sign != null && sign.hasCustomText();
             this.buttonsSelection[i].visible = onPage = (isBig ? indexBig : indexSmall) / pageCount == this.page;
             if (ignorePage || onPage) {
