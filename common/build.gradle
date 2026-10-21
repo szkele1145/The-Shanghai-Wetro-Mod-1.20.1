@@ -61,6 +61,7 @@ tasks.named("compileJava") {
 //   3. every model's "texture" reference resolves to an existing png
 //   4. every item model's "parent" resolves (shmetro namespace only)
 //   5. every translatable key used in Java exists in every lang file
+//      (both plain literals and prefixes that are concatenated at runtime)
 tasks.register("checkResourceLinks") {
 	def assetsDir = file("src/main/resources/assets/shmetro")
 	def langDir = file("src/main/resources/assets/shmetro/lang")
@@ -77,6 +78,7 @@ tasks.register("checkResourceLinks") {
 		def problems = []
 		def modelsDir = new File(assetsDir, "models")
 		def texturesDir = new File(assetsDir, "textures")
+		def javaFiles = fileTree(sourceDir) { include "**/*.java" }.files
 
 		// model id "shmetro:block/foo" -> models/block/foo.json
 		// Only the "shmetro" namespace is ours; "minecraft:item/generated" and
@@ -159,29 +161,46 @@ tasks.register("checkResourceLinks") {
 			}
 			langKeys[lf.name] = set
 		}
-		def usedKeys = [] as Set
-		def javaFiles = fileTree(sourceDir) { include "**/*.java" }.files
+		// Two extraction patterns, because keys appear in more shapes than a
+		// plain literal right after translatable(:
+		//   a) a full key literal anywhere in a Java string, e.g. the ternary in
+		//      Text.translatable(cond ? "gui.shmetro.a" : "gui.shmetro.b")
+		//   b) a literal PREFIX that gets concatenated with a dynamic part, e.g.
+		//      "tooltip.shmetro." + (type == 1 ? "railmap" : "blank")
+		//      We cannot know the exact key here, but we CAN require that at
+		//      least one lang entry starts with that prefix; if a rename orphans
+		//      the whole prefix family this still catches it.
+		def ourPrefixes = ["gui.shmetro.", "tooltip.shmetro.", "block.shmetro.", "item.shmetro.", "config.shmetro."]
+		def fullKeys = [] as Set
+		def concatPrefixes = [] as Set
 		javaFiles.each { File jf ->
 			def txt = jf.getText("UTF-8")
-			def k = txt =~ /translatable\(\s*\(?\s*(?:String\s*)?\)?\s*"([^"]+)"/
-			while (k.find()) {
-				usedKeys.add(k.group(1))
+			// (a) any string literal that already starts with one of our prefixes
+			def full = txt =~ /"((?:gui|tooltip|block|item|config)\.shmetro\.[a-z0-9_.]+)"/
+			while (full.find()) {
+				fullKeys.add(full.group(1))
+			}
+			// (b) a string literal ending right where concatenation begins,
+			//     i.e. "..." followed by optional whitespace and a '+'
+			def concat = txt =~ /"((?:gui|tooltip|block|item|config)\.shmetro\.[a-z0-9_.]*)"\s*\+/
+			while (concat.find()) {
+				concatPrefixes.add(concat.group(1))
 			}
 		}
+		// (a) full keys: exact match required in every lang file
 		langKeys.each { String name, Set keys ->
-			usedKeys.each { String used ->
-				// Keys owned by other mods or by vanilla live in their own jars:
-				//   mtr.*          -> MTR
-				//   minecraft.*    -> vanilla
-				//   gui.yes        -> vanilla (the Screen's own button label)
-				//   selectWorld.*  -> vanilla
-				// Only keys under our own prefixes are our responsibility.
-				def ours = used.startsWith("gui.shmetro.") || used.startsWith("tooltip.shmetro.") ||
-					used.startsWith("block.shmetro.") || used.startsWith("item.shmetro.") ||
-					used.startsWith("config.shmetro.") || used.startsWith("gui.shmetro")
-				if (!ours) return
+			fullKeys.each { String used ->
 				if (!keys.contains(used)) {
 					problems << "lang/" + name + " is missing key '" + used + "'"
+				}
+			}
+		}
+		// (b) prefixes: at least one lang entry must start with the prefix
+		langKeys.each { String name, Set keys ->
+			concatPrefixes.each { String prefix ->
+				def any = keys.any { it.startsWith(prefix) }
+				if (!any) {
+					problems << "lang/" + name + " has no entry under prefix '" + prefix + "' (referenced via string concatenation)"
 				}
 			}
 		}
@@ -193,7 +212,8 @@ tasks.register("checkResourceLinks") {
 		}
 		logger.lifecycle("checkResourceLinks: OK (" + registered.size() + " registered, " +
 			blockstateFiles.size() + " blockstates, " + modelFiles.size() + " models, " +
-			langKeys.size() + " lang files, " + usedKeys.size() + " translatable keys)")
+			langKeys.size() + " lang files, " + fullKeys.size() + " key literals, " +
+			concatPrefixes.size() + " concatenated key prefix(es))")
 	}
 }
 
