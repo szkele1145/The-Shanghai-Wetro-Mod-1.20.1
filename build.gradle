@@ -55,6 +55,159 @@ tasks.register("setupMtr") {
 	// 已预置 checkouts/1.20.1 下的 dev jar
 }
 
+// Check that the classes the mixins inject into still have the methods the
+// mixins target.
+//
+// Two of the three mixins patch MTR (mtr.client.ClientCache and
+// mtr.render.RenderRailwaySign). MTR is a separate mod that gets updated on
+// its own schedule, so the moment MTR renames or reshapes a method, the
+// mixin stops matching. Mixin does not complain about that in a way we would
+// notice: the injection is simply skipped, the feature quietly stops
+// working, and the build stays green.
+//
+// This task reads the MTR jar that the project builds against and checks
+// that every injection target is still there. It parses the class file
+// constant pool instead of grepping the bytes, so a name that only shows up
+// as some other kind of constant does not count as a hit.
+//
+// Usage: gradle checkMixinTargets
+tasks.register("checkMixinTargets") {
+	group = "verification"
+	description = "Checks that the classes and methods the mixins inject into still exist in the MTR jar the project builds against."
+	doLast {
+		def mtrJar = file("checkouts/${rootProject.minecraft_version}/mtr-common.jar")
+		if (!mtrJar.exists()) {
+			// The whole build depends on this jar anyway (the subprojects put
+			// it on their compile classpath), so a missing one is not a
+			// mixin problem. Say so instead of blaming the mixins.
+			logger.lifecycle("checkMixinTargets: skipped, ${mtrJar} is not present")
+			return
+		}
+
+		// The classes the mixins inject into, grouped by the jar they live in.
+		// Two of them are MTR classes, one is a Minecraft class.
+		def mtrTargets = [
+			"mtr/client/ClientCache.class"        : ["refreshDynamicResources"],
+			"mtr/render/RenderRailwaySign.class"  : ["drawSign"],
+		]
+		def mcTargets = [
+			"com/mojang/blaze3d/platform/GlStateManager.class": ["_texImage2D", "_texSubImage2D", "_getTexImage"],
+		]
+		// Pull the Utf8 entries out of a class file constant pool. A plain
+		// byte search would also hit names that are stored as other kinds of
+		// constant, and that would let a renamed method pass.
+		def utf8Constants = { byte[] bytes ->
+			def result = [] as Set
+			if (bytes.length < 10) return result
+			def pos = 8
+			def count = ((bytes[pos] & 0xFF) << 8) | (bytes[pos + 1] & 0xFF)
+			pos += 2
+			def i = 1
+			while (i < count && pos < bytes.length) {
+				def tag = bytes[pos] & 0xFF
+				pos++
+				switch (tag) {
+					case 1: // Utf8
+						if (pos + 2 > bytes.length) return result
+						def len = ((bytes[pos] & 0xFF) << 8) | (bytes[pos + 1] & 0xFF)
+						pos += 2
+						if (pos + len > bytes.length) return result
+						result.add(new String(bytes, pos, len, "UTF-8"))
+						pos += len
+						break
+					case 7: case 8: case 16: case 19: case 20:
+						pos += 2
+						break
+					case 15:
+						pos += 3
+						break
+					case 3: case 4: case 9: case 10: case 11: case 12: case 17: case 18:
+						pos += 4
+						break
+					case 5: case 6:
+						pos += 8
+						i++ // takes two slots
+						break
+					default:
+						return result
+				}
+				i++
+			}
+			return result
+		}
+
+		def failures = []
+		// Look the Minecraft class up in the compile classpath: the loom
+		// cache path is machine specific, the classpath is not.
+		def mcJar = null
+		try {
+			// The root project does not apply loom, so it has no Minecraft
+			// classpath of its own. Look at the subprojects, they do.
+			def candidates = []
+			project.subprojects.each { sub ->
+				def cfg = sub.configurations.findByName("compileClasspath")
+				if (cfg != null) {
+					try { candidates.addAll(cfg.files) } catch (Exception ignored) { }
+				}
+			}
+			candidates.each { f ->
+				if (mcJar != null || !f.name.endsWith(".jar")) return
+				def z = null
+				try {
+					z = new java.util.zip.ZipFile(f)
+					if (z.getEntry("com/mojang/blaze3d/platform/GlStateManager.class") != null) {
+						mcJar = f
+					}
+				} catch (Exception ignored) {
+					// not a readable zip, ignore
+				} finally {
+					if (z != null) z.close()
+				}
+			}
+		} catch (Exception e) {
+			logger.lifecycle("checkMixinTargets: could not scan the classpath for the Minecraft jar: ${e.message}")
+		}
+		if (mcJar == null) {
+			logger.lifecycle("checkMixinTargets: skipped the Minecraft targets, no jar with GlStateManager was found on the classpath")
+		}
+
+		def checkJar = { String label, File jar, Map classTargets ->
+			def zip = new java.util.zip.ZipFile(jar)
+			try {
+				classTargets.each { classPath, methods ->
+					def entry = zip.getEntry(classPath)
+					if (entry == null) {
+						failures << "${classPath} is not in ${jar.name} (the dependency changed its package layout?)"
+						return
+					}
+					def names = utf8Constants(zip.getInputStream(entry).bytes)
+					methods.each { method ->
+						if (!names.contains(method)) {
+							failures << "${classPath} no longer has a method named '${method}' (${label} renamed it; the mixin will silently stop applying)"
+						}
+					}
+					if (!failures.any { it.contains(classPath) }) {
+						logger.lifecycle("checkMixinTargets: ${classPath} still provides ${methods.join(", ")}")
+					}
+				}
+			} finally {
+				zip.close()
+			}
+		}
+
+		checkJar("MTR", mtrJar, mtrTargets)
+		if (mcJar != null) {
+			checkJar("Minecraft", mcJar, mcTargets)
+		}
+
+		def checkedCount = mtrTargets.size() + (mcJar != null ? mcTargets.size() : 0)
+		if (!failures.isEmpty()) {
+			throw new GradleException("checkMixinTargets failed:\n  - " + failures.join("\n  - "))
+		}
+		logger.lifecycle("checkMixinTargets: OK (${checkedCount} mixin target class(es) verified)")
+	}
+}
+
 // Packaging check for the mixin setup.
 //
 // The mixin config is only wired up inside the built jars: Fabric declares it
@@ -315,4 +468,5 @@ tasks.register("checkTooling") {
 
 tasks.named("build") {
 	dependsOn("checkTooling")
+	dependsOn("checkMixinTargets")
 }
