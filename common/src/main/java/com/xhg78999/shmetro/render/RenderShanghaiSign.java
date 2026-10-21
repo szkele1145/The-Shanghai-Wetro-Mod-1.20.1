@@ -93,7 +93,14 @@ IDrawing {
         }
         for (int i = 0; i < signIds.length; ++i) {
             if (signIds[i] == null) continue;
-            RenderRailwaySign.drawSign((PoseStack)matrices, (MultiBufferSource)vertexConsumers, (StoredMatrixTransformations)storedMatrixTransformations, (Font)Minecraft.getInstance().font, (BlockPos)pos, (String)signIds[i], (float)(0.5f * (float)i), (float)0.0f, (float)0.5f, (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)true), ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSelectedIds(), (Direction)facing, (int)(backgroundColor | 0x223533), (textureId, x, y, size, flipTexture) -> RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation(textureId.toString()), (boolean)true, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT, (matricesNew, vertexConsumer) -> {
+            RenderRailwaySign.drawSign((PoseStack)matrices, (MultiBufferSource)vertexConsumers, (StoredMatrixTransformations)storedMatrixTransformations, (Font)Minecraft.getInstance().font, (BlockPos)pos, (String)signIds[i], (float)(0.5f * (float)i), (float)0.0f, (float)0.5f, (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])signIds, (int)i, (boolean)true), ((BlockShanghaiSign.TileEntityRailwaySign)entity).getSelectedIds(), (Direction)facing, (int)(backgroundColor | 0x223533), (textureId, x, y, size, flipTexture) -> RenderTrains.scheduleRender(
+                // 【1.1.56 去掉无谓的 ResourceLocation 重建】
+                // 原写法: new ResourceLocation(textureId.toString())。
+                // DrawTexture.drawTexture 的第一个参数本来就是 ResourceLocation,
+                // 再 toString() 拆成 "namespace:path" 又 new 回去 —— 等于每帧、
+                // 每个格子都白做一次「拆字符串 + 校验 + 重新解析」。
+                // 指示牌是每帧每方块都跑的热路径, 直接复用原对象即可。
+                textureId, (boolean)true, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT, (matricesNew, vertexConsumer) -> {
                 storedMatrixTransformations.transform(matricesNew);
                 IDrawing.drawTexture((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, (float)x, (float)y, (float)size, (float)size, (float)(flipTexture ? 1.0f : 0.0f), (float)0.0f, (float)(flipTexture ? 0.0f : 1.0f), (float)1.0f, (Direction)facing, (int)-1, (int)0xF000F0);
                 matricesNew.popPose();
