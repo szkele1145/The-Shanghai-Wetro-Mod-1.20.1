@@ -1,26 +1,20 @@
-# shwetro-1201 项目状态 (2026-10-16 20:00)
+# shwetro-1201 项目状态 (2026-10-21 14:15)
 
-## 当前版本: 1.1.16 (双端已发布 Modrinth + GitHub Release)
+## 当前版本: 1.1.60 (双端已发布 Modrinth + GitHub Release)
 
-## 版本链 (GitHub 16 Releases)
-1.0.0 移植基线 → 1.0.1 语言补全 → 1.0.2 放置崩溃修复 → 1.0.3 贴图剔除+方向语义 →
-1.0.4 活塞API+命名规范 → 1.0.5 新方块告示牌+日志化 → 1.0.5.1 刷子旋转 →
-1.0.6 shm_route 接入 MTR 编辑器 → 1.0.7 GL mixin 复活 → 1.0.8 println 统一 →
-1.0.9 告示牌 UV 全幅 → 1.1.0 镜像路线图 → 1.1.1 元数据链接 → 1.1.2 displayURL+参数美化 →
-1.1.3 反编译产物清理 → 1.1.4~1.1.6 性能优化 → 1.1.7 fence 斜面镜像 →
-1.1.8~1.1.10 版本递增 → 1.1.11 StationNameOnWall FACING 守卫 →
-1.1.12~1.1.15 版本递增 → 1.1.16 方块 rotate/mirror 批量修复
+## 版本链 (GitHub 59 Releases)
+1.0.0 移植基线 → 1.0.1~1.1.16 早期移植修复 → 1.1.17~1.1.36 审计修复批(98 处反编译产物/碰撞箱/朝向/资源泄漏) → 1.1.37~1.1.43 深度审计(渲染层/贴图/GUI) → 1.1.44~1.1.47 渲染崩溃与文本布局修复 → 1.1.48~1.1.52 协议防护与排序优化 → 1.1.53~1.1.56 输入限制/距离校验/纹理注入 → 1.1.57~1.1.60 内存泄漏扫尾(NativeImage/InputStream/ResourceLocation/GD 编号清空)
 
 ## 验证矩阵
-- Fabric/Forge 双端: BUILD SUCCESSFUL + 游戏内 Wetro loaded + 0 mixin 错误
+- Fabric/Forge 双端: BUILD SUCCESSFUL, 0 mixin 错误
+- 全部 100 个 .java 已与上游反编译原件逐文件核对完毕 (1.1.60 审计收官)
 - jar 对称性: 双端 assets/data/sign 声明/告示牌资源全一致
-- 42 个方块 rotate/mirror 审计: 21 个已加覆盖（含 BlockShanghaiSign rotate 但缺 mirror —— 已确认为 MTR BlockDirectionalMapper 继承默认行为，非缺陷），21 个继承链自带或继承默认
 
 ## 待办
-- 交接文档: C:\Users\一只屑\Desktop\shwetro-1201交接文档.md
-- README 更新历史表已补全 1.1.1~1.1.16
+- 交接文档: C:\Users\一只屑\Desktop\shwetro-1201交接文档.md (1608 行)
+- SH_PASS_2008 闸机: 无美术资源(bbmodel/贴图/blockstate 全缺), 上游同款, 不激活
 
 ## 构建
-- 工程内自包含: tools/jdk17 + tools/gradle-8.11-dist + build.ps1
-- ./gradlew build 或 powershell build.ps1
-- 每次 Gradle 调用前必须设置 $env:JAVA_HOME = 'F:\vibe coding工程\shwetro-1201\tools\jdk17'
+- 工程内自带 tools/jdk17 + tools/gradle-8.11-dist
+- 构建命令: tools\gradle-8.11-dist\bin\gradle.bat build --console=plain (需 JAVA_HOME=tools\jdk17, GRADLE_USER_HOME=C:\gradle-home)
+- 构建产物: shmetro-1.1.60-1.20.1-{fabric,forge}.jar
