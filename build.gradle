@@ -54,3 +54,59 @@ configure(subprojects) {
 tasks.register("setupMtr") {
 	// 已预置 checkouts/1.20.1 下的 dev jar
 }
+
+// Headless smoke test: actually start a dedicated server on both loaders and
+// verify that the mod loads, that the mixins apply cleanly, and that nothing
+// about shmetro shows up in the error log.
+//
+// BUILD SUCCESSFUL only proves the code compiles. Registry clashes, broken
+// mixins and invalid refmaps only show up once the game starts, so this task
+// exists to catch them before a release instead of after a player reports them.
+//
+// IMPORTANT: this task must NOT try to start the server itself by invoking
+// gradle again. Gradle holds an exclusive lock on the project for the whole
+// build, so a nested `gradle runServer` deadlocks on its configuration phase
+// (observed: it hangs right after "preparing spawn area 0%"). The server is
+// therefore started by tools/smoke-test.ps1, which runs gradle at top level.
+//
+// Usage:
+//   powershell -ExecutionPolicy Bypass -File tools\smoke-test.ps1
+//   gradle smokeTestCheck
+tasks.register("smokeTestCheck") {
+	group = "verification"
+	description = "Checks the headless smoke-test logs written by tools/smoke-test.ps1."
+	doLast {
+		def loaders = ["fabric", "forge"]
+		def failures = []
+		def checked = 0
+		loaders.each { loader ->
+			def logFile = file("${loader}/run/logs/latest.log")
+			if (!logFile.exists()) {
+				failures << "${loader}: no log at ${logFile}. Run tools\\smoke-test.ps1 first."
+				return
+			}
+			checked++
+			def content = logFile.getText("UTF-8")
+			def lines = content.readLines()
+			if (!content.contains("The Shanghai Wetro Mod v")) {
+				failures << "${loader}: the mod never reported that it loaded"
+			}
+			if (!(content =~ /Done \([\d.]+s\)!/)) {
+				failures << "${loader}: the server never finished starting"
+			}
+			if (content =~ /MixinApplyError|InvalidInjectionException|MixinTransformerError|Critical injection failure/) {
+				failures << "${loader}: a mixin failed to apply"
+			}
+			def modErrors = lines.findAll { line ->
+				line =~ /\/ERROR\]|\/FATAL\]/ && line =~ /shmetro|[Mm]ixin/
+			}
+			if (!modErrors.isEmpty()) {
+				failures << "${loader}: " + modErrors.size() + " shmetro/mixin error line(s), first: " + modErrors[0].trim()
+			}
+		}
+		if (!failures.isEmpty()) {
+			throw new GradleException("smokeTestCheck failed:\n  - " + failures.join("\n  - "))
+		}
+		logger.lifecycle("smokeTestCheck: OK (${checked} loader(s) verified)")
+	}
+}
