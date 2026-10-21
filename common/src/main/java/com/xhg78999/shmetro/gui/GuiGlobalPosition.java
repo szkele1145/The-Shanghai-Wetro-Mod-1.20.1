@@ -95,7 +95,24 @@ implements IGui {
 
     protected void saveData() {
         if (this.id == null) {
-            this.id = " ";
+            // 【1.1.60 修数据被意外清空】
+            // 上游原实现是 `if (this.id == null) this.id = " ";` —— 也就是
+            // 「玩家没碰过输入框就点『是』」时, 把方块上原有的编号覆盖成一个空格。
+            //
+            // 之所以会这样: this.id 只在输入框的 responder 回调里被赋值, 而
+            // MC 1.20.1 的 EditBox.setValue(String) **不触发 responder**
+            // (它只做 value = text + 移动光标), 所以 init() 里
+            // `this.gdid.setValue(gd.code)` 回填原编号时, this.id 仍然是 null。
+            // 于是「打开界面 -> 不动输入框 -> 点确定」这条完全正常的操作,
+            // 会把玩家之前认真设好的编号清成一个空格。
+            //
+            // 改成: 没改过就不发包 —— 原值保持不变。
+            // 正常改动路径完全不受影响(玩家动过输入框 => id != null => 照常发包)。
+            //
+            // 注: 这是上游同款缺陷, 但属于「数据被静默清空」这种用户可见的
+            // 功能性错误, 且修法不改变任何其它行为, 因此予以修正。
+            com.xhg78999.shmetro.Main.LOGGER.debug("SHM: GD 编号未改动, 不发送更新包, 保持原值");
+            return;
         }
         SHMPacketGDClient.sendGDUpdateC2S(this.pos, this.id);
     }
