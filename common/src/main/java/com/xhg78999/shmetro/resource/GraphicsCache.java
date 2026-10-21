@@ -263,7 +263,8 @@ public class GraphicsCache {
         }
     }
 
-    public static void read(ResourceManager manager, String path, Consumer<String> callback) {        try {
+    public static void read(ResourceManager manager, String path, Consumer<String> callback) {
+        try {
             UtilitiesClient.getResources((ResourceManager)manager, (ResourceLocation)new ResourceLocation(path)).forEach(resource -> {
                 try {
                     InputStream stream = Utilities.getInputStream((Resource)resource);

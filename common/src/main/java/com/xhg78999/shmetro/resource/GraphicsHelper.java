@@ -25,6 +25,14 @@ import org.joml.Matrix4f;
 
 public class GraphicsHelper {
     public static void drawText(Style style, PoseStack poseStack, MultiBufferSource buffer, BlockEntityRenderDispatcher dispatcher, String text, float x, float y, int r, int g, int b, int light, float sx, float sy, float sz, int maxwidth) {
+        // 【1.1.61 加空值防护】text 为 null 时按空串处理。
+        // Text.literal(null) 会在 getVisualOrderText() 阶段抛 NPE, 而本方法
+        // 的调用方(如 RenderGlobalPosition)处在渲染热路径上, 没有 try/catch ——
+        // 一次 NPE 就会打断整个渲染批次, 让该帧的方块实体全部渲染不出来。
+        // 空串是「没有文字要画」的自然语义, 不会产生任何可见效果。
+        if (text == null) {
+            text = "";
+        }
         FormattedCharSequence orderedText = Text.literal((String)text).withStyle(style).getVisualOrderText();
         int totalWidth = (int)Math.ceil(Minecraft.getInstance().font.width(orderedText));
         float offset = IGui.VerticalAlignment.CENTER.getOffset(y, 10.0f);
