@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.imageio.ImageIO;
@@ -101,6 +102,7 @@ public class GraphicsHelper {
 
     public static void pasteImage(Graphics2D gph, ResourceLocation res, int x, int y) {
         ResourceManager rm = Minecraft.getInstance().getResourceManager();
+        InputStream stream = null;
         try {
             Optional<net.minecraft.server.packs.resources.Resource> resource = rm.getResource(res);
             if (!resource.isPresent()) {
@@ -110,7 +112,14 @@ public class GraphicsHelper {
                 com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 贴图资源缺失, 已跳过: " + res);
                 return;
             }
-            BufferedImage bfi = ImageIO.read(Utilities.getInputStream(resource));
+            stream = Utilities.getInputStream(resource);
+            if (stream == null) {
+                // Utilities.getInputStream 在资源读不出来时返回 null(不抛异常),
+                // ImageIO.read(null) 会抛 NPE。
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 贴图资源流为空, 已跳过: " + res);
+                return;
+            }
+            BufferedImage bfi = ImageIO.read(stream);
             if (bfi == null) {
                 // ImageIO.read 在「数据不是合法图片」时返回 null 而不是抛异常,
                 // 直接 drawImage(null, ...) 会 NPE。
@@ -121,6 +130,21 @@ public class GraphicsHelper {
         }
         catch (Exception e) {
             com.xhg78999.shmetro.Main.LOGGER.catching(e);
+        }
+        finally {
+            // 【1.1.58 修文件句柄泄漏】原来这个 InputStream 从不关闭 ——
+            // 上游反编译原件同错。pasteImage 在 RMG 贴图生成时被反复调用
+            // (每个箭头/图标一次), 资源包里的贴图文件句柄一直不释放,
+            // 长期运行会耗尽进程句柄。
+            // ImageIO.read 已经把数据读进内存, 关流不影响任何可见行为。
+            if (stream != null) {
+                try {
+                    stream.close();
+                }
+                catch (Exception e) {
+                    com.xhg78999.shmetro.Main.LOGGER.catching(e);
+                }
+            }
         }
     }
 

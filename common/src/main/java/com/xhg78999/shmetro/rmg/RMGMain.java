@@ -129,7 +129,15 @@ public class RMGMain {
             return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)(route.getPlatformIdIndex((long)platformId) - 1))).platformId);
         }
         catch (Exception e) {
-            if (route.circularState != Route.CircularState.NONE) {
+            // 【1.1.58 补 size 防护】环线回退取站台时用 get(size - 2) —— 当环线
+            // 只有 1 个站台时 get(-1) 抛 IndexOutOfBoundsException, 而这个异常
+            // 发生在 catch 块内部, 会一路逃出 getRunin (第 49 行的调用在 try 之外)
+            // => 被 GraphicsCache.getResource 的 catch 兜住 => 整张进站图降级成
+            // 白图, 还刷一条错误日志。
+            // 站台数不足 2 时没有「上一站」可取, 返回 null 让调用方跳过对应面板
+            // (SHRunin.drawPrevStn 已有 null 守卫) —— 与 1.1.46/1.1.57 在
+            // SHRunin.generate 内部加的 size>=2 防护是同一件事的两处。
+            if (route.circularState != Route.CircularState.NONE && route.platformIds.size() >= 2) {
                 return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)(route.platformIds.size() - 2))).platformId);
             }
             return null;
@@ -141,7 +149,8 @@ public class RMGMain {
             return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)(route.getPlatformIdIndex((long)platformId) + 1))).platformId);
         }
         catch (Exception e) {
-            if (route.circularState != Route.CircularState.NONE) {
+            // 同 getStationPast: 环线回退到 get(0), 站台数为 0 时会越界。
+            if (route.circularState != Route.CircularState.NONE && !route.platformIds.isEmpty()) {
                 return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)0)).platformId);
             }
             return null;
