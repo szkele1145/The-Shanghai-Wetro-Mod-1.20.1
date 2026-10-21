@@ -86,6 +86,7 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.67 | 新增 `checkMixinTargets`（校验 mixin 注入目标的方法还在，MTR 改名时构建期拦截）|
 | 1.1.66 | 新增 `checkMixinPackaging` / `checkTooling` 两条验证链（查发布 jar 里的 mixin 声明、类、refmap）|
 | 1.1.65 | 补回 4 处被移植退化掉的泛型（原始 List/ArrayList/Map 强转 → 恢复类型检查）|
 | 1.1.64 | `checkResourceLinks` 增加 loot table 对应关系检查（漏掉落表 / 悬空掉落表双向拦截）|
@@ -149,7 +150,6 @@ MIT（随上游）
 | 1.1.5 | 性能 batch 2：PSD 门 / 栏杆门 / 指示牌渲染器静态纹理缓存；热路径 19→1 分配 |
 | 1.1.4 | 性能：缓存 RenderSpecialPassing 热路径全部 12 个逐帧 ResourceLocation 分配 |
 | 1.1.3 | 清理全部 12 处反编译 (Object) 强转产物；build.ps1 loom 预热 |
-| 1.1.2 | Forge mods.toml displayURL + 描述增强；实体工厂参数名修正 |
 | 1.0.9 | 禁止携带物品告示牌全幅 UV 显示修复 |
 | 1.0.8 | 控制台输出统一 slf4j |
 | 1.0.7 | GL 纹理压缩 mixin 恢复（动态贴图省显存） |
