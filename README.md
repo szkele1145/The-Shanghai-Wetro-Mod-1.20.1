@@ -86,6 +86,7 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.64 | `checkResourceLinks` 增加 loot table 对应关系检查（漏掉落表 / 悬空掉落表双向拦截）|
 | 1.1.63 | 改 `checkResourceLinks` 补齐拼接式翻译 key 的检查（三元表达式 / 前缀拼接里的 key 之前抓不到）|
 | 1.1.62 | 新增 `checkResourceLinks` 构建期资源断链检查（注册名↔blockstate→model→texture、lang key 五类链）|
 | 1.1.61 | 修 GD 编号文本渲染 null 防护（防渲染批次被打断）+ 格式残渣清理 |
@@ -115,8 +116,8 @@ MIT（随上游）
 | 1.1.36 | 修 5 个壁挂薄板方块贴墙朝向 + PSD 端头玻璃连接方向 |
 | 1.1.35 | 清理 BlockShanghaiPSDDoor 的占位魔数 114514 |
 | 1.1.34 | BlockShanghaiPSDTop.setState 合并多余方块更新 |
-| 1.1.32 | 纯审计轮（注册完整性交叉核对），无代码改动，未发版 |
 | 1.1.33 | 站名渲染热路径去重复解析（每帧两次 split 合并为一次） |
+| 1.1.32 | 纯审计轮（注册完整性交叉核对），无代码改动，未发版 |
 | 1.1.31 | 修 BlockRailingEndCorner.asItem() 无限递归 → SOE 必崩 |
 | 1.1.30 | 修 BlockIronFrame 放置时南/西两侧连接判定读错方块 |
 | 1.1.29 | 修指示牌包长度字段无上限导致服务端 OOM 崩溃 |
