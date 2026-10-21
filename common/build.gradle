@@ -44,6 +44,163 @@ tasks.named("compileJava") {
 	dependsOn("checkModVersion")
 }
 
+// Fail the build when an asset reference is dangling.
+//
+// Minecraft resolves blockstate -> model -> texture purely by path, and a
+// missing file is NOT a compile error: the game silently shows the purple
+// "missing texture" checkerboard. The same goes for a block that was
+// registered in code but never got a blockstate/model, and for a lang key
+// referenced from Java but absent from en_us.json / zh_cn.json.
+//
+// This task walks those chains and fails the build, so a broken link is
+// caught at build time instead of by a player reporting a purple box.
+//
+// Scope (namespace "shmetro" only, foreign namespaces live in other jars):
+//   1. every registered block/item name has a matching blockstate file
+//   2. every blockstate's "model" reference resolves to an existing model
+//   3. every model's "texture" reference resolves to an existing png
+//   4. every item model's "parent" resolves (shmetro namespace only)
+//   5. every translatable key used in Java exists in every lang file
+tasks.register("checkResourceLinks") {
+	def assetsDir = file("src/main/resources/assets/shmetro")
+	def langDir = file("src/main/resources/assets/shmetro/lang")
+	def sourceDir = file("src/main/java")
+	def mainSource = file("src/main/java/com/xhg78999/shmetro/Main.java")
+	def langFiles = fileTree(langDir) { include "*.json" }
+	inputs.dir(assetsDir).withPathSensitivity(PathSensitivity.RELATIVE)
+	inputs.dir(sourceDir).withPathSensitivity(PathSensitivity.RELATIVE)
+	inputs.file(mainSource)
+	inputs.files(langFiles)
+	// A version bump on its own must not re-run this; only resource/source edits should.
+	outputs.upToDateWhen { false }
+	doLast {
+		def problems = []
+		def modelsDir = new File(assetsDir, "models")
+		def texturesDir = new File(assetsDir, "textures")
+
+		// model id "shmetro:block/foo" -> models/block/foo.json
+		// Only the "shmetro" namespace is ours; "minecraft:item/generated" and
+		// friends live in the vanilla/other jars and are not our responsibility.
+		def resolveModel = { String ref ->
+			if (ref == null) return null
+			// Only the "shmetro" namespace (and bare refs, which default to
+			// minecraft: for parents / shmetro: for blockstates) is ours.
+			// "mtr:*" parents live in the MTR jar and are not our responsibility.
+			if (ref.startsWith("minecraft:")) return null
+			if (ref.startsWith("mtr:")) return null
+			def rel = ref.contains(":") ? ref.substring(ref.indexOf(":") + 1) : ref
+			// A bare "item/generated" is vanilla's built-in parent, not a shmetro file.
+			if (!ref.contains(":") && (rel.startsWith("item/") || rel.startsWith("block/"))) return null
+			return new File(modelsDir, rel + ".json")
+		}
+
+		// 1) registered names -> blockstate
+		def mainText = mainSource.getText("UTF-8")
+		def registered = [] as Set
+		def regMatcher = mainText =~ /register(?:BlockAndItem|Block|Item)\("([a-z0-9_]+)"/ 
+		while (regMatcher.find()) {
+			registered.add(regMatcher.group(1))
+		}
+		def blockstatesDir = new File(assetsDir, "blockstates")
+		registered.each { String name ->
+			if (!new File(blockstatesDir, name + ".json").exists()) {
+				problems << "registered '" + name + "' has no blockstates/" + name + ".json"
+			}
+		}
+
+		// 2) blockstate -> model
+		def blockstateFiles = fileTree(blockstatesDir) { include "*.json" }.files
+		blockstateFiles.each { File f ->
+			def txt = f.getText("UTF-8")
+			def m = txt =~ /"model"\s*:\s*"([^"]+)"/
+			def seen = [] as Set
+			while (m.find()) {
+				def ref = m.group(1)
+				if (!seen.add(ref)) continue
+				def target = resolveModel(ref)
+				if (target != null && !target.exists()) {
+					problems << "blockstates/" + f.name + " references missing model '" + ref + "'"
+				}
+			}
+		}
+
+		// 3) model -> texture, 4) item model -> parent
+		def modelFiles = fileTree(modelsDir) { include "**/*.json" }.files
+		modelFiles.each { File f ->
+			def txt = f.getText("UTF-8")
+			def t = txt =~ /"texture"\s*:\s*"([^"]+)"/
+			while (t.find()) {
+				def ref = t.group(1)
+				if (ref.startsWith("#") || ref.startsWith("minecraft:")) continue
+				def rel = ref.contains(":") ? ref.substring(ref.indexOf(":") + 1) : ref
+				if (!new File(texturesDir, rel + ".png").exists()) {
+					problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") + " references missing texture '" + ref + "'"
+				}
+			}
+			def p = txt =~ /"parent"\s*:\s*"([^"]+)"/
+			while (p.find()) {
+				def ref = p.group(1)
+				if (ref.startsWith("minecraft:")) continue
+				def target = resolveModel(ref)
+				if (target != null && !target.exists()) {
+					problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") + " references missing parent '" + ref + "'"
+				}
+			}
+		}
+
+		// 5) translatable keys used in Java -> lang files
+		def langKeys = [:]
+		langFiles.files.each { File lf ->
+			def txt = lf.getText("UTF-8")
+			def k = txt =~ /"((?:gui|tooltip|block|item|config)\.[^"]+)"\s*:/
+			def set = [] as Set
+			while (k.find()) {
+				set.add(k.group(1))
+			}
+			langKeys[lf.name] = set
+		}
+		def usedKeys = [] as Set
+		def javaFiles = fileTree(sourceDir) { include "**/*.java" }.files
+		javaFiles.each { File jf ->
+			def txt = jf.getText("UTF-8")
+			def k = txt =~ /translatable\(\s*\(?\s*(?:String\s*)?\)?\s*"([^"]+)"/
+			while (k.find()) {
+				usedKeys.add(k.group(1))
+			}
+		}
+		langKeys.each { String name, Set keys ->
+			usedKeys.each { String used ->
+				// Keys owned by other mods or by vanilla live in their own jars:
+				//   mtr.*          -> MTR
+				//   minecraft.*    -> vanilla
+				//   gui.yes        -> vanilla (the Screen's own button label)
+				//   selectWorld.*  -> vanilla
+				// Only keys under our own prefixes are our responsibility.
+				def ours = used.startsWith("gui.shmetro.") || used.startsWith("tooltip.shmetro.") ||
+					used.startsWith("block.shmetro.") || used.startsWith("item.shmetro.") ||
+					used.startsWith("config.shmetro.") || used.startsWith("gui.shmetro")
+				if (!ours) return
+				if (!keys.contains(used)) {
+					problems << "lang/" + name + " is missing key '" + used + "'"
+				}
+			}
+		}
+
+		if (!problems.isEmpty()) {
+			def message = "checkResourceLinks: " + problems.size() + " dangling resource reference(s):"
+			problems.each { message += "\n  - " + it }
+			throw new GradleException(message)
+		}
+		logger.lifecycle("checkResourceLinks: OK (" + registered.size() + " registered, " +
+			blockstateFiles.size() + " blockstates, " + modelFiles.size() + " models, " +
+			langKeys.size() + " lang files, " + usedKeys.size() + " translatable keys)")
+	}
+}
+
+tasks.named("processResources") {
+	dependsOn("checkResourceLinks")
+}
+
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 	options.release = 17
