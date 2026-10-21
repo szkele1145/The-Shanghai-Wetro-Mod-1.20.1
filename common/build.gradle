@@ -110,6 +110,41 @@ tasks.register("checkResourceLinks") {
 			}
 		}
 
+		// 1b) registered names -> loot table
+		// A block without a loot table drops nothing when mined, which is easy to
+		// overlook and never shows up as an error in game. Most blocks should have
+		// one; the exceptions are listed explicitly below.
+		//
+		// The exceptions are all inherited from MTR's own base classes
+		// (BlockPSDDoor / BlockPSDGlass / BlockPSDTop and the railing doors):
+		// their BlockBehaviour.Properties come from MTR, which never calls
+		// noLootTable(), so upstream ships exactly the same set without loot
+		// tables. The two shmetro blocks that DO call noLootTable() explicitly
+		// are BlockShanghaiPSDTop and BlockShanghaiSign.
+		def noLootTableExpected = [
+			"erailing_door_1", "erailing_door_2", "erailing_glass_1", "erailing_glass_2",
+			"psd_door_blank", "psd_door_railmap", "psd_door_runin",
+			"psd_end", "psd_glass_blank", "psd_glass_destination", "psd_glass_railmap",
+			"psd_top", "shm_sign_middle"
+		] as Set
+		def lootTablesDir = file("src/main/resources/data/shmetro/loot_tables/blocks")
+		registered.each { String name ->
+			if (noLootTableExpected.contains(name)) return
+			if (!new File(lootTablesDir, name + ".json").exists()) {
+				problems << "registered '" + name + "' has no loot_tables/blocks/" + name + ".json"
+			}
+		}
+		// The other direction: a loot table for a block that does not exist is
+		// dead weight that never fires.
+		if (lootTablesDir.exists()) {
+			fileTree(lootTablesDir) { include "*.json" }.files.each { File f ->
+				def name = f.name.replaceAll(/\.json$/, "")
+				if (!registered.contains(name)) {
+					problems << "loot_tables/blocks/" + f.name + " has no registered block named '" + name + "'"
+				}
+			}
+		}
+
 		// 2) blockstate -> model
 		def blockstateFiles = fileTree(blockstatesDir) { include "*.json" }.files
 		blockstateFiles.each { File f ->
@@ -210,8 +245,10 @@ tasks.register("checkResourceLinks") {
 			problems.each { message += "\n  - " + it }
 			throw new GradleException(message)
 		}
+		def lootCount = lootTablesDir.exists() ? fileTree(lootTablesDir) { include "*.json" }.files.size() : 0
 		logger.lifecycle("checkResourceLinks: OK (" + registered.size() + " registered, " +
 			blockstateFiles.size() + " blockstates, " + modelFiles.size() + " models, " +
+			lootCount + " loot tables, " +
 			langKeys.size() + " lang files, " + fullKeys.size() + " key literals, " +
 			concatPrefixes.size() + " concatenated key prefix(es))")
 	}
