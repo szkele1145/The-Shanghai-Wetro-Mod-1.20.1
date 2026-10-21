@@ -86,6 +86,7 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.65 | 补回 4 处被移植退化掉的泛型（原始 List/ArrayList/Map 强转 → 恢复类型检查）|
 | 1.1.64 | `checkResourceLinks` 增加 loot table 对应关系检查（漏掉落表 / 悬空掉落表双向拦截）|
 | 1.1.63 | 改 `checkResourceLinks` 补齐拼接式翻译 key 的检查（三元表达式 / 前缀拼接里的 key 之前抓不到）|
 | 1.1.62 | 新增 `checkResourceLinks` 构建期资源断链检查（注册名↔blockstate→model→texture、lang key 五类链）|
@@ -149,7 +150,6 @@ MIT（随上游）
 | 1.1.3 | 清理全部 12 处反编译 (Object) 强转产物；build.ps1 loom 预热 |
 | 1.1.2 | Forge mods.toml displayURL + 描述增强；实体工厂参数名修正 |
 | 1.1.1 | 版本号递增 |
-| 1.1.0 | shm_route_flipped 镜像路线图指示牌（对向站台） |
 | 1.0.9 | 禁止携带物品告示牌全幅 UV 显示修复 |
 | 1.0.8 | 控制台输出统一 slf4j |
 | 1.0.7 | GL 纹理压缩 mixin 恢复（动态贴图省显存） |
