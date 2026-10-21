@@ -86,6 +86,9 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.63 | 改 `checkResourceLinks` 补齐拼接式翻译 key 的检查（三元表达式 / 前缀拼接里的 key 之前抓不到）|
+| 1.1.62 | 新增 `checkResourceLinks` 构建期资源断链检查（注册名↔blockstate→model→texture、lang key 五类链）|
+| 1.1.61 | 修 GD 编号文本渲染 null 防护（防渲染批次被打断）+ 格式残渣清理 |
 | 1.1.60 | 修 GD 编号「打开界面直接点确定」会把编号清成空格 |
 | 1.1.59 | 修 4 个 blockbench 渲染器每帧 new ResourceLocation |
 | 1.1.58 | 修文件句柄泄漏（pasteImage 的 InputStream 从不关闭）+ 环线站台数不足时的越界 |
