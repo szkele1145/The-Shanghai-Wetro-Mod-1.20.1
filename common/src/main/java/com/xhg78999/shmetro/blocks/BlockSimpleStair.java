@@ -29,7 +29,11 @@ extends BlockDirectionalMapper
 implements IBlock {
     public static final BooleanProperty LEFT = BooleanProperty.create((String)"left");
     public static final BooleanProperty RIGHT = BooleanProperty.create((String)"right");
-    protected static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = (Map)PipeBlock.PROPERTY_BY_DIRECTION.entrySet().stream().filter(entry -> ((Direction)entry.getKey()).getAxis().isHorizontal()).collect(Util.toMap());
+    // 【1.1.65 去掉多余的强转】上游是 Map<Direction, BooleanProperty> = ...,
+    // 移植时退化成了 (Map) 强转。PipeBlock.PROPERTY_BY_DIRECTION 本身就是
+    // Map<Direction, BooleanProperty>, filter + Util.toMap() 之后泛型也能
+    // 自然推断出来, 这个 (Map) 强转既无必要, 又把编译期类型检查关掉了。
+    protected static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = PipeBlock.PROPERTY_BY_DIRECTION.entrySet().stream().filter(entry -> entry.getKey().getAxis().isHorizontal()).collect(Util.toMap());
 
     public BlockSimpleStair(BlockBehaviour.Properties properties) {
         super(properties);

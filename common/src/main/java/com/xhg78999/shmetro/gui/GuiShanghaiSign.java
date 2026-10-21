@@ -82,7 +82,11 @@ implements IGui {
             BlockRailwaySign.SignType signType = var3[var5];
             this.allSignIds.add(signType.toString());
         }
-        ArrayList sortedKeys = new ArrayList(CustomResources.CUSTOM_SIGNS.keySet());
+        // 【1.1.65 补回泛型】上游是 List<String>, 移植时退化成了原始 ArrayList。
+        // 原始类型下 Collections.sort 与 addAll 都失去编译期检查, 而且
+        // CUSTOM_SIGNS 的 key 类型一旦变化, 这里就会在运行期抛
+        // ClassCastException(而且是在渲染路径上, 很难定位)。
+        ArrayList<String> sortedKeys = new ArrayList<>(CustomResources.CUSTOM_SIGNS.keySet());
         Collections.sort(sortedKeys);
         this.allSignIds.addAll(sortedKeys);
         try {

@@ -72,7 +72,11 @@ public class SHRouteMapLoopline {
     }
 
     private static void drawStationBricks(Graphics2D g2d, boolean direction, boolean flip, Station now, Route line, int width, int nowpos) {
-        List pids = line.platformIds.stream().collect(Collectors.toList());
+        // 【1.1.65 补回泛型】上游是 List<RoutePlatform>, 移植时退化成了原始 List。
+        // 原始 List 编译期不做任何元素类型检查, 下面的 (Route.RoutePlatform)
+        // 强转在编译期也查不出问题, 混进别的元素类型就变成运行期
+        // ClassCastException。补回泛型让编译器盯住这一处。
+        List<Route.RoutePlatform> pids = line.platformIds.stream().collect(Collectors.toList());
         if (flip) {
             Collections.reverse(pids);
             if (nowpos != 0) {
