@@ -20,6 +20,11 @@ public class RenderEntitySecurityCheckPole
 extends BlockEntityRendererMapper<BlockEntitySecurityCheckPole>
 implements BlockEntityRenderer<BlockEntitySecurityCheckPole> {
     private BlockbenchModel model;
+    // 【1.1.59 修渲染热路径的每帧分配】ResourceLocation 的构造要做
+    // 字符串分割 + 命名空间/路径校验 + 哈希计算, 每帧每个方块实体做一次
+    // 是纯浪费。贴图路径是常量, 直接提成静态字段 —— 与 1.1.42 在
+    // RenderSpecialPassing 里的做法一致。
+    private static final ResourceLocation TEXTURE = new ResourceLocation("shmetro", "textures/block/security_check_pole.png");
 
     public RenderEntitySecurityCheckPole(BlockEntityRenderDispatcher dispatcher) {
         super(dispatcher);
@@ -42,7 +47,7 @@ implements BlockEntityRenderer<BlockEntitySecurityCheckPole> {
                 matricesNew.translate(0.5 + (double)entity.getBlockPos().getX(), (double)entity.getBlockPos().getY(), 0.5 + (double)entity.getBlockPos().getZ());
                 UtilitiesClient.rotateXDegrees((PoseStack)matricesNew, (float)180.0f);
             });
-            RenderTrains.scheduleRender((ResourceLocation)new ResourceLocation("shmetro", "textures/block/security_check_pole.png"), (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+            RenderTrains.scheduleRender((ResourceLocation)TEXTURE, (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                 storedMatrixTransformations.transform(matricesNew);
                 this.model.renderToBuffer((PoseStack)matricesNew, (VertexConsumer)vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                 matricesNew.popPose();
