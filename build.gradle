@@ -55,6 +55,153 @@ tasks.register("setupMtr") {
 	// 已预置 checkouts/1.20.1 下的 dev jar
 }
 
+// Packaging check for the mixin setup.
+//
+// The mixin config is only wired up inside the built jars: Fabric declares it
+// in fabric.mod.json ("mixins"), Forge declares it through the jar manifest
+// ("MixinConfigs: shmetro.mixins.json", which is what Architectury Loom
+// writes) or through a [[mixins]] section in mods.toml. Nothing in the
+// source tree states that, so a refactor can silently drop the declaration.
+//
+// The failure mode is nasty: the dev run still works, because Loom passes
+// --mixin.config on the command line, and the server still starts, so
+// `gradle build` and the smoke test both stay green while every mixin in
+// the published jar is dead. This task looks at the jars that actually get
+// uploaded instead, and fails the build when the wiring is missing.
+//
+// It also checks the reverse direction: every mixin class listed in the
+// config has to exist in the jar, and the refmap has to be present and
+// parseable. A stale entry in shmetro.mixins.json points at a class that
+// was renamed or deleted, and Mixin would throw while starting the game.
+//
+// Usage: gradle checkMixinPackaging
+tasks.register("checkMixinPackaging") {
+	group = "verification"
+	description = "Checks that the built jars declare the mixin config and that every listed mixin class and the refmap are present."
+	dependsOn ":fabric:remapJar", ":forge:remapJar"
+	doLast {
+		def failures = []
+		def checked = 0
+		def mixinConfigName = "shmetro.mixins.json"
+
+		def checkJar = { String loader, File jar ->
+			if (jar == null || !jar.exists()) {
+				failures << "${loader}: jar not found (${jar})"
+				return
+			}
+			checked++
+			def zip = new java.util.zip.ZipFile(jar)
+			try {
+				def entries = zip.entries().collect { it.name }
+				def readText = { String name ->
+					def e = zip.getEntry(name)
+					if (e == null) return null
+					return zip.getInputStream(e).getText("UTF-8")
+				}
+
+				// 1) the mixin config itself has to be in the jar
+				if (!entries.contains(mixinConfigName)) {
+					failures << "${loader}: ${mixinConfigName} is missing from the jar"
+					return
+				}
+
+				// 2) the jar has to actually declare the config
+				def declared = false
+				if (loader == "fabric") {
+					def modJson = readText("fabric.mod.json")
+					if (modJson == null) {
+						failures << "${loader}: fabric.mod.json is missing from the jar"
+						return
+					}
+					def parsed = new groovy.json.JsonSlurper().parseText(modJson)
+					def mixins = parsed."mixins"
+					if (mixins instanceof List && mixins.contains(mixinConfigName)) {
+						declared = true
+					} else {
+						failures << "${loader}: fabric.mod.json does not list ${mixinConfigName} in \"mixins\" (got: ${mixins})"
+					}
+				} else {
+					// Forge: either the manifest attribute or a [[mixins]] section in mods.toml
+					def manifest = readText("META-INF/MANIFEST.MF")
+					if (manifest != null && manifest.readLines().any { it.trim() == "MixinConfigs: " + mixinConfigName }) {
+						declared = true
+					} else {
+						def toml = readText("META-INF/mods.toml")
+						if (toml != null && toml.contains("[[mixins]]") && toml.contains(mixinConfigName)) {
+							declared = true
+						} else {
+							failures << "${loader}: the jar never declares ${mixinConfigName} (no MixinConfigs manifest attribute, no [[mixins]] section in mods.toml)"
+						}
+					}
+				}
+
+				// 3) every mixin class named in the config has to exist in the jar
+				def config = new groovy.json.JsonSlurper().parseText(readText(mixinConfigName))
+				def mixinClasses = []
+				["server", "client"].each { side ->
+					def list = config."${side}"
+					if (list instanceof List) {
+						mixinClasses.addAll(list.collect { "${config.package}.${it}" })
+					}
+				}
+				if (mixinClasses.isEmpty()) {
+					failures << "${loader}: ${mixinConfigName} does not list a single mixin class"
+				}
+				mixinClasses.each { className ->
+					def path = className.replace(".", "/") + ".class"
+					if (!entries.contains(path)) {
+						failures << "${loader}: mixin class ${className} is listed in ${mixinConfigName} but is not in the jar"
+					}
+				}
+
+				// 4) the refmap has to be there and has to be valid JSON.
+				// The config points at one specific refmap by name, so that one
+				// has to exist; scanning for any *.refmap.json is not enough,
+				// a config pointing at a refmap that does not exist would
+				// leave the mixins unmapped and break on the real game.
+				def configRefmap = config.refmap
+				if (!(configRefmap instanceof String) || configRefmap.trim().isEmpty()) {
+					failures << "${loader}: ${mixinConfigName} does not name a refmap"
+				} else {
+					if (!entries.contains(configRefmap)) {
+						failures << "${loader}: ${mixinConfigName} points at refmap '${configRefmap}', which is not in the jar"
+					} else {
+						try {
+							new groovy.json.JsonSlurper().parseText(readText(configRefmap))
+						} catch (Exception e) {
+							failures << "${loader}: refmap ${configRefmap} is not valid JSON: ${e.message}"
+						}
+					}
+				}
+				def refmapNames = entries.findAll { it.endsWith(".refmap.json") }
+				if (refmapNames.isEmpty()) {
+					failures << "${loader}: no refmap (*.refmap.json) in the jar"
+				}
+
+				if (declared) {
+					logger.lifecycle("checkMixinPackaging: ${loader} declares ${mixinConfigName} (${mixinClasses.size()} mixin class(es), refmap: ${refmapNames.join(", ")})")
+				}
+			} finally {
+				zip.close()
+			}
+		}
+
+		checkJar("fabric", file("${projectDir}/fabric/build/libs/shmetro-${rootProject.mod_version}-${rootProject.minecraft_version}-fabric.jar"))
+		checkJar("forge", file("${projectDir}/forge/build/libs/shmetro-${rootProject.mod_version}-${rootProject.minecraft_version}-forge.jar"))
+
+		if (!failures.isEmpty()) {
+			throw new GradleException("checkMixinPackaging failed:\n  - " + failures.join("\n  - "))
+		}
+		logger.lifecycle("checkMixinPackaging: OK (${checked} jar(s) verified)")
+	}
+}
+
+// Run the packaging check as part of every build: a jar that lost its mixin
+// declaration still compiles and still starts, so nothing else would notice.
+tasks.named("build") {
+	dependsOn("checkMixinPackaging")
+}
+
 // Headless smoke test: actually start a dedicated server on both loaders and
 // verify that the mod loads, that the mixins apply cleanly, and that nothing
 // about shmetro shows up in the error log.
@@ -97,6 +244,26 @@ tasks.register("smokeTestCheck") {
 			if (content =~ /MixinApplyError|InvalidInjectionException|MixinTransformerError|Critical injection failure/) {
 				failures << "${loader}: a mixin failed to apply"
 			}
+			// The mixins of this mod all live in the "client" section of
+			// shmetro.mixins.json, and a dedicated server never loads those.
+			// So this log cannot tell us whether the client mixins work; that
+			// is what the checkMixinPackaging task is for, it inspects the
+			// jars that actually get published. What can be checked here is
+			// that the server side of the mixin config (currently empty) stays
+			// consistent with the log: a server mixin that fails to apply
+			// leaves a visible error, and we must not report "mixins applied"
+			// on the strength of a check that never looked at them.
+			def mixinConfigFile = file("common/src/main/resources/shmetro.mixins.json")
+			if (mixinConfigFile.exists()) {
+				def cfg = new groovy.json.JsonSlurper().parseText(mixinConfigFile.getText("UTF-8"))
+				def serverMixins = cfg."server"
+				if (serverMixins instanceof List && !serverMixins.isEmpty()) {
+					def sawServerMixin = content =~ /shmetro\.mixins\.json/
+					if (!sawServerMixin) {
+						failures << "${loader}: shmetro.mixins.json declares ${serverMixins.size()} server mixin(s) but the log never mentions the config"
+					}
+				}
+			}
 			def modErrors = lines.findAll { line ->
 				line =~ /\/ERROR\]|\/FATAL\]/ && line =~ /shmetro|[Mm]ixin/
 			}
@@ -109,4 +276,43 @@ tasks.register("smokeTestCheck") {
 		}
 		logger.lifecycle("smokeTestCheck: OK (${checked} loader(s) verified)")
 	}
+}
+
+// Guard the release tooling itself.
+//
+// The smoke test script is the only thing that proves the mod actually runs,
+// and it lives in the repository next to a pile of other helper scripts.
+// A file that quietly goes missing (an over-eager cleanup, a sync tool, a
+// virus scanner quarantining a .ps1) is invisible until the next release
+// tries to run it, which is the worst possible moment to find out.
+//
+// This task only checks that the files are there and are not empty, so the
+// failure shows up at build time instead of at release time.
+//
+// Usage: gradle checkTooling
+tasks.register("checkTooling") {
+	group = "verification"
+	description = "Checks that the release tooling scripts are present and not empty."
+	doLast {
+		def required = [
+			"tools/smoke-test.ps1"
+		]
+		def failures = []
+		required.each { path ->
+			def f = file(path)
+			if (!f.exists()) {
+				failures << "${path} is missing (restore it with: git checkout -- ${path})"
+			} else if (f.length() == 0L) {
+				failures << "${path} is empty"
+			}
+		}
+		if (!failures.isEmpty()) {
+			throw new GradleException("checkTooling failed:\n  - " + failures.join("\n  - "))
+		}
+		logger.lifecycle("checkTooling: OK (${required.size()} script(s) present)")
+	}
+}
+
+tasks.named("build") {
+	dependsOn("checkTooling")
 }
