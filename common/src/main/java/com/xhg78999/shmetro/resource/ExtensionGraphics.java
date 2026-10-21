@@ -59,6 +59,13 @@ public class ExtensionGraphics {
             width += 20;
             width += Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(routes.get((int)i).name)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(routes.get((int)i).name)));
         }
+        // 【1.1.57 修 AWT 资源泄漏】上面的 1x1 探测图只用来量文字宽度,
+        // 真正画图时会被换掉 —— 但它的 Graphics2D 从未 dispose()。
+        // Graphics2D 持有 AWT 的渲染状态(字体 hint、颜色栈、native peer),
+        // 不释放会一直挂在 AWT 的 Disposable/Disposer 队列上, 直到 GC
+        // 也不一定回收 (AWT 的引用是强引用) => 每生成一张线路图泄漏一份。
+        // 这里在换图之前显式释放。
+        g2d.dispose();
         image = new BufferedImage(width, 100, 2);
         g2d = image.createGraphics();
         dlflag = false;
@@ -93,7 +100,14 @@ public class ExtensionGraphics {
             width += dw;
         }
         g2d.dispose();
-        NativeImage nat = new NativeImage(NativeImage.Format.RGBA, width, 100, false);
+        // 【1.1.57 修 NativeImage 堆外内存泄漏】
+        // 之前这里有一行
+        //     NativeImage nat = new NativeImage(NativeImage.Format.RGBA, width, 100, false);
+        // 只是为了在 ImageIO 失败时有个返回值兜底, 正常路径上它的堆外内存
+        // (NativeImage 底层是 memAlloc) 会被整个丢弃 —— 每生成一张线路图
+        // 就白漏一块堆外内存(几百 KB 起)。
+        // 改成: 正常路径不提前分配, 直接由 NativeImage.read 返回结果;
+        // 异常路径才临时分配一张有效的 1x1 交给调用方。
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             ImageIO.write((RenderedImage)image, "png", os);
@@ -101,7 +115,11 @@ public class ExtensionGraphics {
         }
         catch (IOException e) {
             com.xhg78999.shmetro.Main.LOGGER.catching(e);
-            return nat;
+            // 返回一张有效的 1x1 兜底图(所有权交给调用方 —— 调用方会把它
+            // 包进 DynamicTexture, 由 DynamicTexture 负责释放)。
+            // 注意这里不能 close() 后再返回: NativeImage.close() 释放的是
+            // 堆外内存, 交还一个已释放的对象给调用方 = use-after-free。
+            return new NativeImage(NativeImage.Format.RGBA, 1, 1, false);
         }
         return NativeImage.read((InputStream) ist);
     }

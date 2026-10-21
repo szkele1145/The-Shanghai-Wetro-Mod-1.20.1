@@ -48,7 +48,6 @@ public class SHRunin {
         }
         SHRunin.drawGeneralStation(g2d, direction, next, prev, now, line, flip);
         g2d.dispose();
-        NativeImage nat = new NativeImage(NativeImage.Format.RGBA, width, height, false);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             ImageIO.write((RenderedImage)image, "png", os);
@@ -56,7 +55,12 @@ public class SHRunin {
         }
         catch (IOException e) {
             com.xhg78999.shmetro.Main.LOGGER.catching(e);
-            return nat;
+            // 【1.1.57 修 NativeImage 堆外内存泄漏】原来这里提前分配了一张
+            // 整幅大小的 NativeImage 只为在 ImageIO 失败时兜底, 正常路径上它的
+            // 堆外内存(memAlloc, 不受 GC 管)被整个丢弃 => 每生成一张图白漏一块
+            // (进站图 1816x400x4 ≈ 2.9 MB)。现在正常路径不提前分配,
+            // 异常路径只返回一张有效的 1x1(所有权交给调用方 -> DynamicTexture)。
+            return new NativeImage(NativeImage.Format.RGBA, 1, 1, false);
         }
         return NativeImage.read((InputStream) ist);
     }
