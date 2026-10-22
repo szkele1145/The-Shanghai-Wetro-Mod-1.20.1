@@ -86,6 +86,7 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.70 | **RMG 贴图宽度硬上限 + PSD 排布循环步数上限** —— 三类 PSD 贴图（线路图/目的地/进站图）的宽度由 PSD 顶板在世界里**连续排布的长度**推算而来（`width/height*400`），异常值会让 `BufferedImage` 按该宽度**直接分配内存**并逐像素绘制（32k 宽约 50 MB）；新增 `RMGMain.MAX_IMAGE_WIDTH=32768` 与 `clampWidth()` 在 `SHDestination`/`SHRouteMap`/`SHRouteMapLoopline` 入口统一钳制。另给 `RenderShanghaiPSDTop.getTextureNumber()` 的排布探测循环加 64 步上限（原先无界，极端排布会卡住渲染线程）。同时完成全量审计：95 个 Java 文件与上游反编译原件做方法/字段级比对，确认移植后无功能缺失（15 处差异均为 API 改名/等价迁移/CFR 伪影） |
 | 1.1.69 | 新增 state property 链（variant key / multipart when 条件）+ 资源 JSON 合法性链 |
 | 1.1.68 | 修好 model→texture 链的空检查（425 条引用首次真正被检查）+ 新增 Java 资源引用链 + 资源路径大小写敏感 |
 | 1.1.67 | 新增 `checkMixinTargets`（校验 mixin 注入目标的方法还在，MTR 改名时构建期拦截）|
