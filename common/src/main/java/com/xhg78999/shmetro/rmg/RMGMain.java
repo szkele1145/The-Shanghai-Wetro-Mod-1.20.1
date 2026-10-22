@@ -22,6 +22,20 @@ import com.mojang.blaze3d.platform.NativeImage;
 
 public class RMGMain {
     /**
+     * RMG 贴图宽度的硬上限。
+     *
+     * <p>贴图宽度由 PSD 顶板的连续排布长度推算而来
+     * ({@code RenderShanghaiPSDTop} 里的 {@code width / height * 400}),
+     * 正常玩法下十几格就到头了。但推算链条里每一步都依赖世界里的方块排布,
+     * 一旦某个环节算出异常值(例如一个巨大的连续同类方块串),
+     * {@code new BufferedImage(width, 400)} 就会按那个宽度直接分配内存
+     * 并逐像素绘制 —— 32k 宽的图大约 50 MB, 再大就开始拖垮客户端。
+     * 这里把宽度钳到 32768: 正常贴图(几万分之一都碰不到)完全不受影响,
+     * 异常值也不会把客户端拖死。</p>
+     */
+    public static final int MAX_IMAGE_WIDTH = 32768;
+
+    /**
      * 中文排序用的比较器。
      *
      * <p>{@link Collator#getInstance(Locale)} 每次调用都会新建一个 Collator 对象
@@ -35,6 +49,12 @@ public class RMGMain {
      * 提成静态常量共享 —— 排序结果与原来完全一致。
      */
     private static final Collator CHINA_COLLATOR = Collator.getInstance(Locale.CHINA);
+
+    /** 钳制 RMG 贴图宽度到硬上限, 越界值(负数/0/超大)统一按上限处理。 */
+    public static int clampWidth(int width) {
+        return width <= 0 ? MAX_IMAGE_WIDTH : Math.min(width, MAX_IMAGE_WIDTH);
+    }
+
 
     public static NativeImage getRunin(long platformId, boolean hasLeft, boolean flip) {
         Route route = null;

@@ -114,7 +114,10 @@ IBlock {
         BlockState state;
         int number = 0;
         Block thisBlock = world.getBlockState(pos).getBlock();
-        while ((state = world.getBlockState(pos.relative(searchLeft ? facing.getOpposite() : facing.getClockWise(), number))).getBlock() == thisBlock) {
+        // 循环步数上限: 每次迭代都是一次方块查询, 无界循环在极端排布下
+        // (理论上能沿一条直线一直查到区块边界)会让渲染线程卡住。
+        // 正常 PSD 排布不会超过几十格, 64 已是宽松上限。
+        while (number < 64 && (state = world.getBlockState(pos.relative(searchLeft ? facing.getOpposite() : facing.getClockWise(), number))).getBlock() == thisBlock) {
             boolean isLeft = this.isLeft(state);
             boolean isRight = this.isRight(state);
             if (number != 0 && (searchLeft ? isRight : isLeft)) break;

@@ -29,6 +29,9 @@ public class SHRouteMapLoopline {
     public static NativeImage generate(boolean direction, boolean flip, Station now, Route line, int width, int nowpos) throws IOException {
         ByteArrayInputStream ist;
         int height = 400;
+        // 宽度来自 PSD 顶板的连续排布长度, 越界值会让 BufferedImage
+        // 按那个宽度直接分配内存, 详见 RMGMain.MAX_IMAGE_WIDTH。
+        width = RMGMain.clampWidth(width);
         BufferedImage image = new BufferedImage(width, height, 2);
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
