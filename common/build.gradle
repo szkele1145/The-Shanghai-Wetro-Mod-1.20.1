@@ -157,6 +157,15 @@ tasks.register("checkResourceLinks") {
 				def target = resolveModel(ref)
 				if (target != null && !target.exists()) {
 					problems << "blockstates/" + f.name + " references missing model '" + ref + "'"
+				} else if (target != null) {
+					// Case has to match exactly, see the note in the texture
+					// check below.
+					def actual = target.parentFile.listFiles()?.find { it.name == target.name }
+					if (actual == null) {
+						problems << "blockstates/" + f.name + " references model '" + ref +
+							"', but the file on disk has a different case (found " +
+							(target.parentFile.listFiles()?.find { it.name.equalsIgnoreCase(target.name) }?.name ?: "nothing") + ")"
+					}
 				}
 			}
 		}
@@ -165,13 +174,41 @@ tasks.register("checkResourceLinks") {
 		def modelFiles = fileTree(modelsDir) { include "**/*.json" }.files
 		modelFiles.each { File f ->
 			def txt = f.getText("UTF-8")
-			def t = txt =~ /"texture"\s*:\s*"([^"]+)"/
+			// A model names its textures in the "textures" map:
+			//     "textures": { "0": "shmetro:block/aed", "particle": "..." }
+			// The singular "texture" key belongs to the faces, where the
+			// value is a reference to an entry of that map ("#0"), not a
+			// texture path. Matching the singular one only ever saw the
+			// face references and skipped all of them, so the texture
+			// names in the map were never checked at all.
+			def t = txt =~ /"textures"\s*:\s*\{([^}]*)\}/
 			while (t.find()) {
-				def ref = t.group(1)
-				if (ref.startsWith("#") || ref.startsWith("minecraft:")) continue
-				def rel = ref.contains(":") ? ref.substring(ref.indexOf(":") + 1) : ref
-				if (!new File(texturesDir, rel + ".png").exists()) {
-					problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") + " references missing texture '" + ref + "'"
+				def m2 = t.group(1) =~ /"([^"]+)"\s*:\s*"([^"]+)"/
+				while (m2.find()) {
+					def ref = m2.group(2)
+					if (ref.startsWith("#") || ref.startsWith("minecraft:")) continue
+					// A texture from another mod (mtr:block/metal and
+					// friends) lives in that mod's jar, not in this project.
+					if (ref.contains(":") && !ref.startsWith("shmetro:")) continue
+					def rel = ref.contains(":") ? ref.substring(ref.indexOf(":") + 1) : ref
+					def target = new File(texturesDir, rel + ".png")
+					if (!target.exists()) {
+						problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") + " references missing texture '" + ref + "'"
+					} else {
+						// The file system on the build machine is usually case
+						// insensitive, so a plain exists() would accept
+						// "Arrow_Left.png" for "arrow_left.png". The game does
+						// not work that way: the resource system matches the
+						// path as written, and a Linux server would come up
+						// with a missing texture that the developer never
+						// sees.
+						def actual = target.parentFile.listFiles()?.find { it.name == target.name }
+						if (actual == null) {
+							problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") +
+								" references texture '" + ref + "', but the file on disk has a different case (found " +
+								(target.parentFile.listFiles()?.find { it.name.equalsIgnoreCase(target.name) }?.name ?: "nothing") + ")"
+						}
+					}
 				}
 			}
 			def p = txt =~ /"parent"\s*:\s*"([^"]+)"/
@@ -181,6 +218,13 @@ tasks.register("checkResourceLinks") {
 				def target = resolveModel(ref)
 				if (target != null && !target.exists()) {
 					problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") + " references missing parent '" + ref + "'"
+				} else if (target != null) {
+					def actual = target.parentFile.listFiles()?.find { it.name == target.name }
+					if (actual == null) {
+						problems << f.path.replace(assetsDir.path + File.separator, "assets/shmetro/") +
+							" references parent '" + ref + "', but the file on disk has a different case (found " +
+							(target.parentFile.listFiles()?.find { it.name.equalsIgnoreCase(target.name) }?.name ?: "nothing") + ")"
+					}
 				}
 			}
 		}
@@ -240,6 +284,113 @@ tasks.register("checkResourceLinks") {
 			}
 		}
 
+		// (7) Resource locations that Java builds by hand.
+		//
+		// The model -> texture chain above never sees these: they are string
+		// literals inside the code, e.g.
+		//     new ResourceLocation("shmetro", "textures/rendering/arrow_left.png")
+		//     new ResourceLocation("shmetro", "font/arial.ttf")
+		// A typo in one of them is invisible to every other check and only
+		// shows up on a player's screen as a missing font or a blank arrow.
+		//
+		// Only our own namespace can be checked here: the paths that point at
+		// another mod (mtr:textures/gui/icon_left.png) live in that mod's jar,
+		// which is not part of this project.
+		//
+		// Not every resource location names a file. Some are identifiers: a
+		// creative tab id ("navigation"), a network packet id
+		// ("packet_shm_sign_types"). Those have no file behind them, so only
+		// the ones that look like a path are checked, plus the font ids,
+		// which do have a file (assets/<ns>/font/<id>.json).
+		def ours = [] as Set
+		def fontIds = [] as Set
+		def foreign = [] as Set
+		javaFiles.each { File jf ->
+			def txt = jf.getText("UTF-8")
+			// Two shapes: the two argument form
+			//     new ResourceLocation("shmetro", "textures/thing.png")
+			// and the one argument form, where the namespace is part of the
+			// string
+			//     new ResourceLocation("shmetro:textures/thing.png")
+			// Both can point at our own assets, so both have to be looked at.
+			// The namespace and the path are not restricted to lower case
+			// letters, so keep the character classes wide open: a path with
+			// an upper case letter in it has to be matched too, otherwise the
+			// check silently skips it.
+			def two = ~/(?:new\s+)?ResourceLocation\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/
+			def one = ~/(?:new\s+)?ResourceLocation\s*\(\s*"([^":\s]+):([^"]+)"\s*\)/
+			[two, one].each { re ->
+				def m = re.matcher(txt)
+				while (m.find()) {
+					if (m.group(1) != "shmetro") {
+						foreign.add(m.group(1) + ":" + m.group(2))
+						continue
+					}
+					def path = m.group(2)
+					// A font id is passed to withFont(...) and resolves to
+					// assets/<ns>/font/<id>.json.
+					def before = txt.substring(Math.max(0, m.start() - 40), m.start())
+					if (before =~ /withFont\s*\(\s*$/) {
+						fontIds.add(path)
+					} else if (path.contains("/") || path.contains(".")) {
+						ours.add(path)
+					}
+				}
+			}
+		}
+		ours.each { String path ->
+			// Compare the file names case sensitively. On Windows a lookup
+			// would happily find "Arrow_Left.png" for "arrow_left.png", but
+			// the resource system is not case insensitive everywhere: a
+			// Linux server that runs the same mod would not find the file
+			// and the texture would silently go missing there.
+			def target = new File(assetsDir, path)
+			if (!target.exists()) {
+				problems << "assets/shmetro/" + path + " is referenced by Java but does not exist"
+			} else {
+				def parent = target.parentFile
+				def wanted = target.name
+				def actual = parent.listFiles()?.find { it.name == wanted }
+				if (actual == null) {
+					problems << "assets/shmetro/" + path + " is referenced by Java, but the file on disk has a different case (found " +
+						(parent.listFiles()?.find { it.name.equalsIgnoreCase(wanted) }?.name ?: "nothing") + ")"
+				}
+			}
+		}
+		fontIds.each { String id ->
+			if (!new File(new File(assetsDir, "font"), id + ".json").exists()) {
+				problems << "font id '" + id + "' is referenced by Java but assets/shmetro/font/" + id + ".json does not exist"
+			}
+		}
+		// A font provider names its ttf as "<ns>:<file>" inside the font json.
+		// Those files are looked up in assets/<ns>/font/, so check them too.
+		def fontDir = new File(assetsDir, "font")
+		if (fontDir.exists()) {
+			fontDir.listFiles()?.each { File ff ->
+				if (!ff.name.endsWith(".json")) return
+				def txt = ff.getText("UTF-8")
+				// The file name may contain any character that is legal in a
+				// resource path, so do not narrow it down to a character
+				// class: a path with an upper case letter in it has to be
+				// matched too, otherwise the check silently skips it.
+				def re = ~/"file"\s*:\s*"([^":\s]+):([^"]+)"/
+				def m = re.matcher(txt)
+				while (m.find()) {
+					if (m.group(1) != "shmetro") continue
+					def target = new File(fontDir, m.group(2))
+					if (!target.exists()) {
+						problems << "assets/shmetro/font/" + ff.name + " names provider file '" + m.group(2) + "', which does not exist"
+						continue
+					}
+					// Case matters here too, see the note above.
+					def actual = fontDir.listFiles()?.find { it.name == target.name }
+					if (actual == null) {
+						problems << "assets/shmetro/font/" + ff.name + " names provider file '" + m.group(2) + "', but the file on disk has a different case"
+					}
+				}
+			}
+		}
+
 		if (!problems.isEmpty()) {
 			def message = "checkResourceLinks: " + problems.size() + " dangling resource reference(s):"
 			problems.each { message += "\n  - " + it }
@@ -250,7 +401,9 @@ tasks.register("checkResourceLinks") {
 			blockstateFiles.size() + " blockstates, " + modelFiles.size() + " models, " +
 			lootCount + " loot tables, " +
 			langKeys.size() + " lang files, " + fullKeys.size() + " key literals, " +
-			concatPrefixes.size() + " concatenated key prefix(es))")
+			concatPrefixes.size() + " concatenated key prefix(es), " +
+			ours.size() + " java resource path(s), " + fontIds.size() + " font id(s), " +
+			foreign.size() + " foreign reference(s))")
 	}
 }
 
