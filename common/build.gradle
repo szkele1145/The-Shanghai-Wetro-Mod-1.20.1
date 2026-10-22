@@ -391,6 +391,127 @@ tasks.register("checkResourceLinks") {
 			}
 		}
 
+		// 8) blockstate variant keys -> state properties that really exist.
+		//
+		// A variant key names the state properties it applies to, for
+		// example "type=0,facing=north". If it names a property the block
+		// does not have, Minecraft cannot resolve the variant: the model is
+		// never loaded and the block shows up as the missing model. The
+		// property names in a multipart "when" condition work the same way.
+		//
+		// The set of properties that exist is derived from the source:
+		//   - Property.create("name") spells out the real name,
+		//   - a constant that is added to the state definition names its
+		//     property after the constant, which is how Minecraft and MTR
+		//     do it (FACING -> "facing", HALF -> "half",
+		//     TOUCHING_LEFT -> "touching_left", ...).
+		// Both are collected, so a property that is inherited from a base
+		// class counts as well. Nothing here is hard coded, so renaming a
+		// property in the source automatically updates the check.
+		def declaredStateProperties = [] as Set
+		javaFiles.each { File jf ->
+			def txt = jf.getText("UTF-8")
+			def created = txt =~ /\b(?:IntegerProperty|BooleanProperty|EnumProperty|DirectionProperty)\s*\.\s*create\s*\(\s*(?:\(String\))?"([^"]+)"/
+			while (created.find()) {
+				declaredStateProperties.add(created.group(1))
+			}
+			def added = txt =~ /add\s*\(\s*new\s+Property\[\]\s*\{([^}]*)\}\s*\)/
+			while (added.find()) {
+				added.group(1).split(",").each { String p ->
+					p = p.trim()
+					if (p) declaredStateProperties.add(p.toLowerCase())
+				}
+			}
+			def addedOne = txt =~ /addProperty\s*\(\s*([A-Za-z0-9_.]+)\s*\)/
+			while (addedOne.find()) {
+				// "." is a regex metacharacter, it has to be escaped here or
+				// split returns an empty array.
+				declaredStateProperties.add(addedOne.group(1).split(/\./)[-1].toLowerCase())
+			}
+		}
+		// A block class can also inherit its whole state definition from an
+		// MTR base class without ever spelling the properties out again (the
+		// psd_end block never calls createBlockStateDefinition). Those names
+		// only exist inside the MTR jar, so scan it as well: every snake_case
+		// string constant in an mtr/block class is a candidate property name.
+		// The net is deliberately wide for the jar - a wrong name written in
+		// this project's sources never collides with anything in it, which is
+		// the typo this check is here for.
+		def mtrJar = rootProject.file("checkouts/${rootProject.minecraft_version}/mtr-common.jar")
+		if (mtrJar.exists()) {
+			def poolStrings = { byte[] data ->
+				def out = [] as Set
+				if (data.length < 10 || data[0] != (byte)0xCA || data[1] != (byte)0xFE || data[2] != (byte)0xBA || data[3] != (byte)0xBE) return out
+				def count = ((data[8] & 0xFF) << 8) | (data[9] & 0xFF)
+				def i = 10
+				for (def n = 1; n < count && i < data.length; n++) {
+					def tag = data[i]; i++
+					if (tag == 1) {
+						def len = ((data[i] & 0xFF) << 8) | (data[i + 1] & 0xFF); i += 2
+						out.add(new String(data, i, len, "UTF-8")); i += len
+					} else if (tag == 3 || tag == 4) { i += 4 }
+					else if (tag == 5 || tag == 6) { i += 8; n++ }
+					else if (tag == 7 || tag == 8 || tag == 16 || tag == 19 || tag == 20) { i += 2 }
+					else if (tag == 9 || tag == 10 || tag == 11 || tag == 12 || tag == 17 || tag == 18) { i += 4 }
+					else if (tag == 15) { i += 3 }
+					else { break }
+				}
+				return out
+			}
+			new java.util.zip.ZipFile(mtrJar).withCloseable { zip ->
+				zip.entries().toList().each { entry ->
+					if (!entry.name.startsWith("mtr/block/") || !entry.name.endsWith(".class")) return
+					poolStrings(zip.getInputStream(entry).getBytes()).each { String s ->
+						if (s ==~ /[a-z][a-z0-9_]{2,30}/) declaredStateProperties.add(s)
+					}
+				}
+			}
+		}
+		def checkStatePropertyName = { String where, String name ->
+			if (!declaredStateProperties.contains(name)) {
+				problems << where + " uses state property '" + name + "', but no such property is declared"
+			}
+		}
+		blockstateFiles.each { File f ->
+			def txt = f.getText("UTF-8")
+			// "facing=north" or "type=0,facing=north"
+			def variant = txt =~ /"((?:[a-z_]+=[a-z0-9_]+,?)+)"\s*:\s*\{/
+			while (variant.find()) {
+				variant.group(1).split(",").each { String kv ->
+					if (!kv.contains("=")) return
+					checkStatePropertyName("blockstates/" + f.name, kv.substring(0, kv.indexOf("=")).trim())
+				}
+			}
+			// "when": { "facing": "west" }
+			def when = txt =~ /"when"\s*:\s*\{([^}]*)\}/
+			while (when.find()) {
+				def key = when.group(1) =~ /"([^"]+)"\s*:/
+				while (key.find()) {
+					checkStatePropertyName("blockstates/" + f.name, key.group(1))
+				}
+			}
+		}
+
+		// 9) every json file under the resources must actually parse.
+		//
+		// Minecraft reads these files with a json parser and silently skips
+		// the ones it cannot read, so a stray comma turns a block into the
+		// missing model without a single error message. The build is the
+		// only place where this can be caught cheaply.
+		def jsonFiles = fileTree("src/main/resources") { include "**/*.json" }.files
+		jsonFiles.each { File f ->
+			try {
+				def parsed = new groovy.json.JsonSlurper().parse(f, "UTF-8")
+				if (!(parsed instanceof Map || parsed instanceof List)) {
+					problems << "resources/" + f.path.replace(file("src/main/resources").path + File.separator, "") +
+						" does not contain a json object or array"
+				}
+			} catch (Exception e) {
+				problems << "resources/" + f.path.replace(file("src/main/resources").path + File.separator, "") +
+					" is not valid json: " + e.message
+			}
+		}
+
 		if (!problems.isEmpty()) {
 			def message = "checkResourceLinks: " + problems.size() + " dangling resource reference(s):"
 			problems.each { message += "\n  - " + it }
@@ -403,7 +524,9 @@ tasks.register("checkResourceLinks") {
 			langKeys.size() + " lang files, " + fullKeys.size() + " key literals, " +
 			concatPrefixes.size() + " concatenated key prefix(es), " +
 			ours.size() + " java resource path(s), " + fontIds.size() + " font id(s), " +
-			foreign.size() + " foreign reference(s))")
+			foreign.size() + " foreign reference(s), " +
+			declaredStateProperties.size() + " state properties, " +
+			jsonFiles.size() + " json files parsed)")
 	}
 }
 
