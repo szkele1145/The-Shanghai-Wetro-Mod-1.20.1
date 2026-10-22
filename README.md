@@ -86,6 +86,7 @@ MIT（随上游）
 
 | 版本 | 内容 |
 |---|---|
+| 1.1.69 | 新增 state property 链（variant key / multipart when 条件）+ 资源 JSON 合法性链 |
 | 1.1.68 | 修好 model→texture 链的空检查（425 条引用首次真正被检查）+ 新增 Java 资源引用链 + 资源路径大小写敏感 |
 | 1.1.67 | 新增 `checkMixinTargets`（校验 mixin 注入目标的方法还在，MTR 改名时构建期拦截）|
 | 1.1.66 | 新增 `checkMixinPackaging` / `checkTooling` 两条验证链（查发布 jar 里的 mixin 声明、类、refmap）|
@@ -149,7 +150,6 @@ MIT（随上游）
 | 1.1.7 | 修复 Fence 斜面镜像 blockstates；同步 MOD_VERSION；新增 checkModVersion 校验 |
 | 1.1.6 | 性能 batch 3：RMG 缓存键改用字符串拼接（消除 3× String.format）；getSHRoutes 键改用 StringBuilder（消除逐帧 MD5）；注意：缺字形症状仅出现在 headless runClient，正式 jar 无此问题 |
 | 1.1.5 | 性能 batch 2：PSD 门 / 栏杆门 / 指示牌渲染器静态纹理缓存；热路径 19→1 分配 |
-| 1.1.4 | 性能：缓存 RenderSpecialPassing 热路径全部 12 个逐帧 ResourceLocation 分配 |
 | 1.0.9 | 禁止携带物品告示牌全幅 UV 显示修复 |
 | 1.0.8 | 控制台输出统一 slf4j |
 | 1.0.7 | GL 纹理压缩 mixin 恢复（动态贴图省显存） |
