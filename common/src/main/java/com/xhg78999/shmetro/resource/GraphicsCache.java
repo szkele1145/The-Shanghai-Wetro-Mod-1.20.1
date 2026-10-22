@@ -29,10 +29,108 @@ import org.apache.commons.io.IOUtils;
 
 public class GraphicsCache {
     public static final GraphicsCache CACHE = new GraphicsCache();
+    /**
+     * 动态纹理缓存的字节预算(估算值)。
+     *
+     * <p>{@link #dynamicResources} 原本是<b>无界</b>的, 而缓存 key 里含有会变的维度:
+     * RMG 的线路图/目的地图 key 末尾带着 {@code width}(由 PSD 顶板在世界里的
+     * <b>连续排布长度</b>推算), 玩家每改一次排布就是一个新 key;
+     * 线路方图 key 带着所选线路 id 的组合。旧 key 的条目<b>永远不会被释放</b>
+     * —— 只有「同一个 key 重新生成」或 F3+T 资源重载才会释放。
+     * 每个条目都持有一张 {@link NativeImage}(堆外内存, 不受 GC 管理)
+     * 加一份 GL 纹理, 进站图一张就有 1816x400x4 ≈ 2.9 MB
+     * ⇒ 长时间游玩会持续涨内存, 直到玩家手动重载资源。</p>
+     *
+     * <p>这里给出预算, 超出后按 LRU 淘汰最久未用的条目并立即释放。
+     * 64 MB 足够容纳正常游玩用到的全部站台贴图(实测几十张), 
+     * 又能在异常增长时兜住内存。</p>
+     */
+    private static final long MAX_DYNAMIC_BYTES = 64L * 1024 * 1024;
+    /** 条目数硬上限: 防止大量极小贴图绕过字节预算。 */
+    private static final int MAX_DYNAMIC_ENTRIES = 512;
+    /**
+     * 淘汰时保护「最近使用」的条目数。
+     *
+     * <p>渲染是在一帧里逐个方块实体进行的: 若把本帧稍后要画的纹理淘汰掉,
+     * 那一帧就会画成缺失贴图(紫黑格), 下一帧才重新生成。保护最近若干条
+     * 可以彻底避开这种同帧自伤, 代价只是预算可能被轻微超出。</p>
+     */
+    private static final int PROTECTED_RECENT_ENTRIES = 16;
     // 纹理 register/release 必须在主线程执行(对齐 MTR ClientCache.resourceRegistryQueue 架构)。
     // 原实现在 ForkJoinPool 异步线程直接调 TextureManager.register, 与主线程并发读写
     // 普通 HashMap —— 两处线程安全隐患。队列由主线程 getResource/reloadDynamic 消费。
     private final ConcurrentHashMap<String, DynamicResource> dynamicResources = new ConcurrentHashMap();
+    /** 当前缓存占用的估算字节数, 用于触发 LRU 淘汰。 */
+    private final java.util.concurrent.atomic.AtomicLong dynamicBytes = new java.util.concurrent.atomic.AtomicLong();
+    /** 单调递增的访问序号, 充当 LRU 的时间戳。 */
+    private final java.util.concurrent.atomic.AtomicLong accessCounter = new java.util.concurrent.atomic.AtomicLong();
+    /** 每个 key 的最近访问序号, 数值最小者最先被淘汰。 */
+    private final ConcurrentHashMap<String, Long> accessOrder = new ConcurrentHashMap();
+
+    /**
+     * 记录一次访问并按预算淘汰旧条目。
+     *
+     * <p><b>只能在主线程调用</b>(getResource 的入口处): 淘汰动作会把旧纹理的
+     * release 排进主线程队列, 而主线程队列的消费点就在 getResource 里 ——
+     * 在异步线程做这件事会与主线程的 register/release 竞争。</p>
+     *
+     * <p>淘汰保护: 最近访问的若干条不参与淘汰, 避免同帧自伤(本帧稍后
+     * 要画的纹理被本帧开头的淘汰踢掉)。</p>
+     */
+    private void recordAccessAndEvict(String key, DynamicResource resource) {
+        accessOrder.put(key, accessCounter.incrementAndGet());
+        // 字节数只在「创建条目」时加、「淘汰/替换/重载」时减,
+        // 这里不能重复加(每次命中都加会让计数虚高数倍)。
+        long bytes = dynamicBytes.get();
+        int entries = dynamicResources.size();
+        if (bytes <= MAX_DYNAMIC_BYTES && entries <= MAX_DYNAMIC_ENTRIES) {
+            return;
+        }
+        // 按 accessOrder 升序找候选: 最久未用的先淘汰。
+        // 末尾 PROTECTED_RECENT_ENTRIES 条是最近用的, 保护不动,
+        // 避免同帧自伤(本帧稍后要画的纹理被本帧开头的淘汰踢掉)。
+        java.util.List<String> candidates = new java.util.ArrayList<>();
+        dynamicResources.keySet().forEach(k -> {
+            Long ord = accessOrder.get(k);
+            if (ord != null) {
+                candidates.add(k);
+            }
+        });
+        candidates.sort(java.util.Comparator.comparingLong(k -> {
+            Long ord = accessOrder.get(k);
+            return ord == null ? Long.MAX_VALUE : ord;
+        }));
+        int evictable = candidates.size() - PROTECTED_RECENT_ENTRIES;
+        if (evictable <= 0) {
+            return;
+        }
+        int freedEntries = 0;
+        long freedBytes = 0;
+        for (int i = 0; i < evictable; i++) {
+            String k = candidates.get(i);
+            DynamicResource dr = dynamicResources.get(k);
+            if (dr == null || dr == DEFAULT_WHITE_DYN_RESOURCE) {
+                continue;
+            }
+            // 原子 remove(key, value): 只有一个调用方能赢, 赢家才排队释放纹理,
+            // 杜绝并发下同一张纹理被 release 两次的可能。
+            if (!dynamicResources.remove(k, dr)) {
+                continue;
+            }
+            accessOrder.remove(k);
+            dynamicBytes.addAndGet(-dr.estimatedBytes);
+            this.textureRegistryQueue.add(dr::remove);
+            freedBytes += dr.estimatedBytes;
+            freedEntries++;
+            if (dynamicBytes.get() <= MAX_DYNAMIC_BYTES && dynamicResources.size() <= MAX_DYNAMIC_ENTRIES - PROTECTED_RECENT_ENTRIES) {
+                break;
+            }
+        }
+        if (freedEntries > 0) {
+            Main.LOGGER.info(String.format("SHM GraphicsCache: evicted %d dynamic texture(s), freed ~%.1f MB (cache ~%.1f MB, %d entries)",
+                freedEntries, freedBytes / 1048576.0, dynamicBytes.get() / 1048576.0, dynamicResources.size()));
+        }
+    }
     private final ConcurrentLinkedQueue<Runnable> textureRegistryQueue = new ConcurrentLinkedQueue();
     /**
      * 已生成、但还没在主线程注册进 TextureManager 的纹理。
@@ -114,6 +212,10 @@ public class GraphicsCache {
             }
         }
         this.dynamicResources.clear();
+        // 记账与访问序一并清空: 旧条目全部被释放了, 字节数必须归零,
+        // 否则重载后计数一直虚高, 淘汰逻辑会立刻误触发。
+        this.dynamicBytes.set(0L);
+        this.accessOrder.clear();
         // 关闭所有「已生成但还没注册进 TextureManager」的纹理。
         // 它们的注册任务刚刚被清空丢弃, 现在必须释放堆外内存。
         for (DynamicTexture dt : this.pendingTextures) {
@@ -160,9 +262,15 @@ public class GraphicsCache {
         if (dynamicResource != null) {
             // 占位(DEFAULT)存在时同样直接返回: 生成中不重复触发,
             // 生成失败则保持占位(与 MTR 原版行为一致, 不重试)。
+            //
+            // 命中即算一次使用: 记录 LRU 访问序并按预算淘汰旧条目。
+            // 缓存 key 含有会变的维度(RMG 的 width、线路图 id 组合),
+            // 玩家改一次排布就是一个新 key, 旧条目原本永远不释放。
+            this.recordAccessAndEvict(key, dynamicResource);
             return dynamicResource;
         }
         this.dynamicResources.put(key, DEFAULT_WHITE_DYN_RESOURCE);
+        accessOrder.put(key, accessCounter.incrementAndGet());
         final String keyFinal = key;
         final long epoch = this.reloadEpoch.get();
         CompletableFuture.runAsync(() -> {
@@ -189,6 +297,8 @@ public class GraphicsCache {
             DynamicResource staticTextureProviderOld = this.dynamicResources.get(keyFinal);
             if (staticTextureProviderOld != null && staticTextureProviderOld != DEFAULT_WHITE_DYN_RESOURCE) {
                 this.textureRegistryQueue.add(staticTextureProviderOld::remove);
+                // 旧条目被替换: 减掉它的记账, 免得字节数只增不减。
+                this.dynamicBytes.addAndGet(-staticTextureProviderOld.estimatedBytes);
             }
             if (nativeImage == null) {
                 dynamicResourceNew = DEFAULT_WHITE_DYN_RESOURCE;
@@ -215,8 +325,17 @@ public class GraphicsCache {
                     this.pendingTextures.remove(dynamicTexture);
                 });
                 dynamicResourceNew = new DynamicResource(resourceLocation, dynamicTexture);
+                // 记账: 纹理真正生成后才知道它占多少字节。
+                // (命中缓存的条目在 recordAccessAndEvict 里已记过一次,
+                //  这里是首次创建, 之前只有占位条目, 没记过字节。)
+                this.dynamicBytes.addAndGet(dynamicResourceNew.estimatedBytes);
             }
             this.dynamicResources.put(keyFinal, dynamicResourceNew);
+            // 刷新访问序: 占位条目的序号是「占位创建时」的, 若生成期间别的 key
+            // 被大量访问, 新纹理的序号就显得很旧 ⇒ 超预算时会被优先淘汰,
+            // 玩家刚等到的图立刻变紫黑格再重新生成(抖动)。异步线程更新
+            // ConcurrentHashMap + AtomicLong 是安全的。
+            accessOrder.put(keyFinal, accessCounter.incrementAndGet());
         });
         return DEFAULT_WHITE_DYN_RESOURCE;
     }
@@ -304,6 +423,8 @@ public class GraphicsCache {
         public final int width;
         public final int height;
         public final ResourceLocation resourceLocation;
+        /** 本条目占用的估算字节数(width*height*4, 与 NativeImage 的 RGBA 布局一致)。 */
+        public final long estimatedBytes;
 
         public DynamicResource(ResourceLocation resourceLocation, DynamicTexture dynamicTexture) {
             this.resourceLocation = resourceLocation;
@@ -320,6 +441,7 @@ public class GraphicsCache {
                 this.width = 16;
                 this.height = 16;
             }
+            this.estimatedBytes = (long)this.width * (long)this.height * 4L;
         }
 
         /**
