@@ -196,7 +196,11 @@ public class RMGMain {
                 }
             });
         }
-        return res.stream().sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).collect(Collectors.toList());
+        return res.stream().filter(Objects::nonNull).sorted((route1, route2) -> {
+            String n1 = route1.name == null ? "" : route1.name;
+            String n2 = route2.name == null ? "" : route2.name;
+            return CHINA_COLLATOR.compare(n1, n2);
+        }).collect(Collectors.toList());
     }
 
     public static boolean isDigitLine(String name) {
