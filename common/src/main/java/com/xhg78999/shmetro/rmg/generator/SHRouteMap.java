@@ -90,7 +90,14 @@ public class SHRouteMap {
                     g2d.setColor(Color.GRAY);
                 }
                 g2d.fillRect(basic - 6, 341, 12, 24);
-                SHRouteMap.drawStation(g2d, direction, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), line, basic - 6, i == nowpos, i > nowpos);
+                // 【1.1.82 补 null 站守卫】getStationFromPlatform 对未注册的
+                // platformId 返回 null, 原实现直接把 null 传给 drawStation,
+                // 在 drawStation 里 now.id 解引用时 NPE -> 整张线路图白图。
+                // 该站数据缺失时跳过绘制此站(其余站不受影响)。
+                Station stn1 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                if (stn1 != null) {
+                    SHRouteMap.drawStation(g2d, direction, stn1, line, basic - 6, i == nowpos, i > nowpos);
+                }
                 basic += SHRouteMap.calculateInterval(pids.size(), width);
             }
         } else {
@@ -107,7 +114,11 @@ public class SHRouteMap {
                     g2d.setColor(Color.GRAY);
                 }
                 g2d.fillRect(basic - 6, 341, 12, 24);
-                SHRouteMap.drawStation(g2d, direction, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), line, basic + 6, i == nowpos, i < nowpos);
+                // 同上: null 站跳过绘制。
+                Station stn2 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                if (stn2 != null) {
+                    SHRouteMap.drawStation(g2d, direction, stn2, line, basic + 6, i == nowpos, i < nowpos);
+                }
                 if (i == nowpos) {
                     g2d.setColor(Color.RED);
                     GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(17.0f), "\u672c\u7ad9", basic, 383, "middle");

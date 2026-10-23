@@ -99,7 +99,11 @@ public class SHRouteMapLoopline {
                     }
                     g2d.setColor(new Color(line.color));
                     g2d.fillRect(228 + (i + 1) * ym, (int)(347.0 - (double)((i + 1) * ym) * 0.54), 34, 12);
-                    SHRouteMapLoopline.drawStationVLeft(g2d, direction, line, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), ym * (i + 1), i == nowpos);
+                    // 【1.1.82 补 null 站守卫】null 站跳过绘制。
+                    Station stnv1 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                    if (stnv1 != null) {
+                        SHRouteMapLoopline.drawStationVLeft(g2d, direction, line, stnv1, ym * (i + 1), i == nowpos);
+                    }
                     continue;
                 }
                 if (i >= lpad && i < pids.size() - lpad) {
@@ -110,7 +114,10 @@ public class SHRouteMapLoopline {
                     }
                     g2d.setColor(new Color(line.color));
                     g2d.fillRect(base - 6, 244, 12, 24);
-                    SHRouteMapLoopline.drawStation(g2d, direction, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), line, base, i == nowpos);
+                    Station stnLoop1 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                    if (stnLoop1 != null) {
+                        SHRouteMapLoopline.drawStation(g2d, direction, stnLoop1, line, base, i == nowpos);
+                    }
                     continue;
                 }
                 ym = Math.round(150.0f / (float)(lpad + 1));
@@ -120,7 +127,10 @@ public class SHRouteMapLoopline {
                 }
                 g2d.setColor(new Color(line.color));
                 g2d.fillRect(width - 412 + (pids.size() - i) * ym, (int)(347.0 - (double)((pids.size() - i) * ym) * 0.54), 34, 12);
-                SHRouteMapLoopline.drawStationVRight(g2d, direction, line, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), ym * (pids.size() - i), width, i == nowpos);
+                Station stnLoopV1 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                if (stnLoopV1 != null) {
+                    SHRouteMapLoopline.drawStationVRight(g2d, direction, line, stnLoopV1, ym * (pids.size() - i), width, i == nowpos);
+                }
             }
         } else {
             int lpad = SHRouteMapLoopline.getLeftAndRight(pids.size());
@@ -130,7 +140,10 @@ public class SHRouteMapLoopline {
                     ym = Math.round(150.0f / (float)(lpad + 1));
                     g2d.setColor(new Color(line.color));
                     g2d.fillRect(378 - (i + 1) * ym, (int)(347.0 - (double)((i + 1) * ym) * 0.54), 34, 12);
-                    SHRouteMapLoopline.drawStationVLeft(g2d, direction, line, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), ym * (i + 1), i == nowpos);
+                    Station stnv2 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                    if (stnv2 != null) {
+                        SHRouteMapLoopline.drawStationVLeft(g2d, direction, line, stnv2, ym * (i + 1), i == nowpos);
+                    }
                     continue;
                 }
                 if (i >= lpad && i < pids.size() - lpad) {
@@ -141,13 +154,19 @@ public class SHRouteMapLoopline {
                     }
                     g2d.setColor(new Color(line.color));
                     g2d.fillRect(base - 6, 244, 12, 24);
-                    SHRouteMapLoopline.drawStation(g2d, direction, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), line, base, i == nowpos);
+                    Station stnLoop2 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                    if (stnLoop2 != null) {
+                        SHRouteMapLoopline.drawStation(g2d, direction, stnLoop2, line, base, i == nowpos);
+                    }
                     continue;
                 }
                 ym = Math.round(150.0f / (float)(lpad + 1));
                 g2d.setColor(new Color(line.color));
                 g2d.fillRect(width - 262 - (pids.size() - i) * ym, (int)(347.0 - (double)((pids.size() - i) * ym) * 0.54), 34, 12);
-                SHRouteMapLoopline.drawStationVRight(g2d, direction, line, RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId), ym * (pids.size() - i), width, i == nowpos);
+                Station stnLoopV2 = RMGMain.getStationFromPlatform(((Route.RoutePlatform)pids.get((int)i)).platformId);
+                if (stnLoopV2 != null) {
+                    SHRouteMapLoopline.drawStationVRight(g2d, direction, line, stnLoopV2, ym * (pids.size() - i), width, i == nowpos);
+                }
             }
         }
     }
