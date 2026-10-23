@@ -335,9 +335,10 @@ implements IGui {
     }
 
     private void setPage(int newPage) {
-        // 【1.1.85 保底 totalPages>=1】loopSigns 在 allSignIds 为空(资源包缺自定义
-        // 指示牌且内置 SignType 枚举为 0, 理论极端)时返回 0, clamp(x, 0, -1) 会
-        // 反转成 -1 页 -> 翻页按钮状态错乱。保底 1 页, 空界面也无害。
+        // 【1.1.87 保底 totalPages>=1】
+        if (this.totalPages < 1) {
+            this.totalPages = 1;
+        }
         this.page = Mth.clamp((int)newPage, (int)0, (int)Math.max(this.totalPages - 1, 0));
         this.buttonPrevPage.visible = this.editingIndex >= 0 && this.page > 0;
         this.buttonNextPage.visible = this.editingIndex >= 0 && this.page < this.totalPages - 1;
