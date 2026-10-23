@@ -37,7 +37,7 @@ public class ExtensionGraphics {
     private static NativeImage getSHRoutesI(List<Long> routeIds) throws IOException {
         ByteArrayInputStream ist;
         int i;
-        List<Route> routes = routeIds.stream().map(ClientData.DATA_CACHE.routeIdMap::get).sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).toList();
+        List<Route> routes = routeIds.stream().map(ClientData.DATA_CACHE.routeIdMap::get).filter(java.util.Objects::nonNull).sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).toList();
         int width = 15;
         boolean dlflag = false;
         ArrayList<String> blocks = new ArrayList<String>();
