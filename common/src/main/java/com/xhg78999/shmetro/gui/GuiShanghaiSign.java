@@ -103,7 +103,11 @@ implements IGui {
                 Collections.sort(platforms);
                 Stream<DataConverter> platformStream = platforms.stream().map(platform -> {
                     String platformName = platform.name;
-                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().map(route -> ((ClientCache.PlatformRouteDetails.StationDetails)route.stationDetails.get((int)(route.stationDetails.size() - 1))).stationName).collect(Collectors.toList())), 0);
+                    // stationDetails 为空时原实现 get(size-1) = get(-1) 会抛
+                    // IndexOutOfBoundsException。该异常被外层 catch 吃掉, 后果是
+                    // 整个站点的出入口/站台/线路/换乘站列表全部丢失(不只是这一条线路),
+                    // 玩家看到空白的牌子编辑界面。这里跳过空列表的线路。
+                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().filter(route -> !route.stationDetails.isEmpty()).map(route -> ((ClientCache.PlatformRouteDetails.StationDetails)route.stationDetails.get((int)(route.stationDetails.size() - 1))).stationName).collect(Collectors.toList())), 0);
                 });
                 List<NameColorDataBase> platformList = this.platformsForList;
                 Objects.requireNonNull(platformList);
