@@ -29,6 +29,15 @@ extends BlockEntityClientSerializableMapper {
             com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃超长的 GD 编号 (len=" + raw.length() + ")");
             raw = raw.substring(0, MAX_CODE_LENGTH);
         }
+        // 【1.1.86 过滤控制字符】防止 NBT 被篡改导致渲染/聊天异常
+        StringBuilder sb = new StringBuilder(raw.length());
+        for (int i = 0; i < raw.length(); ++i) {
+            char c = raw.charAt(i);
+            if (c >= 32 && c != 127) {
+                sb.append(c);
+            }
+        }
+        raw = sb.toString();
         this.code = raw.isEmpty() ? "GD 000000" : raw;
     }
 }
