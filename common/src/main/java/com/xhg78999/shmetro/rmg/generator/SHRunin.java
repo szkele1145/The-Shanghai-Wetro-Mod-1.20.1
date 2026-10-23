@@ -86,6 +86,9 @@ public class SHRunin {
     }
 
     private static void drawCurrentText(Graphics2D g2d, boolean direction, Station next, Station prev, Station now, Route line) {
+        // 【1.1.83 补 null 站守卫】now 可能为 null（平台站点映射缺失时 getStationFromPlatform 返回 null）。
+        // 原实现 RMGMain.getStationName(null) 返回 "" 已有保护, 但为保险起见直接跳过绘制也行。
+        // 此处依赖 getStationName(null)="", 保持最小改动。
         Font fontCjk = GraphicsCache.CACHE.fontCjk.deriveFont(112.0f);
         Font fontEng = GraphicsCache.CACHE.font.deriveFont(36.0f);
         g2d.setColor(Color.BLACK);
