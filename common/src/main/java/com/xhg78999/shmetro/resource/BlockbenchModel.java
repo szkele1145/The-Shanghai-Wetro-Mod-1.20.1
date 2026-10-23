@@ -27,9 +27,9 @@ extends EntityModel<Entity> {
     public void parseBBModel(String raw) {
         JsonObject model = (JsonObject)JsonParser.parseString((String)raw);
         try {
-            JsonObject resolution = model.getAsJsonObject("resolution");
-            int textureWidth = resolution.get("width").getAsInt();
-            int textureHeight = resolution.get("height").getAsInt();
+            JsonObject resolution = model.has("resolution") ? model.getAsJsonObject("resolution") : null;
+            int textureWidth = (resolution != null && resolution.has("width")) ? resolution.get("width").getAsInt() : 16;
+            int textureHeight = (resolution != null && resolution.has("height")) ? resolution.get("height").getAsInt() : 16;
             ModelDataWrapper modelDataWrapper = new ModelDataWrapper((Model)this, textureWidth, textureHeight);
             this.bone = new ModelMapper(modelDataWrapper);
             model.getAsJsonArray("elements").forEach(element -> {
