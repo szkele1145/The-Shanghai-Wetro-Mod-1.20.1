@@ -180,7 +180,10 @@ IBlock {
 
     private BlockPos findEndWithDirection(Level world, BlockPos startPos, Direction direction, boolean allowOpposite) {
         int i = 0;
-        while (true) {
+        // 循环步数上限: 无界 while 沿直线一直查到区块边界甚至更远,
+        // 极端排布(被破坏方块拼接的环)会让主线程卡死。正常牌子最长 13 格,
+        // 64 已是宽松上限。
+        while (i < 64) {
             BlockPos checkPos;
             BlockState checkState;
             if ((checkState = world.getBlockState(checkPos = startPos.relative(direction.getOpposite(), i))).getBlock() instanceof BlockShanghaiSign) {
@@ -193,6 +196,7 @@ IBlock {
             }
             ++i;
         }
+        return null;
     }
 
     public static class TileEntityRailwaySign
