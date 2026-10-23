@@ -46,7 +46,9 @@ extends PacketTrainDataBase {
         }
         String[] signIds = new String[signLength];
         for (int i = 0; i < signLength; ++i) {
-            String signId = packet.readUtf(Short.MAX_VALUE);
+            // 与 BlockShanghaiSign.MAX_SIGN_ID_LENGTH 保持一致, 避免恶意客户端
+            // 发送超长 signId 被同步广播 + 逐字渲染。
+            String signId = packet.readUtf(256);
             signIds[i] = signId.isEmpty() ? null : signId;
         }
         // 距离校验: signPos 完全由客户端提供, 原实现照单全收 ⇒ 恶意客户端
