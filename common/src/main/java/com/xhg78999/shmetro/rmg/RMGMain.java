@@ -57,14 +57,11 @@ public class RMGMain {
 
 
     public static NativeImage getRunin(long platformId, boolean hasLeft, boolean flip) {
-        Route route = null;
-        try {
-            route = RMGMain.getRouteStream(platformId).get(0);
-        }
-        catch (Exception e) {
-            com.xhg78999.shmetro.Main.LOGGER.catching(e);
+        List<Route> routeList = RMGMain.getRouteStream(platformId);
+        if (routeList.isEmpty()) {
             return null;
         }
+        Route route = routeList.get(0);
         Station now = RMGMain.getStationFromPlatform(platformId);
         Station past = RMGMain.getStationPast(route, platformId);
         Station next = RMGMain.getStationNext(route, platformId);
@@ -78,14 +75,11 @@ public class RMGMain {
     }
 
     public static NativeImage getDestination(long platformId, boolean hasLeft, boolean flip, int width) {
-        Route route = null;
-        try {
-            route = RMGMain.getRouteStream(platformId).get(0);
-        }
-        catch (Exception e) {
-            com.xhg78999.shmetro.Main.LOGGER.catching(e);
+        List<Route> routeList = RMGMain.getRouteStream(platformId);
+        if (routeList.isEmpty()) {
             return null;
         }
+        Route route = routeList.get(0);
         Platform platform = (Platform)ClientData.DATA_CACHE.platformIdMap.get(platformId);
         try {
             return SHDestination.generate(hasLeft, flip, route, width, platform);
@@ -97,13 +91,11 @@ public class RMGMain {
     }
 
     public static NativeImage getRailMap(long platformId, boolean hasLeft, boolean flip, int width) {
-        Route route = null;
-        try {
-            route = RMGMain.getRouteStream(platformId).get(0);
-        }
-        catch (Exception e) {
+        List<Route> routeList = RMGMain.getRouteStream(platformId);
+        if (routeList.isEmpty()) {
             return null;
         }
+        Route route = routeList.get(0);
         Station now = RMGMain.getStationFromPlatform(platformId);
         int nowPos = route.getPlatformIdIndex(platformId);
         try {
