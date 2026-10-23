@@ -20,9 +20,16 @@ extends BlockEntityClientSerializableMapper {
         super.writeCompoundTag(nbt);
     }
 
+    private static final int MAX_CODE_LENGTH = 16;
+
     public void readCompoundTag(CompoundTag nbt) {
         super.readCompoundTag(nbt);
-        this.code = nbt.getString("code");
+        String raw = nbt.getString("code");
+        if (raw.length() > MAX_CODE_LENGTH) {
+            com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃超长的 GD 编号 (len=" + raw.length() + ")");
+            raw = raw.substring(0, MAX_CODE_LENGTH);
+        }
+        this.code = raw.isEmpty() ? "GD 000000" : raw;
     }
 }
 
