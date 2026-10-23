@@ -195,12 +195,15 @@ public class RMGMain {
         HashSet<ClientCache.ColorNameTuple> res = new HashSet<>();
         HashSet<Integer> colorCache = new HashSet<Integer>();
         colorCache.add(route.color);
-        ((Map<Integer, ClientCache.ColorNameTuple>) ClientData.DATA_CACHE.stationIdToRoutes.get(stationId)).forEach((rid, rc) -> {
-            if (!colorCache.contains(rc.color)) {
-                colorCache.add(rc.color);
-                res.add(rc);
-            }
-        });
+        Map<Integer, ClientCache.ColorNameTuple> routeMap = (Map<Integer, ClientCache.ColorNameTuple>) ClientData.DATA_CACHE.stationIdToRoutes.get(stationId);
+        if (routeMap != null) {
+            routeMap.forEach((rid, rc) -> {
+                if (rc != null && !colorCache.contains(rc.color)) {
+                    colorCache.add(rc.color);
+                    res.add(rc);
+                }
+            });
+        }
         return res.stream().sorted((route1, route2) -> CHINA_COLLATOR.compare(route1.name, route2.name)).collect(Collectors.toList());
     }
 
