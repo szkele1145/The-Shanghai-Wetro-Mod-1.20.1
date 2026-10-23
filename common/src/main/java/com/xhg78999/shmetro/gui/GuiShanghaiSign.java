@@ -172,11 +172,11 @@ implements IGui {
         xOffsetSmall = (this.width - 16 * (this.columns * 4 + 3)) / 2 + 16;
         int xOffsetBig = xOffsetSmall + 16 * (this.columns + 1);
         int finalXOffsetSmall = xOffsetSmall;
-        this.totalPages = this.loopSigns((index, x, y, isBig) -> {
+        this.totalPages = Math.max(this.loopSigns((index, x, y, isBig) -> {
             IDrawing.setPositionAndWidth((AbstractWidget)this.buttonsSelection[index], (int)((isBig ? xOffsetBig : finalXOffsetSmall) + x), (int)(62 + y), (int)(isBig ? 48 : 16));
             this.buttonsSelection[index].visible = false;
             this.addDrawableChild((AbstractWidget)this.buttonsSelection[index]);
-        }, true);
+        }, true), 1);
         int buttonClearX = (this.width - 144 - 80) / 2;
         int buttonY = this.height - 40;
         IDrawing.setPositionAndWidth((AbstractWidget)this.buttonClear, (int)buttonClearX, (int)buttonY, (int)144);
@@ -335,7 +335,10 @@ implements IGui {
     }
 
     private void setPage(int newPage) {
-        this.page = Mth.clamp((int)newPage, (int)0, (int)(this.totalPages - 1));
+        // 【1.1.85 保底 totalPages>=1】loopSigns 在 allSignIds 为空(资源包缺自定义
+        // 指示牌且内置 SignType 枚举为 0, 理论极端)时返回 0, clamp(x, 0, -1) 会
+        // 反转成 -1 页 -> 翻页按钮状态错乱。保底 1 页, 空界面也无害。
+        this.page = Mth.clamp((int)newPage, (int)0, (int)Math.max(this.totalPages - 1, 0));
         this.buttonPrevPage.visible = this.editingIndex >= 0 && this.page > 0;
         this.buttonNextPage.visible = this.editingIndex >= 0 && this.page < this.totalPages - 1;
     }
