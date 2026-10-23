@@ -213,12 +213,28 @@ IBlock {
             return 128.0;
         }
 
+        // 防御性上限：NBT 可被恶意/损坏数据构造，避免超长字符串被同步广播 + 逐字渲染，
+        // 以及超大 id 集合撑爆内存。正常值远低于这些上限。
+        private static final int MAX_SIGN_ID_LENGTH = 256;
+        private static final int MAX_SELECTED_IDS = 1024;
+
         public void readCompoundTag(CompoundTag compoundTag) {
             this.selectedIds.clear();
-            Arrays.stream(compoundTag.getLongArray(KEY_SELECTED_IDS)).forEach(this.selectedIds::add);
+            long[] rawIds = compoundTag.getLongArray(KEY_SELECTED_IDS);
+            int idCount = Math.min(rawIds.length, MAX_SELECTED_IDS);
+            for (int i = 0; i < idCount; ++i) {
+                this.selectedIds.add(rawIds[i]);
+            }
             for (int i = 0; i < this.signIds.length; ++i) {
                 String signId = compoundTag.getString(KEY_SIGN_LENGTH + i);
-                this.signIds[i] = signId.isEmpty() ? null : signId;
+                if (signId.isEmpty()) {
+                    this.signIds[i] = null;
+                } else if (signId.length() > MAX_SIGN_ID_LENGTH) {
+                    com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃超长的 signId (len=" + signId.length() + ")");
+                    this.signIds[i] = null;
+                } else {
+                    this.signIds[i] = signId;
+                }
             }
         }
 
