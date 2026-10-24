@@ -49,7 +49,28 @@ extends PacketTrainDataBase {
             // 与 BlockShanghaiSign.MAX_SIGN_ID_LENGTH 保持一致, 避免恶意客户端
             // 发送超长 signId 被同步广播 + 逐字渲染。
             String signId = packet.readUtf(256);
-            signIds[i] = signId.isEmpty() ? null : signId;
+            if (signId.isEmpty()) {
+                signIds[i] = null;
+                continue;
+            }
+            // 【1.1.90 过滤控制字符】与 TileEntity.readCompoundTag 同标准
+            StringBuilder sb = new StringBuilder(signId.length());
+            for (int j = 0; j < signId.length(); ++j) {
+                char c = signId.charAt(j);
+                if (c >= 32 && c != 127) {
+                    sb.append(c);
+                }
+            }
+            String sanitized = sb.toString();
+            if (sanitized.isEmpty()) {
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃含控制字符的指示牌 signId(player=" + player.getName().getString() + ")");
+                signIds[i] = null;
+            } else if (sanitized.length() != signId.length()) {
+                com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 过滤指示牌 signId 中的控制字符(player=" + player.getName().getString() + ")");
+                signIds[i] = sanitized;
+            } else {
+                signIds[i] = signId;
+            }
         }
         // 距离校验: signPos 完全由客户端提供, 原实现照单全收 ⇒ 恶意客户端
         // 可以改写世界任意位置的指示牌。正常玩法下这个界面是右键指示牌
