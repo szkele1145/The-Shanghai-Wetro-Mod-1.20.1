@@ -237,7 +237,17 @@ IBlock {
                     com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 丢弃超长的 signId (len=" + signId.length() + ")");
                     this.signIds[i] = null;
                 } else {
-                    this.signIds[i] = signId;
+                    String sanitized = sanitizeSignId(signId);
+                    if (sanitized.isEmpty() || sanitized.length() != signId.length()) {
+                        if (sanitized.isEmpty()) {
+                            this.signIds[i] = null;
+                        } else {
+                            com.xhg78999.shmetro.Main.LOGGER.warn("SHM: 过滤指示牌 signId 中的控制字符");
+                            this.signIds[i] = sanitized;
+                        }
+                    } else {
+                        this.signIds[i] = signId;
+                    }
                 }
             }
         }
@@ -257,6 +267,23 @@ IBlock {
             }
             this.setChanged();
             this.syncData();
+        }
+
+        /**
+         * 【1.1.89】writeCompoundTag 对 null signId 写空串, 但 readCompoundTag
+         * 之外的位置(如旧存档手工编辑 NBT)可能写入非空但含控制字符的内容。
+         * 与 SHMPacketGDServer.containsControlCharacter 同标准: 读入时过滤,
+         * 防止逐字渲染时画出不发字形/渲染错乱。
+         */
+        private static String sanitizeSignId(String signId) {
+            StringBuilder sb = new StringBuilder(signId.length());
+            for (int i = 0; i < signId.length(); ++i) {
+                char c = signId.charAt(i);
+                if (c >= 32 && c != 127) {
+                    sb.append(c);
+                }
+            }
+            return sb.toString();
         }
 
         public Set<Long> getSelectedIds() {
