@@ -104,7 +104,8 @@ implements IGui {
                     if (destinations == null || destinations.isEmpty()) {
                         this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent, 0));
                     } else {
-                        this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent + " " + (String)destinations.get(0), 0));
+                        Object firstDest = destinations.get(0);
+                        this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent + " " + (firstDest == null ? "" : String.valueOf(firstDest)), 0));
                     }
                 });
                 ArrayList<mtr.data.Platform> platforms = new ArrayList<>(ClientData.DATA_CACHE.requestStationIdToPlatforms(station.id).values());
