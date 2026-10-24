@@ -115,7 +115,14 @@ implements IGui {
                     // IndexOutOfBoundsException。该异常被外层 catch 吃掉, 后果是
                     // 整个站点的出入口/站台/线路/换乘站列表全部丢失(不只是这一条线路),
                     // 玩家看到空白的牌子编辑界面。这里跳过空列表的线路。
-                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().filter(route -> !route.stationDetails.isEmpty()).map(route -> ((ClientCache.PlatformRouteDetails.StationDetails)route.stationDetails.get((int)(route.stationDetails.size() - 1))).stationName).collect(Collectors.toList())), 0);
+                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().filter(route -> route.stationDetails != null && !route.stationDetails.isEmpty()).map(route -> {
+                        List<?> details = route.stationDetails;
+                        Object last = details.get(details.size() - 1);
+                        if (last instanceof ClientCache.PlatformRouteDetails.StationDetails sd) {
+                            return sd.stationName;
+                        }
+                        return "";
+                    }).filter(s -> s != null && !s.isEmpty()).collect(Collectors.toList())), 0);
                 });
                 List<NameColorDataBase> platformList = this.platformsForList;
                 Objects.requireNonNull(platformList);
