@@ -128,8 +128,22 @@ implements IGui {
                 List<NameColorDataBase> platformList = this.platformsForList;
                 Objects.requireNonNull(platformList);
                 platformStream.forEach(platformList::add);
-                ClientData.DATA_CACHE.getAllRoutesIncludingConnectingStations(station).forEach((color, route) -> this.routesForList.add((NameColorDataBase)new DataConverter((long)route.color, route.name, route.color)));
-                ClientData.DATA_CACHE.getConnectingStationsIncludingThisOne(station).forEach(connectingStation -> this.stationsForList.add((NameColorDataBase)new DataConverter(connectingStation.id, connectingStation.name, connectingStation.color)));
+                java.util.Map<Integer, ?> allRoutes = ClientData.DATA_CACHE.getAllRoutesIncludingConnectingStations(station);
+                if (allRoutes != null) {
+                    allRoutes.forEach((color, route) -> {
+                        if (route instanceof mtr.data.Route r) {
+                            this.routesForList.add((NameColorDataBase)new DataConverter((long)r.color, r.name, r.color));
+                        }
+                    });
+                }
+                java.util.Set<?> connectingStations = ClientData.DATA_CACHE.getConnectingStationsIncludingThisOne(station);
+                if (connectingStations != null) {
+                    connectingStations.forEach(connectingStation -> {
+                        if (connectingStation instanceof mtr.data.Station cs) {
+                            this.stationsForList.add((NameColorDataBase)new DataConverter(cs.id, cs.name, cs.color));
+                        }
+                    });
+                }
             }
         }
         catch (Exception var8) {
