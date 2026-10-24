@@ -80,7 +80,11 @@ public class RMGMain {
             return null;
         }
         Route route = routeList.get(0);
+        // 【1.1.88 补 null 守卫】平台信息缺失时跳过生成, 避免下游 NPE
         Platform platform = (Platform)ClientData.DATA_CACHE.platformIdMap.get(platformId);
+        if (platform == null) {
+            return null;
+        }
         try {
             return SHDestination.generate(hasLeft, flip, route, width, platform);
         }

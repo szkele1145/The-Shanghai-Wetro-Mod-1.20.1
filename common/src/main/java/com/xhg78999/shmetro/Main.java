@@ -20,7 +20,7 @@ public class Main {
      * common/build.gradle 的 checkModVersion 任务会在二者不一致时直接让构建失败，
      * 避免发布出启动日志里版本号陈旧的产物。
      */
-    public static final String MOD_VERSION = "1.1.87";
+    public static final String MOD_VERSION = "1.1.88";
     public static final Logger LOGGER = LogManager.getLogger((String)"shmetro");
 
     public static void init(RegistriesWrapper registries) {
