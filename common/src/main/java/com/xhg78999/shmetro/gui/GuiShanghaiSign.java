@@ -97,7 +97,11 @@ implements IGui {
                 exitParents.sort(String::compareTo);
                 exitParents.forEach(exitParent -> {
                     List<String> destinations = exits.get(exitParent);
-                    this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent + " " + (destinations.size() > 0 ? (String)destinations.get(0) : ""), 0));
+                    if (destinations == null || destinations.isEmpty()) {
+                        this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent, 0));
+                    } else {
+                        this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent + " " + (String)destinations.get(0), 0));
+                    }
                 });
                 ArrayList<mtr.data.Platform> platforms = new ArrayList<>(ClientData.DATA_CACHE.requestStationIdToPlatforms(station.id).values());
                 Collections.sort(platforms);
