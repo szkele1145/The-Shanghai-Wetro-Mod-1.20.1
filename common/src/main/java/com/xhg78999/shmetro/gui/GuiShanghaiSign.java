@@ -92,7 +92,11 @@ implements IGui {
         try {
             Station station = RailwayData.getStation((Set)ClientData.STATIONS, (DataCache)ClientData.DATA_CACHE, (BlockPos)signPos);
             if (station != null) {
-                Map<String, List<String>> exits = station.getGeneratedExits();
+                Map<String, List<String>> exitsMap = station.getGeneratedExits();
+                if (exitsMap == null) {
+                    exitsMap = java.util.Collections.emptyMap();
+                }
+                final Map<String, List<String>> exits = exitsMap;
                 ArrayList<String> exitParents = new ArrayList<>(exits.keySet());
                 exitParents.sort(String::compareTo);
                 exitParents.forEach(exitParent -> {
