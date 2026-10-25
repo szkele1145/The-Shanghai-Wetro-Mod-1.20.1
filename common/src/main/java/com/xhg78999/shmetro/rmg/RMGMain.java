@@ -208,10 +208,16 @@ public class RMGMain {
     }
 
     public static boolean isDigitLine(String name) {
+        if (name == null) {
+            return false;
+        }
         return StringUtil.getCjkMain(name).contains("\u53f7\u7ebf");
     }
 
     public static String getDigitLine(String name) {
+        if (name == null) {
+            return "";
+        }
         return StringUtil.getCjkMain(name).replace("\u53f7\u7ebf", "");
     }
 }
