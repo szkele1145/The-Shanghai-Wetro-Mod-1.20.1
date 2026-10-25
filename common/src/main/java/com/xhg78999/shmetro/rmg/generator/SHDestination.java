@@ -122,7 +122,7 @@ public class SHDestination {
         g2d.setStroke(new BasicStroke(2.0f));
         g2d.drawOval(-60, 20, 120, 120);
         GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(100.0f), "\u7ad9\u53f0", 67, 120, "left");
-        GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(120.0f), platform.name, 0, 130, "middle");
+        GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(120.0f), platform.name == null ? "" : platform.name, 0, 130, "middle");
         g2d.translate(102 - x, -180);
     }
 }
