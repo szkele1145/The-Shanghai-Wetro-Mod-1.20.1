@@ -27,10 +27,12 @@ extends PacketTrainDataBase {
     public static void sendSHMSignIdsC2S(BlockPos signPos, Set<Long> selectedIds, String[] signIds) {
         FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeBlockPos(signPos);
-        packet.writeInt(selectedIds.size());
-        selectedIds.forEach(arg_0 -> ((FriendlyByteBuf)packet).writeLong(arg_0));
-        packet.writeInt(signIds.length);
-        for (String signType : signIds) {
+        java.util.Set<Long> ids = selectedIds == null ? java.util.Collections.emptySet() : selectedIds;
+        packet.writeInt(ids.size());
+        ids.forEach(arg_0 -> ((FriendlyByteBuf)packet).writeLong(arg_0));
+        String[] types = signIds == null ? new String[0] : signIds;
+        packet.writeInt(types.length);
+        for (String signType : types) {
             packet.writeUtf(signType == null ? "" : signType);
         }
         RegistryClient.sendToServer((ResourceLocation)SHMPacketDefine.PACKET_SHM_SIGN_TYPES, (FriendlyByteBuf)packet);
