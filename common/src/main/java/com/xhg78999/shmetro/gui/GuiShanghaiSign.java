@@ -112,7 +112,7 @@ implements IGui {
                 ArrayList<mtr.data.Platform> platforms = platformMap == null ? new ArrayList<mtr.data.Platform>() : new ArrayList<mtr.data.Platform>(platformMap.values());
                 Collections.sort(platforms);
                 Stream<DataConverter> platformStream = platforms.stream().map(platform -> {
-                    String platformName = platform.name;
+                    String platformName = platform.name == null ? "" : platform.name;
                     // stationDetails 为空时原实现 get(size-1) = get(-1) 会抛
                     // IndexOutOfBoundsException。该异常被外层 catch 吃掉, 后果是
                     // 整个站点的出入口/站台/线路/换乘站列表全部丢失(不只是这一条线路),
@@ -143,7 +143,8 @@ implements IGui {
                 if (allRoutes != null) {
                     allRoutes.forEach((color, route) -> {
                         if (route instanceof mtr.data.Route r) {
-                            this.routesForList.add((NameColorDataBase)new DataConverter((long)r.color, r.name, r.color));
+                            String routeName = r.name == null ? "" : r.name;
+                            this.routesForList.add((NameColorDataBase)new DataConverter((long)r.color, routeName, r.color));
                         }
                     });
                 }
@@ -151,7 +152,8 @@ implements IGui {
                 if (connectingStations != null) {
                     connectingStations.forEach(connectingStation -> {
                         if (connectingStation instanceof mtr.data.Station cs) {
-                            this.stationsForList.add((NameColorDataBase)new DataConverter(cs.id, cs.name, cs.color));
+                            String stationName = cs.name == null ? "" : cs.name;
+                            this.stationsForList.add((NameColorDataBase)new DataConverter(cs.id, stationName, cs.color));
                         }
                     });
                 }
