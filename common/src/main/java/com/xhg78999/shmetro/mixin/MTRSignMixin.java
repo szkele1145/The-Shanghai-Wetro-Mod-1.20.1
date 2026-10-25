@@ -61,7 +61,13 @@ public class MTRSignMixin {
         }
 
         final Map<Integer, ?> routesInStation = ClientData.DATA_CACHE.getAllRoutesIncludingConnectingStations(station);
-        final Set<Long> filtered = selectedIds.stream()
+        // 【1.1.96 null/空守卫】getAllRoutesIncludingConnectingStations 在数据未就绪时可能返回 null;
+        // selectedIds 理论上非 null, 但一并防御。此时没有可画的线路图, 直接取消渲染。
+        if (routesInStation == null || routesInStation.isEmpty()) {
+            ci.cancel();
+            return;
+        }
+        final Set<Long> filtered = selectedIds == null ? java.util.Collections.emptySet() : selectedIds.stream()
                 .filter(selectedId -> RailwayData.isBetween(selectedId, Long.MIN_VALUE, Long.MAX_VALUE))
                 .map(Long::intValue)
                 .filter(routesInStation::containsKey)
