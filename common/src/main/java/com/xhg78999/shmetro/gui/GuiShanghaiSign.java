@@ -108,7 +108,8 @@ implements IGui {
                         this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent + " " + (firstDest == null ? "" : String.valueOf(firstDest)), 0));
                     }
                 });
-                ArrayList<mtr.data.Platform> platforms = new ArrayList<>(ClientData.DATA_CACHE.requestStationIdToPlatforms(station.id).values());
+                java.util.Map<?, mtr.data.Platform> platformMap = ClientData.DATA_CACHE.requestStationIdToPlatforms(station.id);
+                ArrayList<mtr.data.Platform> platforms = platformMap == null ? new ArrayList<mtr.data.Platform>() : new ArrayList<mtr.data.Platform>(platformMap.values());
                 Collections.sort(platforms);
                 Stream<DataConverter> platformStream = platforms.stream().map(platform -> {
                     String platformName = platform.name;
@@ -116,8 +117,18 @@ implements IGui {
                     // IndexOutOfBoundsException。该异常被外层 catch 吃掉, 后果是
                     // 整个站点的出入口/站台/线路/换乘站列表全部丢失(不只是这一条线路),
                     // 玩家看到空白的牌子编辑界面。这里跳过空列表的线路。
-                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id).stream().filter(route -> route.stationDetails != null && !route.stationDetails.isEmpty()).map(route -> {
-                        List<?> details = route.stationDetails;
+                    java.util.List<?> routeListForPlatform = ClientData.DATA_CACHE.requestPlatformIdToRoutes(platform.id);
+                    if (routeListForPlatform == null || routeListForPlatform.isEmpty()) {
+                        return new DataConverter(platform.id, platformName, 0);
+                    }
+                    return new DataConverter(platform.id, platformName + " " + IGui.mergeStations(routeListForPlatform.stream().filter(route -> {
+                        if (!(route instanceof ClientCache.PlatformRouteDetails prd)) {
+                            return false;
+                        }
+                        return prd.stationDetails != null && !prd.stationDetails.isEmpty();
+                    }).map(route -> {
+                        ClientCache.PlatformRouteDetails prd = (ClientCache.PlatformRouteDetails) route;
+                        List<?> details = prd.stationDetails;
                         Object last = details.get(details.size() - 1);
                         if (last instanceof ClientCache.PlatformRouteDetails.StationDetails sd) {
                             return sd.stationName;
