@@ -72,7 +72,8 @@ implements IGui {
             ClientLevel world = Minecraft.getInstance().level;
             if (world != null && (gd = (BlockEntityGlobalPosition)world.getBlockEntity(this.pos)) != null) {
                 gd.syncData();
-                this.gdid.setValue(gd.code);
+                this.gdid.setValue(gd.code == null ? "" : gd.code);
+                this.trimToMaxLength(this.gdid.getValue());
                 this.tick();
             }
         }
