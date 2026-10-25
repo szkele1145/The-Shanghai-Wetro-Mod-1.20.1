@@ -100,6 +100,9 @@ implements IGui {
                 ArrayList<String> exitParents = new ArrayList<>(exits.keySet());
                 exitParents.sort(String::compareTo);
                 exitParents.forEach(exitParent -> {
+                    if (exitParent == null) {
+                        return;
+                    }
                     List<String> destinations = exits.get(exitParent);
                     if (destinations == null || destinations.isEmpty()) {
                         this.exitsForList.add((NameColorDataBase)new DataConverter(Station.serializeExit((String)exitParent), exitParent, 0));
