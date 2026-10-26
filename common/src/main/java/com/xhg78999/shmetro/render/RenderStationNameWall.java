@@ -42,7 +42,7 @@ implements BlockEntityRenderer<T> {
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockShanghaiStationNameOnWall.FACING);
             Station station = RailwayData.getStation((Set)ClientData.STATIONS, (DataCache)ClientData.DATA_CACHE, (BlockPos)pos);
             String[] cjkAndEng;
-            if (station == null) {
+            if (station == null || station.name == null) {
                 cjkAndEng = StringUtil.getCjkAndEngMain(Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).toString());
             } else {
                 cjkAndEng = StringUtil.getCjkAndEngMain(station.name);
