@@ -141,6 +141,9 @@ public class RMGMain {
     }
 
     public static Station getStationPast(Route route, long platformId) {
+        if (route == null || route.platformIds == null) {
+            return null;
+        }
         try {
             return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)(route.getPlatformIdIndex((long)platformId) - 1))).platformId);
         }
@@ -161,6 +164,9 @@ public class RMGMain {
     }
 
     public static Station getStationNext(Route route, long platformId) {
+        if (route == null || route.platformIds == null) {
+            return null;
+        }
         try {
             return RMGMain.getStationFromPlatform(((Route.RoutePlatform)route.platformIds.get((int)(route.getPlatformIdIndex((long)platformId) + 1))).platformId);
         }
