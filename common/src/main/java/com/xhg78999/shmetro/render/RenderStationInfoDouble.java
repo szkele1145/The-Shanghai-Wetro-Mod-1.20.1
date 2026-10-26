@@ -39,7 +39,7 @@ implements BlockEntityRenderer<T> {
             BlockPos pos = entity.getBlockPos();
             Direction facing = (Direction)IBlock.getStatePropertySafe((BlockGetter)world, (BlockPos)pos, (Property)BlockStationInfoBoardDouble.FACING);
             Station station = RailwayData.getStation((Set)ClientData.STATIONS, (DataCache)ClientData.DATA_CACHE, (BlockPos)pos);
-            String fullName = station == null ? Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).getString() : station.name;
+            String fullName = station == null || station.name == null ? Text.translatable((String)"gui.mtr.untitled", (Object[])new Object[0]).getString() : station.name;
             String[] cjkAndEng = StringUtil.getCjkAndEngMain(fullName);
             String cjkName = cjkAndEng[0];
             String engName = cjkAndEng[1];
