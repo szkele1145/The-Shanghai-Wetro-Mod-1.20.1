@@ -58,7 +58,7 @@ public class RMGMain {
 
     public static NativeImage getRunin(long platformId, boolean hasLeft, boolean flip) {
         List<Route> routeList = RMGMain.getRouteStream(platformId);
-        if (routeList.isEmpty()) {
+        if (routeList == null || routeList.isEmpty() || routeList.get(0) == null) {
             return null;
         }
         Route route = routeList.get(0);
@@ -76,7 +76,7 @@ public class RMGMain {
 
     public static NativeImage getDestination(long platformId, boolean hasLeft, boolean flip, int width) {
         List<Route> routeList = RMGMain.getRouteStream(platformId);
-        if (routeList.isEmpty()) {
+        if (routeList == null || routeList.isEmpty() || routeList.get(0) == null) {
             return null;
         }
         Route route = routeList.get(0);
@@ -96,7 +96,7 @@ public class RMGMain {
 
     public static NativeImage getRailMap(long platformId, boolean hasLeft, boolean flip, int width) {
         List<Route> routeList = RMGMain.getRouteStream(platformId);
-        if (routeList.isEmpty()) {
+        if (routeList == null || routeList.isEmpty() || routeList.get(0) == null) {
             return null;
         }
         Route route = routeList.get(0);
