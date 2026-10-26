@@ -22,6 +22,9 @@ import com.mojang.blaze3d.platform.NativeImage;
 
 public class SHRunin {
     public static NativeImage generate(boolean direction, Station next, Station prev, Station now, Route line, boolean flip) throws IOException {
+        if (line == null) {
+            throw new IOException("line is null");
+        }
         ByteArrayInputStream ist;
         int width = 1816;
         int height = 400;
