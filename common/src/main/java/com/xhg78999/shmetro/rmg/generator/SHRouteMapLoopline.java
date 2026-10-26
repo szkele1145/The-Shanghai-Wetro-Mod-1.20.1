@@ -27,6 +27,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SHRouteMapLoopline {
     public static NativeImage generate(boolean direction, boolean flip, Station now, Route line, int width, int nowpos) throws IOException {
+        if (line == null) {
+            throw new IOException("line is null");
+        }
         ByteArrayInputStream ist;
         int height = 400;
         // 宽度来自 PSD 顶板的连续排布长度, 越界值会让 BufferedImage
