@@ -261,8 +261,10 @@ IBlock {
 
         public void setData(Set<Long> selectedIds, String[] signTypes) {
             this.selectedIds.clear();
-            this.selectedIds.addAll(selectedIds);
-            if (this.signIds.length == signTypes.length) {
+            if (selectedIds != null) {
+                this.selectedIds.addAll(selectedIds);
+            }
+            if (signTypes != null && this.signIds.length == signTypes.length) {
                 System.arraycopy(signTypes, 0, this.signIds, 0, signTypes.length);
             }
             this.setChanged();
