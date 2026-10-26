@@ -50,9 +50,10 @@ public class ExtensionGraphics {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         for (i = 0; i < routes.size(); ++i) {
-            if (RMGMain.isDigitLine(routes.get((int)i).name)) {
+            String rname = routes.get((int)i).name;
+            if (RMGMain.isDigitLine(rname)) {
                 width += 90;
-                blocks.add(RMGMain.getDigitLine(routes.get((int)i).name));
+                blocks.add(RMGMain.getDigitLine(rname));
                 continue;
             }
             if (!dlflag) {
@@ -61,7 +62,7 @@ public class ExtensionGraphics {
                 dlflag = true;
             }
             width += 20;
-            width += Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(routes.get((int)i).name)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(routes.get((int)i).name)));
+            width += Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(rname)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(rname)));
         }
         // 【1.1.57 修 AWT 资源泄漏】上面的 1x1 探测图只用来量文字宽度,
         // 真正画图时会被换掉 —— 但它的 Graphics2D 从未 dispose()。
@@ -77,13 +78,14 @@ public class ExtensionGraphics {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         for (i = 0; i < routes.size(); ++i) {
-            if (RMGMain.isDigitLine(routes.get((int)i).name)) {
+            String rname2 = routes.get((int)i).name;
+            if (RMGMain.isDigitLine(rname2)) {
                 g2d.setColor(Color.WHITE);
                 g2d.fillRect(15 + width, 15, 80, 70);
                 g2d.setColor(new Color(routes.get((int)i).color));
                 g2d.fillRect(16 + width, 16, 76, 66);
                 g2d.setColor(GraphicsHelper.foreground(routes.get((int)i).color));
-                GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(72.0f), RMGMain.getDigitLine(routes.get((int)i).name), 15 + width / 2, 85, "middle");
+                GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(72.0f), RMGMain.getDigitLine(rname2), 15 + width / 2, 85, "middle");
                 width += 90;
                 continue;
             }
@@ -94,13 +96,13 @@ public class ExtensionGraphics {
                 width += Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(20.0f), "Line " + String.join((CharSequence)", ", blocks)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(36.0f), "\u53f7\u7ebf"));
                 dlflag = true;
             }
-            int dw = Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(routes.get((int)i).name)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(routes.get((int)i).name)));
+            int dw = Math.max(GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(rname2)), GraphicsHelper.measureImageText(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(rname2)));
             g2d.setColor(Color.WHITE);
             g2d.fillRect(15 + (width += 20), 15, dw + 20, 70);
             g2d.setColor(new Color(routes.get((int)i).color));
             g2d.fillRect(16 + width, 16, dw + 20, 66);
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(routes.get((int)i).name), 16 + width + dw / 2 + 10, 70, "middle");
-            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(routes.get((int)i).name), 16 + width + dw / 2 + 10, 85, "middle");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.fontCjk.deriveFont(28.0f), StringUtil.getCjkMain(rname2), 16 + width + dw / 2 + 10, 70, "middle");
+            GraphicsHelper.drawImageTextAlign(g2d, GraphicsCache.CACHE.font.deriveFont(18.0f), StringUtil.getEngMain(rname2), 16 + width + dw / 2 + 10, 85, "middle");
             width += dw;
         }
         g2d.dispose();
