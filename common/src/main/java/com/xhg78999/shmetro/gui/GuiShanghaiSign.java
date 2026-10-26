@@ -249,7 +249,8 @@ implements IGui {
             }
             for (xOffsetSmall = 0; xOffsetSmall < this.signIds.length; ++xOffsetSmall) {
                 if (this.signIds[xOffsetSmall] == null) continue;
-                RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, (Font)this.font, (BlockPos)this.signPos, (String)this.signIds[xOffsetSmall], (float)((float)(this.width - 32 * this.length) / 2.0f + (float)(xOffsetSmall * 32)), (float)0.0f, (float)32.0f, (float)RenderRailwaySign.getMaxWidth((String[])this.signIds, (int)xOffsetSmall, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])this.signIds, (int)xOffsetSmall, (boolean)true), this.selectedIds, (Direction)Direction.UP, (int)0, (textureId, x, y, size, flipTexture) -> {
+                java.util.Set<Long> sel2 = this.selectedIds == null ? java.util.Collections.emptySet() : this.selectedIds;
+                RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, (Font)this.font, (BlockPos)this.signPos, (String)this.signIds[xOffsetSmall], (float)((float)(this.width - 32 * this.length) / 2.0f + (float)(xOffsetSmall * 32)), (float)0.0f, (float)32.0f, (float)RenderRailwaySign.getMaxWidth((String[])this.signIds, (int)xOffsetSmall, (boolean)false), (float)RenderRailwaySign.getMaxWidth((String[])this.signIds, (int)xOffsetSmall, (boolean)true), sel2, (Direction)Direction.UP, (int)0, (textureId, x, y, size, flipTexture) -> {
                     guiGraphics.blit((ResourceLocation)textureId, (int)x, (int)y, 0.0f, 0.0f, (int)size, (int)size, (int)(flipTexture ? -size : size), (int)size);
                 });
             }
@@ -262,7 +263,8 @@ implements IGui {
                     CustomResources.CustomSign sign = SignCache.getSign(signId);
                     if (sign != null) {
                         boolean moveRight = sign.hasCustomText() && sign.flipCustomText;
-                        RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, this.font, this.signPos, signId, (isBig ? xOffsetBig : finalXOffsetSmall) + x + (moveRight ? 32 : 0), 62 + y, 16.0f, 2.0f, 2.0f, this.selectedIds, Direction.UP, 0, (textureId, x1, y1, size, flipTexture) -> guiGraphics.blit(textureId, (int)x1, (int)y1, 0.0f, 0.0f, (int)size, (int)size, (int)(flipTexture ? -size : size), (int)size));
+                        java.util.Set<Long> sel = this.selectedIds == null ? java.util.Collections.emptySet() : this.selectedIds;
+                        RenderRailwaySign.drawSign(guiGraphics.pose(), null, null, this.font, this.signPos, signId, (isBig ? xOffsetBig : finalXOffsetSmall) + x + (moveRight ? 32 : 0), 62 + y, 16.0f, 2.0f, 2.0f, sel, Direction.UP, 0, (textureId, x1, y1, size, flipTexture) -> guiGraphics.blit(textureId, (int)x1, (int)y1, 0.0f, 0.0f, (int)size, (int)size, (int)(flipTexture ? -size : size), (int)size));
                     }
                 }, false);
                 // 热路径: 每帧渲染, 直接拼接替代 String.format 的格式串解析
