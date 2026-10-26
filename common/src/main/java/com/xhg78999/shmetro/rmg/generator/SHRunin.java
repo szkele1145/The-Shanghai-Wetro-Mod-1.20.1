@@ -29,7 +29,7 @@ public class SHRunin {
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        if (line.circularState != Route.CircularState.NONE) {
+        if (line != null && line.platformIds != null && line.circularState != Route.CircularState.NONE) {
             // 【1.1.46】环线回退取站台时的两道防护:
             //   1) platformIds.size() < 2 时 line.platformIds.get(size-2) / get(1) 会越界;
             //      站台数为 1 的环线 (现实中不存在, 但 MTR 允许加载) 就会抛
@@ -40,10 +40,16 @@ public class SHRunin {
             // drawPrevStn / drawNextStn 已有 null 守卫, 会跳过对应面板,
             // 而不是整张图生成失败。
             if (prev == null && line.platformIds.size() >= 2) {
-                prev = RMGMain.getStationFromPlatform(((Route.RoutePlatform)line.platformIds.get((int)(line.platformIds.size() - 2))).platformId);
+                Object rp = line.platformIds.get((int)(line.platformIds.size() - 2));
+                if (rp instanceof Route.RoutePlatform rpp) {
+                    prev = RMGMain.getStationFromPlatform(rpp.platformId);
+                }
             }
             if (next == null && line.platformIds.size() >= 2) {
-                next = RMGMain.getStationFromPlatform(((Route.RoutePlatform)line.platformIds.get((int)1)).platformId);
+                Object rp2 = line.platformIds.get((int)1);
+                if (rp2 instanceof Route.RoutePlatform rpp2) {
+                    next = RMGMain.getStationFromPlatform(rpp2.platformId);
+                }
             }
         }
         SHRunin.drawGeneralStation(g2d, direction, next, prev, now, line, flip);
