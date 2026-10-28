@@ -196,7 +196,9 @@ public class RMGMain {
     public static List<ClientCache.ColorNameTuple> getInterchangeRoutes(long stationId, Route route) {
         HashSet<ClientCache.ColorNameTuple> res = new HashSet<>();
         HashSet<Integer> colorCache = new HashSet<Integer>();
-        colorCache.add(route.color);
+        if (route != null) {
+            colorCache.add(route.color);
+        }
         Map<Integer, ClientCache.ColorNameTuple> routeMap = (Map<Integer, ClientCache.ColorNameTuple>) ClientData.DATA_CACHE.stationIdToRoutes.get(stationId);
         if (routeMap != null) {
             routeMap.forEach((rid, rc) -> {
