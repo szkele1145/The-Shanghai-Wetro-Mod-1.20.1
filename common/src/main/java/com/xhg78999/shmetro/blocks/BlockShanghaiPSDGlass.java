@@ -10,7 +10,10 @@ extends BlockPSDGlass {
     public final BlockShanghaiPSDTop.EnumPSDTop top;
 
     public BlockShanghaiPSDGlass(BlockShanghaiPSDTop.EnumPSDTop top) {
-        super(114514);
+        // MTR BlockPSDGlass(int style) 的 style 只用于它自己的 asItem()
+        // 去选 PSD_GLASS_1/2; 本类完全覆写了 asItem()(见下), 该字段不可达。
+        // 上游此处写的是占位魔数 114514, 这里改为语义明确的 0, 行为零变化。
+        super(0);
         this.top = top;
     }
 
