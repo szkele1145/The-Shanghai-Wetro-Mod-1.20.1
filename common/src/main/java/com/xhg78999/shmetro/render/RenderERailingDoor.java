@@ -71,7 +71,12 @@ IBlock {
             });
             storedMatrixTransformations.add(matricesNew -> matricesNew.translate((double)(open * (float)(side ? -1 : 1)), 0.0, 0.0));
             if (!half) {
-                RenderTrains.scheduleRender((ResourceLocation)RAILING_TEX[this.type == 114514 ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
+                // 贴图索引: type 1 -> erailing_1_*, type 2 -> erailing_2_*。
+                // 原实现用魔数 114514 判 type==1, 而 MainClient 注册时传的
+                // 也是 114514/191981 —— 两处自洽但都是上游残留占位魔数,
+                // 与 BlockRailingDoor.type(1/2) 完全对不上。一旦有人把注册值
+                // 改成 1/2 对齐, 这里会静默选错贴图。此处一并统一。
+                RenderTrains.scheduleRender((ResourceLocation)RAILING_TEX[this.type == 1 ? 0 : 1][side ? 1 : 0], (boolean)false, (RenderTrains.QueuedRenderLayer)RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
                     storedMatrixTransformations.transform(matricesNew);
                     this.model.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 1.0f, 1.0f, 1.0f, 1.0f);
                     matricesNew.popPose();

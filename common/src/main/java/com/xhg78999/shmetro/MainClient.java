@@ -79,8 +79,8 @@ public class MainClient {
         RegistryClient.registerBlockRenderType((RenderType)RenderType.translucent(), (Block)((Block)Blocks.SH_PSD_TOP.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.translucent(), (Block)((Block)Blocks.IRON_FRAME.get()));
         RegistryClient.registerBlockRenderType((RenderType)RenderType.translucent(), (Block)((Block)Blocks.SECURITY_CHECK_POLE.get()));
-        RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.ERAILING_DOOR_TILE_ENTITY_1.get()), dispatcher -> new RenderERailingDoor((BlockEntityRenderDispatcher)dispatcher, 114514));
-        RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.ERAILING_DOOR_TILE_ENTITY_2.get()), dispatcher -> new RenderERailingDoor((BlockEntityRenderDispatcher)dispatcher, 191981));
+        RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.ERAILING_DOOR_TILE_ENTITY_1.get()), dispatcher -> new RenderERailingDoor((BlockEntityRenderDispatcher)dispatcher, 1));
+        RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.ERAILING_DOOR_TILE_ENTITY_2.get()), dispatcher -> new RenderERailingDoor((BlockEntityRenderDispatcher)dispatcher, 2));
         RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.SHM_SIGN_2_EVEN_TILE_ENTITY.get()), RenderShanghaiSign::new);
         RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.SHM_SIGN_2_ODD_TILE_ENTITY.get()), RenderShanghaiSign::new);
         RegistryClient.registerTileEntityRenderer((BlockEntityType)((BlockEntityType)BlockEntity.SHM_SIGN_3_EVEN_TILE_ENTITY.get()), RenderShanghaiSign::new);

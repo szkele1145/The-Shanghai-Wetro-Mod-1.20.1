@@ -64,6 +64,16 @@ extends EntityModel<Entity> {
     }
 
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        // 【1.1.92 加空值防护】parseBBModel 的异常被 catch 吞掉后 this.bone 仍是 null,
+        // 而 GraphicsCache.reload() 仍会把这个「构造完成但无骨」的模型 put 进 models 表
+        // (见 reload 里的 newModels.put(name, new BlockbenchModel(...)))。
+        // 各渲染器只判了 this.model == null(模型表里有没有这个 key),
+        // 没判 this.bone == null —— 拿到这种模型后这里直接 this.bone.render(...) -> NPE。
+        // 渲染热路径无 try/catch, 一次 NPE 打断整个渲染批次。
+        // 加守卫后行为与「模型缺失」一致: 静默跳过。
+        if (this.bone == null) {
+            return;
+        }
         this.bone.render(poseStack, buffer, 0.0f, 0.0f, 0.0f, 0.0f, packedLight, packedOverlay);
     }
 
