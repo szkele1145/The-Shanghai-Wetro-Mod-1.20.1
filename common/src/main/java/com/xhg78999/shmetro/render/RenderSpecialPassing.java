@@ -31,6 +31,8 @@ implements BlockEntityRenderer<BlockEntityPassing> {
     // PASSING_TEX: [0=2000, 1=2010, 2=2020][0=entrance_close, 1=exit_close, 2=entrance_open, 3=exit_open]
     private static final String[] PASSING_KINDS = { "2000", "2010", "2020" };
     private static final net.minecraft.resources.ResourceLocation[][] PASSING_TEX = new net.minecraft.resources.ResourceLocation[3][4];
+    // PASSING_2008 缺资源时的「只 warn 一次」标志: 渲染热路径上不能每帧打日志。
+    private static final java.util.concurrent.atomic.AtomicBoolean PASSING_2008_WARNED = new java.util.concurrent.atomic.AtomicBoolean(false);
     static {
         for (int t = 0; t < 3; t++) {
             String kind = PASSING_KINDS[t];
@@ -140,7 +142,25 @@ implements BlockEntityRenderer<BlockEntityPassing> {
                     break;
                 }
                 case 1: {
-                    throw new UnsupportedOperationException();
+                    // 【1.1.90 修渲染崩溃】PASSING_2008 的模型/贴图资源在本 mod 里
+                    // 一份都没有(models/dynamic 下无 passing_2008_*.bbmodel,
+                    // textures/block 下无 passing_2008_*.png), 但方块和方块实体
+                    // 都注册了(Main.java / Blocks.java / BlockEntity.java),
+                    // 放进世界后每帧都会走到这里。
+                    //
+                    // 原实现直接 throw new UnsupportedOperationException(),
+                    // 而 render() 在 MC 的渲染热路径上没有 try/catch ——
+                    // 每帧抛一次异常会打断整个渲染批次, 连带同帧其它方块
+                    // 也不画(白屏/闪烁)。
+                    //
+                    // 这里改成: 静默跳过渲染(不画任何东西, 表现为隐形闸机),
+                    // 并只在进程里第一次遇到时打一条 warn, 避免每帧刷屏。
+                    if (PASSING_2008_WARNED.compareAndSet(false, true)) {
+                        com.xhg78999.shmetro.Main.LOGGER.warn(
+                            "SHM: PASSING_2008 闸机没有对应的模型/贴图资源, 渲染将被跳过。"
+                            + "请确认资源包完整性, 或移除世界里的该方块。");
+                    }
+                    break;
                 }
                 case 2: {
                     Block neighborB = world.getBlockState(pos.relative(facing.getOpposite(), 1)).getBlock();
