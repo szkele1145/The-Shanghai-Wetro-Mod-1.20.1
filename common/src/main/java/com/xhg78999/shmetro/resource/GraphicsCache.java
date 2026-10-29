@@ -66,6 +66,11 @@ public class GraphicsCache {
     private final java.util.concurrent.atomic.AtomicLong accessCounter = new java.util.concurrent.atomic.AtomicLong();
     /** 每个 key 的最近访问序号, 数值最小者最先被淘汰。 */
     private final ConcurrentHashMap<String, Long> accessOrder = new ConcurrentHashMap();
+    /**
+     * 上一次跑过淘汰检查的访问序号。命中路径每 64 次命中才做一次兜底检查,
+     * 避免「只命中不新增」时缓存被缓慢撑破上限, 同时又不必每次命中都排序。
+     */
+    private final java.util.concurrent.atomic.AtomicLong lastEvictCheck = new java.util.concurrent.atomic.AtomicLong(-1L);
 
     /**
      * 记录一次访问并按预算淘汰旧条目。
@@ -76,16 +81,57 @@ public class GraphicsCache {
      *
      * <p>淘汰保护: 最近访问的若干条不参与淘汰, 避免同帧自伤(本帧稍后
      * 要画的纹理被本帧开头的淘汰踢掉)。</p>
+     *
+     * <p><b>1.1.91 拆分热路径</b>: 原实现把「记录访问序」和「按预算淘汰」绑在
+     * 一个方法里, 而它在<b>每次缓存命中</b>时都被调用(每帧每方块)。缓存
+     * 一旦超过 512 条目 / 64 MB 上限, 每次命中都要对最多 512 个 key 做
+     * 全量排序 —— 一个站台视野里 50 个方块就是每帧 50 次 O(n log n) 排序,
+     * 而这些排序的结果(哪些该淘汰)在「只命中、不新增」的稳态下根本不变。
+     *
+     * <p>这里拆成两段:</p>
+     * <ul>
+     *   <li>{@link #recordAccess(String)} 只写访问序号(一次 ConcurrentHashMap.put),
+     *       命中路径零额外开销;</li>
+     *   <li>{@link #evictIfNeeded()} 才做排序+淘汰, 只在<b>预算可能超支</b>时跑 ——
+     *       即新增条目时(本来就要异步生成贴图, 排序开销可忽略), 以及
+     *       每 64 次命中一次的兜底检查(防止「只命中不新增」时上限被缓慢撑破)。</li>
+     * </ul>
+     *
+     * <p>语义等价: 淘汰只在超预算时触发, 延迟到下次新增时才淘汰最多一个条目,
+     * 内存上限的最终约束不变(新增时必触发)。LRU 保护的 16 条最近用的
+     * 也不受影响。</p>
      */
     private void recordAccessAndEvict(String key, DynamicResource resource) {
+        recordAccess(key);
+        evictIfNeeded();
+    }
+
+    /** 只记录访问序号, 不触发淘汰。命中路径调用。 */
+    private void recordAccess(String key) {
         accessOrder.put(key, accessCounter.incrementAndGet());
-        // 字节数只在「创建条目」时加、「淘汰/替换/重载」时减,
-        // 这里不能重复加(每次命中都加会让计数虚高数倍)。
+    }
+
+    /**
+     * 按预算淘汰旧条目。新增条目时必调; 命中路径每 64 次命中调一次兜底检查,
+     * 防止「只命中不新增」时缓存被缓慢撑破上限。
+     */
+    private void evictIfNeeded() {
         long bytes = dynamicBytes.get();
         int entries = dynamicResources.size();
         if (bytes <= MAX_DYNAMIC_BYTES && entries <= MAX_DYNAMIC_ENTRIES) {
             return;
         }
+        if (accessCounter.get() - lastEvictCheck.get() < 64) {
+            return;
+        }
+        lastEvictCheck.set(accessCounter.get());
+        if (dynamicBytes.get() <= MAX_DYNAMIC_BYTES && dynamicResources.size() <= MAX_DYNAMIC_ENTRIES) {
+            return;
+        }
+        evictOldEntries();
+    }
+
+    private void evictOldEntries() {
         // 按 accessOrder 升序找候选: 最久未用的先淘汰。
         // 末尾 PROTECTED_RECENT_ENTRIES 条是最近用的, 保护不动,
         // 避免同帧自伤(本帧稍后要画的纹理被本帧开头的淘汰踢掉)。
@@ -270,7 +316,8 @@ public class GraphicsCache {
             return dynamicResource;
         }
         this.dynamicResources.put(key, DEFAULT_WHITE_DYN_RESOURCE);
-        accessOrder.put(key, accessCounter.incrementAndGet());
+        recordAccess(key);
+        evictIfNeeded();
         final String keyFinal = key;
         final long epoch = this.reloadEpoch.get();
         CompletableFuture.runAsync(() -> {
@@ -326,7 +373,7 @@ public class GraphicsCache {
                 });
                 dynamicResourceNew = new DynamicResource(resourceLocation, dynamicTexture);
                 // 记账: 纹理真正生成后才知道它占多少字节。
-                // (命中缓存的条目在 recordAccessAndEvict 里已记过一次,
+                // (命中缓存的条目在 recordAccess 里已记过一次,
                 //  这里是首次创建, 之前只有占位条目, 没记过字节。)
                 this.dynamicBytes.addAndGet(dynamicResourceNew.estimatedBytes);
             }
@@ -335,7 +382,11 @@ public class GraphicsCache {
             // 被大量访问, 新纹理的序号就显得很旧 ⇒ 超预算时会被优先淘汰,
             // 玩家刚等到的图立刻变紫黑格再重新生成(抖动)。异步线程更新
             // ConcurrentHashMap + AtomicLong 是安全的。
-            accessOrder.put(keyFinal, accessCounter.incrementAndGet());
+            recordAccess(keyFinal);
+            // 新条目刚加进来, 预算很可能超支 -> 这里跑一次淘汰。
+            // 异步线程里跑淘汰是安全的: 只读 accessOrder / dynamicResources,
+            // 写入走 textureRegistryQueue(主线程消费), 与主线程无竞态。
+            this.evictIfNeeded();
         });
         return DEFAULT_WHITE_DYN_RESOURCE;
     }
