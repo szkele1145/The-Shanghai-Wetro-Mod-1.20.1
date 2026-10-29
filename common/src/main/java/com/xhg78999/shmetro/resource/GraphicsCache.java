@@ -383,10 +383,12 @@ public class GraphicsCache {
             // 玩家刚等到的图立刻变紫黑格再重新生成(抖动)。异步线程更新
             // ConcurrentHashMap + AtomicLong 是安全的。
             recordAccess(keyFinal);
-            // 新条目刚加进来, 预算很可能超支 -> 这里跑一次淘汰。
-            // 异步线程里跑淘汰是安全的: 只读 accessOrder / dynamicResources,
-            // 写入走 textureRegistryQueue(主线程消费), 与主线程无竞态。
-            this.evictIfNeeded();
+            // 注意: 这里<b>不</b>调用 evictIfNeeded()。
+            // 淘汰动作会往 textureRegistryQueue 排 release, 而
+            // textureRegistryQueue 是 ArrayDeque(非线程安全), 只能由主线程
+            // 的 runTextureRegistryQueue 消费。异步线程调用会与主线程竞态。
+            // 淘汰延后到下次主线程 getResource 入口触发(通常同帧内下一个方块),
+            // 语义等价: 预算上限最终仍由主线程保证。
         });
         return DEFAULT_WHITE_DYN_RESOURCE;
     }
