@@ -77,13 +77,17 @@ implements BlockEntityRenderer<BlockEntityPassing> {
             }
             // 模型缺失(资源包损坏 / 该模型被移除)时直接跳过渲染:
             // 下面会无条件解引用这些模型 -> null 会导致 NPE 崩溃客户端。
-            if (this.type == 0 && this.P_2000_OPEN == null) {
+            // 原实现只判了 P_*_OPEN, 但 P_*_CLOSE / P_*_SIDE 同样会被无条件
+            // 解引用(12 处 renderToBuffer 调用)。资源包若只移除其中一两个
+            // .bbmodel(OPEN 还在、CLOSE/SIDE 缺失), OPEN 守卫会通过, 随后
+            // CLOSE/SIDE 解引用照样 NPE。这里把三个模型一起判 null。
+            if (this.type == 0 && (this.P_2000_OPEN == null || this.P_2000_CLOSE == null || this.P_2000_SIDE == null)) {
                 return;
             }
-            if (this.type == 2 && this.P_2010_OPEN == null) {
+            if (this.type == 2 && (this.P_2010_OPEN == null || this.P_2010_CLOSE == null || this.P_2010_SIDE == null)) {
                 return;
             }
-            if (this.type == 3 && this.P_2020_OPEN == null) {
+            if (this.type == 3 && (this.P_2020_OPEN == null || this.P_2020_CLOSE == null || this.P_2020_SIDE == null)) {
                 return;
             }
             BlockPos pos = entity.getBlockPos();
