@@ -16,11 +16,11 @@ import org.apache.logging.log4j.Logger;
 public class Main {
     public static final String MOD_ID = "shmetro";
     /**
-     * 涓?gradle.properties 鐨?mod_version 淇濇寔鍚屾锛?
-     * common/build.gradle 鐨?checkModVersion 浠诲姟浼氬湪浜岃€呬笉涓€鑷存椂鐩存帴璁╂瀯寤哄け璐ワ紝
-     * 閬垮厤鍙戝竷鍑哄惎鍔ㄦ棩蹇楅噷鐗堟湰鍙烽檲鏃х殑浜х墿銆?
+     * 娑?gradle.properties 閻?mod_version 娣囨繃瀵旈崥灞绢劄閿?
+     * common/build.gradle 閻?checkModVersion 娴犺濮熸导姘躬娴滃矁鈧懍绗夋稉鈧懛瀛樻閻╁瓨甯寸拋鈺傜€鍝勩亼鐠愩儻绱?
+     * 闁灝鍘ら崣鎴濈閸戝搫鎯庨崝銊︽）韫囨鍣烽悧鍫熸拱閸欑兘妾查弮褏娈戞禍褏澧块妴?
      */
-    public static final String MOD_VERSION = "1.3.15";
+    public static final String MOD_VERSION = "1.3.16";
     public static final Logger LOGGER = LogManager.getLogger((String)"shmetro");
 
     public static void init(RegistriesWrapper registries) {
