@@ -7,8 +7,7 @@
   "server": [],
   "client": [
     "DynamicRefreshMixin",
-    "MTRSignMixin",
-    "StitchTextureSizeFixMixin"
+    "MTRSignMixin"
   ],
   "injectors": {
     "defaultRequire": 1
