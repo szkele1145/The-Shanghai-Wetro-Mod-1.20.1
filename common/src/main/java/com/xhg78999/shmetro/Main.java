@@ -16,11 +16,11 @@ import org.apache.logging.log4j.Logger;
 public class Main {
     public static final String MOD_ID = "shmetro";
     /**
-     * 与 gradle.properties 的 mod_version 保持同步；
-     * common/build.gradle 的 checkModVersion 任务会在二者不一致时直接让构建失败，
-     * 避免发布出启动日志里版本号陈旧的产物。
+     * 涓?gradle.properties 鐨?mod_version 淇濇寔鍚屾锛?
+     * common/build.gradle 鐨?checkModVersion 浠诲姟浼氬湪浜岃€呬笉涓€鑷存椂鐩存帴璁╂瀯寤哄け璐ワ紝
+     * 閬垮厤鍙戝竷鍑哄惎鍔ㄦ棩蹇楅噷鐗堟湰鍙烽檲鏃х殑浜х墿銆?
      */
-    public static final String MOD_VERSION = "1.3.14";
+    public static final String MOD_VERSION = "1.3.15";
     public static final Logger LOGGER = LogManager.getLogger((String)"shmetro");
 
     public static void init(RegistriesWrapper registries) {
