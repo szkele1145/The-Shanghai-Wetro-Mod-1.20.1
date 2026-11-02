@@ -14,3 +14,7 @@ run/
 *.log
 
 local.properties
+
+upload137*.py
+upload1373_retry.py
+
