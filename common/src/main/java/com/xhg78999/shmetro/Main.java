@@ -20,7 +20,7 @@ public class Main {
      * common/build.gradle 閻?checkModVersion 娴犺濮熸导姘躬娴滃矁鈧懍绗夋稉鈧懛瀛樻閻╁瓨甯寸拋鈺傜€鍝勩亼鐠愩儻绱?
      * 闁灝鍘ら崣鎴濈閸戝搫鎯庨崝銊︽）韫囨鍣烽悧鍫熸拱閸欑兘妾查弮褏娈戞禍褏澧块妴?
      */
-    public static final String MOD_VERSION = "1.3.33";
+    public static final String MOD_VERSION = "1.3.34";
     public static final Logger LOGGER = LogManager.getLogger((String)"shmetro");
 
     public static void init(RegistriesWrapper registries) {
